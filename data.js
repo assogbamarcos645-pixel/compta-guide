@@ -1,474 +1,1858 @@
 /* ============================================================
-   data.js — Contenu du cours, plan comptable, quiz
-   Comptabilité Générale I — SYSCOHADA / OHADA
+   data.js — Contenu officiel complet du cours SYSCOHADA
+   Comptabilité Générale I — Licence I Informatique
+   Conforme aux enseignements du Dr Rock Stanislas HINVI
    ============================================================ */
 
-window.COURSE = {};
+window.COURSE = window.COURSE || {};
+var COURSE = window.COURSE;
 
-/* ── Chapitres du guide ─────────────────────────────────────── */
+/* ── 11 Chapitres complets du programme ────────────────────── */
 COURSE.chapters = [
   {
-    id: "generalites",
-    title: "Généralités sur la comptabilité",
-    summary: "Définition, états financiers, historique OHADA, livres obligatoires et principes comptables.",
-    key: true,
-    minutes: 8,
-    content: `
-      <p class="lead">La comptabilité est une technique née dans l'Antiquité pour tracer créances, dettes et patrimoine. Elle est aujourd'hui le moyen de communication et de preuve le plus efficace entre une entreprise et ses partenaires.</p>
-
-      <h3>Définition (référentiel OHADA)</h3>
-      <p>La comptabilité est un système d'organisation financière permettant de :</p>
-      <ul>
-        <li>saisir, classer et enregistrer des données chiffrées de base ;</li>
-        <li>fournir, après traitement, des informations conformes aux besoins des utilisateurs.</li>
-      </ul>
-
-      <h3>Les 4 états financiers indissociables</h3>
-      <table><thead><tr><th>État</th><th>Rôle</th></tr></thead><tbody>
-        <tr><td>Bilan</td><td>Situation patrimoniale à une date donnée</td></tr>
-        <tr><td>Compte de résultat</td><td>Richesse créée ou détruite sur la période</td></tr>
-        <tr><td>TAFIRE / Tableau des flux de trésorerie</td><td>Flux de trésorerie de l'exercice (le SYSCOHADA révisé remplace le TAFIRE par le TFT)</td></tr>
-        <tr><td>Notes annexes</td><td>Informations complémentaires significatives</td></tr>
-      </tbody></table>
-
-      <h3>Historique OHADA / SYSCOA</h3>
-      <ul class="timeline">
-        <li><b>1993</b> Traité OHADA signé à Port-Louis (entré en vigueur le 18/09/1995).</li>
-        <li><b>1994</b> Suite à la dévaluation du franc CFA, l'UEMOA crée le <strong>SYSCOA</strong>.</li>
-        <li><b>1998</b> Application obligatoire du SYSCOA (1er janvier).</li>
-        <li><b>2000</b> Acte uniforme OHADA relatif au droit comptable (24 mars) : harmonisation entre les États membres.</li>
-        <li><b>2017</b> Adoption du SYSCOHADA révisé, applicable à partir de 2018. L'OHADA compte aujourd'hui <strong>17 États membres</strong>.</li>
-      </ul>
-
-      <h3>Les 7 utilisateurs de l'information comptable</h3>
-      <p>L'entreprise elle-même, clients et fournisseurs, associés et banques, personnel, État, Centrale des Bilans, partenaires hors UEMOA (FMI, Banque mondiale).</p>
-
-      <h3>Livres obligatoires</h3>
-      <p>Livre-journal, Grand livre, Balance générale (6 colonnes), Livre d'inventaire — tenus sans blanc ni altération.</p>
-
-      <h3>Principes comptables — 3 familles</h3>
-      <table><thead><tr><th>Famille</th><th>Contenu</th></tr></thead><tbody>
-        <tr><td><strong>Hypothèse</strong></td><td>Continuité de l'exploitation (présomption de poursuite des activités)</td></tr>
-        <tr><td><strong>Postulats (5)</strong></td><td>Entité · Comptabilité d'engagement · Spécialisation des exercices · Permanence des méthodes · Prééminence de la réalité économique</td></tr>
-        <tr><td><strong>Conventions</strong></td><td>Coût historique · Prudence · Régularité et transparence · Correspondance bilan de clôture / d'ouverture · Importance significative</td></tr>
-      </tbody></table>
-
-      <div class="callout">
-        <div class="callout-title">À retenir</div>
-        <p>Postulat de spécialisation des exercices : le résultat de chaque exercice est <em>indépendant</em> de celui qui précède et de celui qui suit.</p>
-      </div>
-    `
+    "id": "generalites",
+    "title": "Généralités sur la comptabilité",
+    "summary": "Définition, historique OHADA, livres obligatoires et postulats comptables fondamentaux.",
+    "key": true,
+    "minutes": 10,
+    "content": "<p class=\"lead\">La comptabilité est une technique d'organisation financière et de communication d'origine séculaire, devenue indispensable pour la gestion, la mesure de la performance et la preuve juridique des transactions de toute entité économique.</p>\n\n<h3>1. Historique et évolution</h3>\n<p>La comptabilité trouve ses racines dans l'Antiquité (Mésopotamie, Égypte, Rome antique) où l'on consignait sur tablettes et registres les opérations d'échange et les créances. Initialement limitée aux transactions avec les tiers (qui doit quoi à qui), elle s'est élargie à la description du patrimoine global de l'entreprise au fil des siècles.</p>\n<ul class=\"timeline\">\n  <li><b>1494</b> Publication du traité de Luca Pacioli à Venise, formalisant la <strong>partie double</strong>.</li>\n  <li><b>1993</b> Signature à Port-Louis (Maurice) du Traité instituant l'<strong>OHADA</strong> (Organisation pour l'Harmonisation en Afrique du Droit des Affaires), entré en vigueur en 1995.</li>\n  <li><b>1994</b> Création de l'UEMOA au lendemain de la dévaluation du Franc CFA, donnant naissance au <strong>SYSCOA</strong> (Système Comptable Ouest Africain).</li>\n  <li><b>1998</b> Entrée en vigueur obligatoire du SYSCOA au 1er janvier 1998.</li>\n  <li><b>2000</b> Adoption de l'Acte Uniforme OHADA portant organisation et harmonisation des comptabilités des entreprises (SYSCOHADA d'origine).</li>\n  <li><b>2017</b> Adoption du <strong>SYSCOHADA révisé</strong> (applicable au 1er janvier 2018), unifiant le droit comptable dans les <strong>17 États membres</strong> de l'espace OHADA.</li>\n</ul>\n\n<h3>2. Définition selon le SYSCOHADA</h3>\n<p>Selon le référentiel comptable OHADA, la comptabilité est un <strong>système d'organisation de l'information financière</strong> permettant de :</p>\n<ul>\n  <li>Saisir, classer et enregistrer des données de base chiffrées ;</li>\n  <li>Fournir, après traitement approprié, un ensemble d'informations conforme aux besoins des divers utilisateurs intéressés.</li>\n</ul>\n\n<h3>3. Les 4 états financiers annuels indissociables</h3>\n<p>Pour les entités relevant du Système Normal, les états financiers de synthèse annuels comprennent obligatoirement :</p>\n<table>\n  <thead><tr><th>État financier</th><th>Nature et objectif</th></tr></thead>\n  <tbody>\n    <tr><td><strong>Le Bilan</strong></td><td>Décrit séparément les éléments d'actif (emplois) et de passif (ressources) et fait apparaître de façon distincte les capitaux propres de l'entité à une date donnée.</td></tr>\n    <tr><td><strong>Le Compte de résultat</strong></td><td>Récapitule les produits et les charges qui font apparaître, par différence, le bénéfice net ou la perte nette de l'exercice.</td></tr>\n    <tr><td><strong>Le Tableau des flux de trésorerie (TFT)</strong></td><td>Remplace l'ancien TAFIRE dans le SYSCOHADA révisé ; il retrace les entrées et sorties de liquidités liées aux activités opérationnelles, d'investissement et de financement.</td></tr>\n    <tr><td><strong>Les Notes annexes</strong></td><td>Commentent, complètent et précisent les informations chiffrées portées au bilan, compte de résultat et TFT.</td></tr>\n  </tbody>\n</table>\n\n<h3>4. Rôles et utilisateurs de l'information comptable</h3>\n<p>La comptabilité répond à une triple exigence :</p>\n<ul>\n  <li><strong>Rôle de gestion et de prévision</strong> : instrument de pilotage interne pour le chef d'entreprise et les managers ;</li>\n  <li><strong>Rôle de preuve et juridique</strong> : moyen de preuve en justice entre commerçants, garantie pour les créanciers et base d'imposition fiscale ;</li>\n  <li><strong>Rôle d'information externe</strong> : communication avec les 7 catégories de partenaires : les dirigeants, les associés/actionnaires, le personnel, les banques et prêteurs, les clients et fournisseurs, l'État (fisc, douane, statistiques) et les institutions internationales (UEMOA, BCEAO, Banque Mondiale, FMI).</li>\n</ul>\n\n<h3>5. Livres obligatoires et formalités légales</h3>\n<p>Toute entité a l'obligation légale de tenir les livres comptables suivants, tenus sans blanc, altération ni rature :</p>\n<ul>\n  <li><strong>Le Livre-Journal</strong> : enregistre chronologiquement au jour le jour chaque transaction ;</li>\n  <li><strong>Le Grand-Livre</strong> : regroupe l'ensemble des comptes ouverts de l'entité avec mouvements débit, crédit et solde ;</li>\n  <li><strong>La Balance générale</strong> : tableau de contrôle récapitulant les totaux débit/crédit et les soldes de tous les comptes ;</li>\n  <li><strong>Le Livre d'inventaire</strong> : regroupe les données de l'inventaire physique des actifs et passifs, appuyé par le bilan et compte de résultat.</li>\n</ul>\n\n<h3>6. Les principes comptables fondamentaux (3 familles)</h3>\n<table>\n  <thead><tr><th>Famille</th><th>Désignation</th><th>Signification</th></tr></thead>\n  <tbody>\n    <tr><td><strong>1. Hypothèse de base</strong></td><td>Continuité de l'exploitation</td><td>L'entité est présumée poursuivre ses activités dans un avenir prévisible, sans intention de liquidation ni réduction drastique de sa voilure.</td></tr>\n    <tr><td rowspan=\"5\"><strong>2. Les 5 Postulats</strong></td><td>Postulat de l'entité</td><td>L'entreprise est une personne distincte de ses propriétaires ou associés. Ses comptes ne contiennent que son patrimoine propre.</td></tr>\n    <tr><td>Comptabilité d'engagement</td><td>Les effets des transactions sont comptabilisés lorsqu'ils se produisent (et non au moment du flux monétaire effectif).</td></tr>\n    <tr><td>Spécialisation des exercices</td><td>La vie de l'entreprise est découpée en périodes annuelles indépendantes ; chaque exercice se voit rattacher ses charges et produits propres.</td></tr>\n    <tr><td>Permanence des méthodes</td><td>Les méthodes d'évaluation et de présentation des comptes doivent être identiques d'un exercice à l'autre pour assurer la comparabilité.</td></tr>\n    <tr><td>Prééminence de la réalité économique</td><td>Les opérations doivent être enregistrées et présentées conformément à leur substance financière et économique, au-delà de leur seule apparence juridique.</td></tr>\n    <tr><td rowspan=\"5\"><strong>3. Les 5 Conventions</strong></td><td>Coût historique</td><td>Les biens figurent à l'actif pour leur coût d'acquisition ou de production nominal, sans réévaluation spontanée.</td></tr>\n    <tr><td>Prudence</td><td>Appréciation raisonnable des faits : les gains potentiels ne sont pas enregistrés, alors que les pertes prévisibles ou risques certains sont provisionnés.</td></tr>\n    <tr><td>Régularité et sincérité (transparence)</td><td>Conformité aux règles en vigueur et traduction loyale de la situation réelle.</td></tr>\n    <tr><td>Correspondance bilan de clôture / d'ouverture</td><td>Le bilan d'ouverture d'un exercice doit correspondre exactement au bilan de clôture de l'exercice précédent (intangibilité).</td></tr>\n    <tr><td>Importance significative</td><td>Sont obligatoirement présentées toutes les informations susceptibles d'influencer le jugement ou les décisions des lecteurs des comptes.</td></tr>\n  </tbody>\n</table>\n\n<div class=\"callout\"><div class=\"callout-title\">À retenir pour l'examen</div><p>Le postulat de <strong>spécialisation des exercices</strong> impose de rattacher à chaque année uniquement les charges et les produits consommés ou acquis sur cette période. Les écritures de régularisation (charges à payer, produits constatés d'avance) découlent directement de ce postulat.</p></div>",
+    "recap": [
+      "La comptabilité est un système d'organisation financière permettant de saisir, classer, enregistrer des données chiffrées et fournir des états financiers fiables.",
+      "L'OHADA regroupe 17 États membres, avec le SYSCOHADA révisé entré en vigueur au 1er janvier 2018.",
+      "Les 4 états financiers du Système Normal sont indissociables : Bilan, Compte de résultat, Tableau des flux de trésorerie (TFT) et Notes annexes.",
+      "Les livres légaux obligatoires sont le Livre-Journal, le Grand-Livre, la Balance et le Livre d'inventaire, tenus sans blanc ni rature.",
+      "L'hypothèse fondamentale est la continuité de l'exploitation.",
+      "Les 5 postulats comptables : entité, comptabilité d'engagement, spécialisation des exercices, permanence des méthodes, prééminence de la réalité économique.",
+      "Les 5 conventions comptables : coût historique, prudence, régularité/transparence, correspondance bilan d'ouverture/clôture, importance significative."
+    ]
   },
   {
-    id: "cadre",
-    title: "Le cadre comptable SYSCOHADA",
-    summary: "Les 9 classes de comptes, la lecture du bilan et les règles de numérotation.",
-    key: true,
-    minutes: 6,
-    content: `
-      <h3>Plan des comptes — 9 classes</h3>
-      <table><thead><tr><th>Classes</th><th>Nature</th><th>Usage</th></tr></thead><tbody>
-        <tr><td>1 à 5</td><td>Comptes de situation (bilan)</td><td>Obligatoire</td></tr>
-        <tr><td>6, 7, 8</td><td>Comptes de gestion (résultat)</td><td>Obligatoire</td></tr>
-        <tr><td>9</td><td>Engagements hors bilan et comptabilité analytique</td><td>Facultatif</td></tr>
-      </tbody></table>
-
-      <h3>Lecture verticale du bilan</h3>
-      <table><thead><tr><th>Actif</th><th>Passif</th></tr></thead><tbody>
-        <tr><td>Haut — Classe 2 : actif immobilisé</td><td>Haut — Classe 1 : ressources stables</td></tr>
-        <tr><td>Bas — Classes 3, 4 (débiteur), 5</td><td>Bas — Classes 4 (créditeur), 5</td></tr>
-      </tbody></table>
-
-      <h3>Constantes de numérotation</h3>
-      <ul>
-        <li>Le 1er chiffre désigne la classe.</li>
-        <li>Chiffre <strong>8</strong> en 2e position (classe 2) = <strong>amortissement</strong> (ex : 245 Matériel de transport → <code>2845</code> Amortissement du matériel de transport).</li>
-        <li>Chiffre <strong>8</strong> en 3e ou 4e position = compte résiduel ou divers.</li>
-        <li>Chiffre <strong>9</strong> en 2e position = <strong>provision / dépréciation</strong> (ex : 69, 39).</li>
-        <li>Chiffre <strong>9</strong> en 3e position = compte <strong>opposant</strong> au sens normal (ex : 411 débiteur, mais <code>4191</code> avances reçues → créditeur).</li>
-      </ul>
-
-      <h3>Plan Comptable d'Entreprise (PCE) — extensions</h3>
-      <ul>
-        <li>+2 chiffres (nature) : <code>6047.18</code> = achat de papier photocopieur.</li>
-        <li>+2 chiffres (fonction) : <code>6047.18.03</code> = papier pour le service comptable — uniquement pour les classes 6, 7 et 8.</li>
-      </ul>
-    `
+    "id": "cadre",
+    "title": "Le cadre comptable SYSCOHADA",
+    "summary": "Classes 1 à 5, lecture verticale et horizontale du bilan et constantes de codification décimale.",
+    "key": true,
+    "minutes": 10,
+    "content": "<p class=\"lead\">Le plan des comptes du SYSCOHADA révisé structure l'ensemble des opérations économiques et financières d'une entité à travers une codification décimale rigoureuse répartie en 9 classes.</p>\n\n<h3>1. Architecture générale : les 9 classes de comptes</h3>\n<table>\n  <thead><tr><th>Classes</th><th>Désignation</th><th>Nature</th><th>Caractère</th></tr></thead>\n  <tbody>\n    <tr><td><strong>Classe 1</strong></td><td>Comptes de ressources durables</td><td>Passif stable (Capitaux propres et Dettes financières)</td><td>Obligatoire</td></tr>\n    <tr><td><strong>Classe 2</strong></td><td>Comptes d'actif immobilisé</td><td>Actif immobilisé (Incorporel, Corporel, Financier)</td><td>Obligatoire</td></tr>\n    <tr><td><strong>Classe 3</strong></td><td>Comptes de stocks</td><td>Actif circulant (Marchandises, Matières, Produits)</td><td>Obligatoire</td></tr>\n    <tr><td><strong>Classe 4</strong></td><td>Comptes de tiers</td><td>Créances (Actif) et Dettes circulantes (Passif)</td><td>Obligatoire</td></tr>\n    <tr><td><strong>Classe 5</strong></td><td>Comptes de trésorerie</td><td>Titres de placement, Banques, Caisse (Actif / Passif)</td><td>Obligatoire</td></tr>\n    <tr><td><strong>Classe 6</strong></td><td>Comptes de charges des activités ordinaires (AO)</td><td>Gestion - Charges d'exploitation et financières</td><td>Obligatoire</td></tr>\n    <tr><td><strong>Classe 7</strong></td><td>Comptes de produits des activités ordinaires (AO)</td><td>Gestion - Produits d'exploitation et financiers</td><td>Obligatoire</td></tr>\n    <tr><td><strong>Classe 8</strong></td><td>Comptes des autres charges et autres produits (HAO)</td><td>Hors Activités Ordinaires (exceptionnel)</td><td>Obligatoire</td></tr>\n    <tr><td><strong>Classe 9</strong></td><td>Comptes des engagements hors bilan et analytique</td><td>Opérations conditionnelles et gestion interne</td><td>Facultatif</td></tr>\n  </tbody>\n</table>\n\n<h3>2. Les classes de situation (1 à 5) : lecture du bilan</h3>\n<p>Les comptes des classes 1 à 5 sont appelés <strong>comptes de situation</strong> ou comptes de bilan. Ils décrivent la structure financière du patrimoine de l'entité :</p>\n<div class=\"bilan-schema\">\n  <div class=\"bilan-col\">\n    <div class=\"bilan-head\">Actif (Emplois de valeurs)</div>\n    <div class=\"bilan-cell\"><b>Classe 2 : Actif immobilisé</b><span>Biens destinés à servir de façon durable (plus d'un an) : terrains (22), bâtiments (23), matériel (24), titres de participation (26).</span></div>\n    <div class=\"bilan-cell\"><b>Classe 3 : Stocks</b><span>Biens achetés ou produits destinés à être revendus ou consommés : marchandises (31), matières premières (32), produits finis (36).</span></div>\n    <div class=\"bilan-cell\"><b>Classe 4 (solde débiteur) : Créances</b><span>Sommes dues par les clients (411), avances versées aux fournisseurs (4091), créances fiscales (445).</span></div>\n    <div class=\"bilan-cell\"><b>Classe 5 : Trésorerie-Actif</b><span>Disponibilités immédiates : banques (521), chèques postaux (531), caisse (571).</span></div>\n  </div>\n  <div class=\"bilan-col\">\n    <div class=\"bilan-head\">Passif (Origine des ressources)</div>\n    <div class=\"bilan-cell\"><b>Classe 1 : Ressources durables</b><span>Capitaux propres (10 Capital, 11 Réserves, 13 Résultat net) et dettes financières à plus d'un an (16 Emprunts bancaires).</span></div>\n    <div class=\"bilan-cell\"><b>Classe 4 (solde créditeur) : Dettes circulantes</b><span>Dettes envers les fournisseurs (401), le personnel (422), les organismes sociaux (431) et l'État (442, 4441).</span></div>\n    <div class=\"bilan-cell\"><b>Classe 5 : Trésorerie-Passif</b><span>Découverts bancaires et facilités de caisse (561 Crédits de trésorerie, 521 créditeur).</span></div>\n  </div>\n</div>\n\n<h3>3. Règles de codification et constantes de numérotation</h3>\n<p>Le plan comptable repose sur une codification décimale arborescente :</p>\n<ul>\n  <li><strong>1er chiffre</strong> : indique la <em>classe</em> (ex : <code>4</code> = Tiers).</li>\n  <li><strong>2e chiffre</strong> : indique le <em>compte principal</em> à deux chiffres (ex : <code>41</code> = Clients et comptes rattachés).</li>\n  <li><strong>3e chiffre</strong> : indique le <em>sous-compte</em> (ex : <code>411</code> = Clients).</li>\n  <li><strong>4e chiffre</strong> : indique la <em>divisionnaire</em> (ex : <code>4111</code> = Clients ordinaires).</li>\n</ul>\n\n<h4>Signification des constantes fondamentales</h4>\n<table>\n  <thead><tr><th>Chiffre</th><th>Position</th><th>Signification conventionnelle</th><th>Exemples</th></tr></thead>\n  <tbody>\n    <tr><td><strong>8</strong></td><td>2e position (classe 2)</td><td>Compte d'<strong>amortissement</strong> de l'immobilisation correspondante</td><td><code>245</code> Matériel de transport &rarr; <code>2845</code> Amortissement du matériel de transport ; <code>23</code> Bâtiments &rarr; <code>283</code> Amortissement des bâtiments.</td></tr>\n    <tr><td><strong>9</strong></td><td>2e position (classes 1 à 5)</td><td>Compte de <strong>dépréciation ou provision</strong> pour risque</td><td><code>31</code> Marchandises &rarr; <code>391</code> Dépréciation des stocks de marchandises ; <code>411</code> Clients &rarr; <code>491</code> Dépréciation des comptes clients.</td></tr>\n    <tr><td><strong>9</strong></td><td>3e ou 4e position</td><td>Compte de <strong>sens inverse (opposant)</strong> au fonctionnement normal de sa catégorie</td><td><code>411</code> Client est débiteur &rarr; <code>4191</code> Avances reçues des clients (dette, créditeur) ;<br><code>401</code> Fournisseur est créditeur &rarr; <code>4091</code> Avances versées aux fournisseurs (créance, débiteur).</td></tr>\n    <tr><td><strong>8</strong></td><td>3e ou 4e position</td><td>Compte <strong>résiduel ou divers</strong> regroupant les éléments non repris ailleurs</td><td><code>2458</code> Autres matériels de transport.</td></tr>\n    <tr><td><strong>0</strong> ou <strong>1</strong></td><td>Dernière position</td><td>Compte principal ordinaire ou subdivision d'exploitation</td><td><code>4011</code> Fournisseurs d'exploitation.</td></tr>\n  </tbody>\n</table>\n\n<h3>4. Le Plan Comptable d'Entreprise (PCE)</h3>\n<p>Chaque entité adapte le cadre général à ses besoins par des subdivisions facultatives :</p>\n<ul>\n  <li><strong>Extension par nature</strong> (+2 chiffres) : ex. <code>6047.18</code> pour identifier précisément les fournitures de bureau informatiques.</li>\n  <li><strong>Extension par fonction ou centre de coût</strong> (+2 chiffres additionnels) : ex. <code>6047.18.03</code> pour affecter cette charge au service comptabilité (classes 6, 7 et 8 uniquement).</li>\n</ul>\n\n<div class=\"callout\"><div class=\"callout-title\">Astuce mnémotechnique</div><p>Pour trouver le compte d'amortissement d'un bien de la classe 2, il suffit d'intercaler un <strong>8</strong> en deuxième position :<br>Terrain non amortissable &rarr; pas d'amortissement.<br>Bâtiment <code>23</code> &rarr; Amortissement <code>283</code>.<br>Matériel <code>24</code> &rarr; Amortissement <code>284</code>.</p></div>",
+    "recap": [
+      "Les classes 1 à 5 forment les comptes de bilan (situation patrimoniale).",
+      "La classe 1 regroupe les ressources durables (Capitaux propres + Dettes financières à long terme).",
+      "La classe 2 représente l'actif immobilisé (biens destinés à servir durablement).",
+      "La classe 3 correspond aux stocks de marchandises, matières et produits.",
+      "La classe 4 regroupe les tiers (créances clients à l'actif, dettes fournisseurs au passif).",
+      "La classe 5 représente la trésorerie active (banque, caisse) ou passive (découverts).",
+      "Le chiffre 8 en 2e position en classe 2 désigne toujours un compte d'amortissement (ex: 2845).",
+      "Le chiffre 9 en 2e position désigne une provision ou dépréciation (ex: 391, 491).",
+      "Le chiffre 9 en 3e position inverse le sens habituel du compte (ex: 4091 créance sur fournisseur, 4191 dette envers client)."
+    ]
   },
   {
-    id: "charges-produits",
-    title: "Comptes de charges et produits (AO / HAO)",
-    summary: "Activités ordinaires (classes 6 et 7) et hors activités ordinaires (classe 8).",
-    key: false,
-    minutes: 5,
-    content: `
-      <h3>Activités ordinaires (AO)</h3>
-      <table><thead><tr><th>Charges (classe 6)</th><th>Produits (classe 7)</th></tr></thead><tbody>
-        <tr><td><code>601</code> Achats de marchandises</td><td><code>701</code> Ventes de marchandises</td></tr>
-        <tr><td><code>602</code> Achats de matières premières</td><td><code>702</code> Ventes de produits finis</td></tr>
-        <tr><td><code>603</code> Variation des stocks achetés</td><td><code>71</code> Subventions d'exploitation</td></tr>
-        <tr><td><code>61</code> Transports</td><td><code>75</code> Autres produits</td></tr>
-        <tr><td><code>62/63</code> Services extérieurs</td><td><code>77</code> Revenus financiers</td></tr>
-        <tr><td><code>64</code> Impôts et taxes</td><td><code>78</code> Transferts de charges</td></tr>
-        <tr><td><code>66</code> Charges de personnel</td><td><code>79</code> Reprises de provisions</td></tr>
-        <tr><td><code>67</code> Frais financiers</td><td></td></tr>
-        <tr><td><code>68</code> Dotations aux amortissements</td><td></td></tr>
-      </tbody></table>
-
-      <h3>Hors activités ordinaires (HAO) — classe 8</h3>
-      <div class="callout">
-        <div class="callout-title">Règle mnémotechnique</div>
-        <p>Comptes <strong>impairs = charges</strong>, comptes <strong>pairs = produits</strong>.</p>
-      </div>
-      <table><thead><tr><th>Charges HAO (impairs)</th><th>Produits HAO (pairs)</th></tr></thead><tbody>
-        <tr><td><code>81</code> Valeurs comptables des cessions</td><td><code>82</code> Produits des cessions d'immobilisations</td></tr>
-        <tr><td><code>83</code> Charges HAO</td><td><code>84</code> Produits HAO</td></tr>
-        <tr><td><code>85</code> Dotations HAO</td><td><code>86</code> Reprises HAO</td></tr>
-        <tr><td><code>87</code> Participation des travailleurs</td><td><code>88</code> Subventions d'équilibre</td></tr>
-      </tbody></table>
-    `
+    "id": "charges-produits",
+    "title": "Comptes de charges et produits (AO / HAO)",
+    "summary": "Activités ordinaires (classes 6 et 7) et hors activités ordinaires (classe 8) pour le calcul du résultat.",
+    "key": false,
+    "minutes": 8,
+    "content": "<p class=\"lead\">Les classes 6, 7 et 8 mesurent l'activité économique de l'entité. Elles regroupent les charges (consommations et emplois définitifs) et les produits (ressources définitives) pour dégager le résultat net de l'exercice.</p>\n\n<h3>1. Distinction fondamentale : AO vs HAO</h3>\n<p>Le SYSCOHADA sépare strictement les opérations récurrentes de celles à caractère exceptionnel :</p>\n<ul>\n  <li><strong>Activités Ordinaires (AO) — Classes 6 et 7</strong> : opérations liées à l'objet social de l'entreprise, se reproduisant de manière régulière au cours de l'exercice (achats, ventes, loyers, salaires, intérêts d'emprunt).</li>\n  <li><strong>Hors Activités Ordinaires (HAO) — Classe 8</strong> : opérations et événements distincts des activités habituelles, imprévisibles ou non censés se reproduire régulièrement (cessions d'immobilisations, sinistres, dons importants, restructurations, subventions d'équilibre).</li>\n</ul>\n\n<h3>2. Les comptes de charges (Classe 6) : Emplois définitifs</h3>\n<p>Les charges représentent des appauvrissements pour l'entité. Elles augmentent par le <strong>DÉBIT</strong> et diminuent exceptionnellement par le <strong>CRÉDIT</strong> (en cas d'annulation ou de retour).</p>\n<table>\n  <thead><tr><th>Poste</th><th>Intitulé</th><th>Exemples d'opérations</th></tr></thead>\n  <tbody>\n    <tr><td><code>601</code></td><td>Achats de marchandises</td><td>Biens achetés pour être revendus en l'état sans transformation.</td></tr>\n    <tr><td><code>602</code></td><td>Achats de matières premières</td><td>Biens destinés à entrer dans la fabrication de produits finis.</td></tr>\n    <tr><td><code>603</code></td><td>Variations des stocks de biens achetés</td><td>Différence entre stock final et stock initial (régularisation d'inventaire).</td></tr>\n    <tr><td><code>604</code></td><td>Achats stockés de matières consommables</td><td>Carburants, emballages, fournitures industrielles d'entretien.</td></tr>\n    <tr><td><code>605</code></td><td>Achats non stockés de matières et fournitures</td><td>Fournitures de bureau non stockées, eau, électricité consommée.</td></tr>\n    <tr><td><code>61</code></td><td>Transports</td><td>Port sur achats (611), transports du personnel (613).</td></tr>\n    <tr><td><code>62 / 63</code></td><td>Services extérieurs A et B</td><td>Loyers et charges locatives (622), entretien et réparations (624), primes d'assurance (625), honoraires (632), publicité (627).</td></tr>\n    <tr><td><code>64</code></td><td>Impôts et taxes</td><td>Patente, taxes foncières, timbres fiscaux, droits d'enregistrement.</td></tr>\n    <tr><td><code>66</code></td><td>Charges de personnel</td><td>Salaires bruts des employés (661), cotisations patronales CNSS (664).</td></tr>\n    <tr><td><code>67</code></td><td>Frais financiers et charges assimilées</td><td>Intérêts sur emprunts bancaires (671), escomptes de règlement accordés aux clients (673).</td></tr>\n    <tr><td><code>68</code></td><td>Dotations aux amortissements et dépréciations</td><td>Constatation de l'usure des immobilisations (681) et risques d'exploitation.</td></tr>\n  </tbody>\n</table>\n\n<h3>3. Les comptes de produits (Classe 7) : Ressources définitives</h3>\n<p>Les produits constituent l'enrichissement généré par les ventes et prestations. Ils augmentent par le <strong>CRÉDIT</strong> et diminuent par le <strong>DÉBIT</strong>.</p>\n<table>\n  <thead><tr><th>Poste</th><th>Intitulé</th><th>Exemples d'opérations</th></tr></thead>\n  <tbody>\n    <tr><td><code>701</code></td><td>Ventes de marchandises</td><td>Revenus tirés de l'activité commerciale principale.</td></tr>\n    <tr><td><code>702</code></td><td>Ventes de produits finis</td><td>Revenus tirés de la vente de biens fabriqués par l'entité.</td></tr>\n    <tr><td><code>706</code></td><td>Services vendus / Travaux</td><td>Prestations de services facturées aux clients.</td></tr>\n    <tr><td><code>707</code></td><td>Produits accessoires</td><td>Ports facturés aux clients (7071), commissions, locations diverses.</td></tr>\n    <tr><td><code>71</code></td><td>Subventions d'exploitation</td><td>Aides reçues de l'État pour compenser des prix de vente réglementés.</td></tr>\n    <tr><td><code>75</code></td><td>Autres produits</td><td>Redevances pour concessions, brevets et licences.</td></tr>\n    <tr><td><code>77</code></td><td>Revenus financiers</td><td>Intérêts perçus sur prêts (771), escomptes de règlement obtenus des fournisseurs (773), gains de change.</td></tr>\n    <tr><td><code>78 / 79</code></td><td>Transferts de charges et Reprises</td><td>Neutralisation d'une charge ou annulation de provisions devenues sans objet.</td></tr>\n  </tbody>\n</table>\n\n<h3>4. Les comptes de gestion HAO (Classe 8)</h3>\n<p>La classe 8 permet de dégager le <strong>Résultat HAO</strong> séparément du Résultat d'Exploitation et du Résultat Financier :</p>\n<ul>\n  <li><code>81</code> Valeurs comptables des cessions d'immobilisations (VCN) — Charge HAO.</li>\n  <li><code>82</code> Produits des cessions d'immobilisations (Prix de vente du matériel cédé) — Produit HAO.</li>\n  <li><code>83</code> Charges HAO constatées (pénalités fiscales, dons versés, pertes exceptionnelles sur créances).</li>\n  <li><code>84</code> Produits HAO constatés (dons reçus, dégrèvements d'impôts).</li>\n  <li><code>85</code> Dotations HAO aux amortissements et provisions.</li>\n  <li><code>86</code> Reprises HAO de dépréciations et provisions.</li>\n  <li><code>87</code> Participation des travailleurs aux bénéfices.</li>\n  <li><code>89</code> Impôt sur le résultat (BIC).</li>\n</ul>\n\n<div class=\"callout\"><div class=\"callout-title\">Règle d'or de détermination du résultat</div><p>Le résultat net de l'exercice découle de la confrontation générale :<br>\n<strong>Résultat Net = Total des Produits (Classes 7 et 8) &minus; Total des Charges (Classes 6 et 8)</strong><br>\nSi Produits &gt; Charges &rarr; <strong>Bénéfice</strong> (Compte <code>131</code> créditeur).<br>\nSi Charges &gt; Produits &rarr; <strong>Perte</strong> (Compte <code>139</code> débiteur).</p></div>",
+    "recap": [
+      "Les classes 6 et 7 traduisent les activités ordinaires (AO) récurrentes de l'entité.",
+      "La classe 8 isole les événements hors activités ordinaires (HAO) exceptionnels.",
+      "Les comptes de charges (classe 6 et charges 8) augmentent au DÉBIT.",
+      "Les comptes de produits (classe 7 et produits 8) augmentent au CRÉDIT.",
+      "Les escomptes obtenus des fournisseurs constituent un produit financier (compte 773).",
+      "Les escomptes accordés aux clients constituent une charge financière (compte 673).",
+      "La cession d'une immobilisation fait intervenir le compte 81 (VCN au débit) et le compte 82 (prix de cession au crédit).",
+      "Le résultat net est la différence entre tous les produits et toutes les charges."
+    ]
   },
   {
-    id: "partie-double",
-    title: "L'entité, les flux et la partie double",
-    summary: "Catégories d'opérations, types de flux et principe emplois / ressources.",
-    key: false,
-    minutes: 5,
-    content: `
-      <h3>Deux catégories d'opérations</h3>
-      <ul>
-        <li><strong>Investissement-financement :</strong> acquisition d'immobilisations financée par le capital ou des emprunts.</li>
-        <li><strong>Exploitation :</strong> achats, ventes, prestations quotidiennes.</li>
-      </ul>
-
-      <h3>Types de flux</h3>
-      <table><thead><tr><th>Type</th><th>Description</th></tr></thead><tbody>
-        <tr><td>Flux externes</td><td>Opérations avec des tiers (les plus nombreux)</td></tr>
-        <tr><td>Flux internes</td><td>Mouvements à l'intérieur (ex : virement caisse → banque)</td></tr>
-        <tr><td>Flux réels</td><td>Portent sur des biens ou ressources échangés</td></tr>
-        <tr><td>Flux quasi-réels</td><td>Prestations : banque, personnel, État → entreprise</td></tr>
-        <tr><td>Flux financiers</td><td>Monnaie, créances, dettes</td></tr>
-        <tr><td>Flux de résultat</td><td>Produits − Charges</td></tr>
-      </tbody></table>
-
-      <h3>Principe de la partie double</h3>
-      <blockquote>Une opération comptable entraîne obligatoirement au moins une ressource et un emploi.</blockquote>
-      <table><thead><tr><th>Emplois (débit)</th><th>Ressources (crédit)</th></tr></thead><tbody>
-        <tr><td>Acquisition d'immobilisation</td><td>Ventes, prestations facturées</td></tr>
-        <tr><td>Achat de marchandises</td><td>Dettes contractées</td></tr>
-        <tr><td>Charges (salaires, impôts…)</td><td>Créances recouvrées</td></tr>
-        <tr><td>Recettes encaissées</td><td>Dépenses effectuées</td></tr>
-      </tbody></table>
-
-      <h3>Incidence sur le résultat</h3>
-      <p>Les emplois consommés (charges) génèrent des pertes ; les ressources créées (ventes) génèrent des profits. Les emplois et ressources réversibles (achats d'immobilisations, emprunts) n'ont pas d'incidence directe sur le résultat.</p>
-    `
+    "id": "partie-double",
+    "title": "L'entité, les flux et la partie double",
+    "summary": "Flux réels et financiers, analyse emplois-ressources et principe d'égalité de la partie double.",
+    "key": true,
+    "minutes": 9,
+    "content": "<p class=\"lead\">L'activité économique d'une entité s'analyse comme un réseau continu de flux réciproques entre l'entreprise et ses partenaires. Le principe de la partie double traduit chaque flux par une égalité rigoureuse entre les emplois et les ressources.</p>\n\n<h3>1. La notion d'entité et ses partenaires</h3>\n<p>L'entité est un organisme économique indépendant exerçant une activité de production ou de distribution de biens et de services. Elle interagit constamment avec son environnement :</p>\n<ul>\n  <li>Les <strong>fournisseurs</strong> (approvisionnement en matières, marchandises et services) ;</li>\n  <li>Les <strong>clients</strong> (vente des produits et encaissement des recettes) ;</li>\n  <li>Le <strong>personnel</strong> (fourniture de travail contre rémunération) ;</li>\n  <li>Les <strong>propriétaires ou associés</strong> (apports en capital contre dividendes) ;</li>\n  <li>Les <strong>banques et prêteurs</strong> (octroi de crédits contre intérêts et remboursements) ;</li>\n  <li>L'<strong>État</strong> (infrastructures publiques contre impôts et taxes).</li>\n</ul>\n\n<h3>2. La typologie des flux économiques</h3>\n<p>Un flux représente la circulation d'une valeur au cours d'une période donnée. On distingue :</p>\n<table>\n  <thead><tr><th>Catégorie de flux</th><th>Nature</th><th>Exemples concrets</th></tr></thead>\n  <tbody>\n    <tr><td><strong>Flux réels (ou physiques)</strong></td><td>Mouvement de biens matériels ou de prestations de services</td><td>Livraison de marchandises, achat de mobilier, consommation d'électricité, travail effectué.</td></tr>\n    <tr><td><strong>Flux financiers (ou monétaires)</strong></td><td>Mouvement de monnaie, de créances ou de dettes</td><td>Paiement en espèces, chèque bancaire, virement postal, promesse de payer à 30 jours (créance/dette).</td></tr>\n    <tr><td><strong>Flux internes</strong></td><td>Mouvement de valeur à l'intérieur même de l'entité</td><td>Transfert de matières du magasin aux ateliers de fabrication, passage de produits finis au stock.</td></tr>\n  </tbody>\n</table>\n\n<h3>3. Analyse Emploi / Ressource</h3>\n<p>Toute transaction économique comporte une double dimension indissociable :</p>\n<ul>\n  <li>La <strong>Ressource (Origine / Moyen)</strong> : d'où provient la valeur ? Quel est le moyen de financement utilisé ?</li>\n  <li>L'<strong>Emploi (Destination / Utilisation)</strong> : où va la valeur ? À quoi a servi la ressource mobilisée ?</li>\n</ul>\n\n<div class=\"example\">\n  <div class=\"example-title\">Exemple fondamental</div>\n  <p>L'entité achète des marchandises pour <strong>500 000 F CFA</strong> au comptant par chèque bancaire :</p>\n  <ul>\n    <li><strong>Ressource :</strong> Avoir en banque (Compte <code>521</code>) &rarr; 500 000 F (Crédit).</li>\n    <li><strong>Emploi :</strong> Entrée de marchandises dans le patrimoine (Compte <code>601</code>) &rarr; 500 000 F (Débit).</li>\n  </ul>\n</div>\n\n<h3>4. Le principe de la partie double</h3>\n<p>Formulé dès le XVe siècle par Luca Pacioli, le principe comptable universel de la partie double s'énonce ainsi :</p>\n<div class=\"formula\">\n  <div>Tout flux entrant (Emploi) = Tout flux sortant (Ressource)</div>\n  <div>Total des Débits = Total des Crédits</div>\n</div>\n<p>Pour chaque opération enregistrée :</p>\n<ul>\n  <li>Un ou plusieurs comptes sont <strong>débités</strong> (pour constater les emplois) ;</li>\n  <li>Un ou plusieurs comptes sont <strong>crédités</strong> (pour constater les ressources) ;</li>\n  <li>La somme des montants portés au débit est <strong>strictement égale</strong> à la somme des montants portés au crédit.</li>\n</ul>\n\n<div class=\"callout\"><div class=\"callout-title\">Règle de conversion Débit / Crédit</div><p><strong>DÉBIT = EMPLOIS</strong> (Augmentation de l'Actif ou Charges consommées).<br>\n<strong>CRÉDIT = RESSOURCES</strong> (Augmentation du Passif ou Produits réalisés).<br>\nIl n'existe aucune écriture comptable où Débit &ne; Crédit.</p></div>",
+    "recap": [
+      "L'entité échange des flux constants avec ses partenaires (clients, fournisseurs, banques, État).",
+      "Les flux réels concernent les biens et services physiques.",
+      "Les flux financiers concernent les règlements immédiats ou différés (créances/dettes).",
+      "La Ressource répond à la question : D'où vient la valeur ? (Origine).",
+      "L'Emploi répond à la question : Où va la valeur ? (Destination).",
+      "Principe de la partie double : Total Débit = Total Crédit pour chaque transaction.",
+      "Tout emploi se traduit par un Débit ; toute ressource se traduit par un Crédit."
+    ]
   },
   {
-    id: "bilan",
-    title: "Le bilan",
-    summary: "Structure actif / passif, situation nette et fonctionnement des comptes principaux.",
-    key: true,
-    minutes: 7,
-    content: `
-      <p class="lead">Le bilan est un état financier de synthèse décrivant séparément les éléments actifs et passifs à une date donnée.</p>
-
-      <div class="bilan-schema">
-        <div class="bilan-col">
-          <div class="bilan-head">Actif — Emplois</div>
-          <div class="bilan-cell"><b>Actif immobilisé</b><span>Immobilisations incorporelles, corporelles, financières, avances sur immobilisations</span></div>
-          <div class="bilan-cell"><b>Actif circulant</b><span>Stocks HAO / AO, créances HAO / AO</span></div>
-          <div class="bilan-cell"><b>Trésorerie-Actif</b><span>Titres de placement, valeurs à encaisser, banque, caisse, CCP</span></div>
-        </div>
-        <div class="bilan-col">
-          <div class="bilan-head">Passif — Ressources</div>
-          <div class="bilan-cell"><b>Capitaux propres et assimilés</b><span>Capital, réserves, résultat, subventions, provisions réglementées</span></div>
-          <div class="bilan-cell"><b>Dettes financières</b><span>Emprunts à long et moyen terme, provisions financières</span></div>
-          <div class="bilan-cell"><b>Passif circulant</b><span>Dettes fournisseurs, dettes sociales et fiscales, passif circulant HAO</span></div>
-          <div class="bilan-cell"><b>Trésorerie-Passif</b><span>Crédits bancaires à court terme, découverts bancaires</span></div>
-        </div>
-      </div>
-
-      <h3>Formules clés</h3>
-      <div class="formula">
-        <div>SN = Actif réel − Passif exigible = Capitaux propres</div>
-        <div>Résultat = Actif − Passif (hors résultat)</div>
-        <div>Bénéfice si Produits &gt; Charges · Perte si Produits &lt; Charges</div>
-      </div>
-
-      <h3>Fonctionnement des comptes principaux</h3>
-      <table><thead><tr><th>Compte</th><th>Débité lors de…</th><th>Crédité lors de…</th></tr></thead><tbody>
-        <tr><td><strong>Capital</strong></td><td>Réductions (retrait, absorption de pertes)</td><td>Apports initiaux, augmentations de capital</td></tr>
-        <tr><td><strong>Immobilisations</strong></td><td>Acquisition (coût HT + frais accessoires)</td><td>Cessions, destructions, mises au rebut</td></tr>
-        <tr><td><strong>Fournisseurs</strong></td><td>Règlements effectués nets d'avoirs</td><td>Achats à crédit, dettes à moins d'un an</td></tr>
-        <tr><td><strong>Clients</strong></td><td>Créances à moins d'un an (ventes à crédit)</td><td>Règlements reçus nets d'avoirs</td></tr>
-      </tbody></table>
-
-      <div class="example">
-        <div class="example-title">Exemple — Bilan AZERD au 31/12/2000</div>
-        <p>Total Actif = Total Passif = 22 750 000. Le bâtiment manquant vaut 22 750 000 − 14 750 000 = <strong>8 000 000 F</strong>.</p>
-      </div>
-    `
+    "id": "bilan",
+    "title": "Le bilan",
+    "summary": "Actif, passif, égalité fondamentale, capitaux propres, situation nette et équilibre financier.",
+    "key": true,
+    "minutes": 10,
+    "content": "<p class=\"lead\">Le bilan est une photographie instantanée de la situation patrimoniale de l'entreprise à une date donnée. Il récapitule d'un côté ce que l'entité possède (Actif) et de l'autre ce qu'elle doit et d'où proviennent ses capitaux (Passif).</p>\n\n<h3>1. Définition et structure générale</h3>\n<p>Conformément au SYSCOHADA révisé, le bilan est un état financier de synthèse faisant partie des comptes annuels. Il se présente sous la forme d'un tableau à deux volets équilibrés :</p>\n<ul>\n  <li><strong>À gauche : l'ACTIF</strong> regroupe les éléments du patrimoine ayant une valeur économique positive pour l'entité (emplois de capitaux).</li>\n  <li><strong>À droite : le PASSIF</strong> décrit l'origine des fonds mis à disposition de l'entité : capitaux propres apportés par les associés ou créés par l'activité, et dettes contractées auprès de tiers.</li>\n</ul>\n\n<h3>2. La structure de l'Actif (Emplois)</h3>\n<p>L'actif est classé selon la destination des biens et leur liquidité croissante :</p>\n<table>\n  <thead><tr><th>Masse d'Actif</th><th>Composantes et caractéristiques</th><th>Exemples de comptes</th></tr></thead>\n  <tbody>\n    <tr><td><strong>Actif immobilisé (Classe 2)</strong></td><td>Biens destinés à être utilisés de façon durable pour les besoins de l'activité (durée &gt; 1 an). Comprend :<br>&bull; Immobilisations incorporelles (logiciels, fonds de commerce) ;<br>&bull; Immobilisations corporelles (terrains, bâtiments, matériel, mobilier) ;<br>&bull; Immobilisations financières (prêts accordés, titres de participation).</td><td><code>21</code> Incorporelles<br><code>22</code> Terrains<br><code>23</code> Bâtiments<br><code>24</code> Matériel et mobilier<br><code>26</code> Titres</td></tr>\n    <tr><td><strong>Actif circulant (Classes 3 et 4)</strong></td><td>Éléments liés au cycle d'exploitation se renouvelant rapidement :<br>&bull; Stocks de marchandises (31), matières (32), produits finis (36) ;<br>&bull; Créances sur clients (411) et débiteurs divers.</td><td><code>31</code> Marchandises<br><code>32</code> Matières premières<br><code>411</code> Clients</td></tr>\n    <tr><td><strong>Trésorerie-Actif (Classe 5)</strong></td><td>Disponibilités financières liquides immédiatement mobilisables.</td><td><code>50</code> Titres de placement<br><code>521</code> Banques<br><code>531</code> Chèques postaux<br><code>571</code> Caisse</td></tr>\n  </tbody>\n</table>\n\n<h3>3. La structure du Passif (Ressources)</h3>\n<p>Le passif est ordonné selon son exigibilité croissante :</p>\n<table>\n  <thead><tr><th>Masse de Passif</th><th>Composantes et caractéristiques</th><th>Exemples de comptes</th></tr></thead>\n  <tbody>\n    <tr><td><strong>Ressources stables / Capitaux propres (Classe 1)</strong></td><td>Fonds propres appartenant définitivement à l'entité et dettes à long et moyen terme :<br>&bull; Capital social apporté par les associés (101) ;<br>&bull; Réserves accumulées (11) ;<br>&bull; Résultat net de l'exercice (13) ;<br>&bull; Emprunts et dettes financières auprès des banques à plus d'un an (16).</td><td><code>101</code> Capital social<br><code>11</code> Réserves<br><code>13</code> Résultat net<br><code>16</code> Emprunts</td></tr>\n    <tr><td><strong>Passif circulant (Classe 4)</strong></td><td>Dettes nées du cycle d'exploitation exigibles à court terme (&lt; 1 an) :<br>&bull; Dettes fournisseurs (401) ;<br>&bull; Dettes fiscales (44) et sociales (42, 43).</td><td><code>401</code> Fournisseurs<br><code>422</code> Salaires dus<br><code>4441</code> TVA due</td></tr>\n    <tr><td><strong>Trésorerie-Passif (Classe 5)</strong></td><td>Avances de trésorerie bancaire à très court terme (découverts autorisés, crédits de trésorerie).</td><td><code>561</code> Crédits de trésorerie<br><code>521</code> Solde créditeur banque</td></tr>\n  </tbody>\n</table>\n\n<h3>4. L'égalité fondamentale du bilan</h3>\n<div class=\"formula\">\n  <div>TOTAL ACTIF = TOTAL PASSIF</div>\n  <div>Actif Immobilisé + Actif Circulant + Trésorerie-Actif = Ressources Stables + Passif Circulant + Trésorerie-Passif</div>\n</div>\n\n<h3>5. La situation nette et le résultat</h3>\n<p>La <strong>Situation Nette (SN)</strong> représente la richesse propre véritable des propriétaires de l'entreprise :</p>\n<div class=\"formula\">\n  <div>Situation Nette = Actif Réel &minus; Dettes exigibles = Capitaux Propres</div>\n</div>\n<p>Le résultat de l'exercice s'intègre au passif parmi les capitaux propres pour équilibrer le bilan :</p>\n<ul>\n  <li>Si l'exercice est bénéficiaire : le résultat s'inscrit au compte <code>131</code> avec un signe <strong>positif (+)</strong> au passif.</li>\n  <li>Si l'exercice est déficitaire : le résultat s'inscrit au compte <code>139</code> avec un signe <strong>négatif (&minus;)</strong> au passif, venant diminuer les capitaux propres.</li>\n</ul>\n\n<div class=\"example\">\n  <div class=\"example-title\">Cas réel du cours : Bilan entreprise AZERD au 31/12/2000</div>\n  <p>L'inventaire donne : Terrains 1 500 000, Mobilier 5 000 000, Matériel de transport 4 200 000, Marchandises 950 000, Clients 1 200 000, Banque 800 000, Chèques postaux 750 000, Caisse 350 000. Passif : Capital 15 000 000, Résultat 2 500 000, Emprunt 5 000 000, Fournisseurs 250 000.<br>\n  Le total du Passif est de <strong>22 750 000 F CFA</strong>.<br>\n  Par équilibre Actif = Passif, le poste Bâtiment inconnu se déduit :<br>\n  <strong>Bâtiment = 22 750 000 &minus; 14 750 000 = 8 000 000 F CFA</strong>.</p>\n</div>",
+    "recap": [
+      "Le bilan est la photographie du patrimoine de l'entreprise à une date précise.",
+      "L'Actif (à gauche) regroupe les emplois de biens et de créances.",
+      "Le Passif (à droite) regroupe les ressources : capitaux propres et dettes.",
+      "L'équilibre fondamental est permanent : Total Actif = Total Passif.",
+      "L'actif se divise en 3 masses : Actif immobilisé, Actif circulant, Trésorerie-Actif.",
+      "Le passif se divise en 3 masses : Ressources stables, Passif circulant, Trésorerie-Passif.",
+      "Situation Nette = Actif Réel - Passif Exigible (Dettes) = Capitaux Propres.",
+      "Le résultat net (bénéfice ou perte) s'inscrit au passif du bilan dans les capitaux propres."
+    ]
   },
   {
-    id: "compte",
-    title: "Le compte et son fonctionnement",
-    summary: "Imputation, solde, arrêt, tracés de compte et règles débit / crédit.",
-    key: false,
-    minutes: 5,
-    content: `
-      <p class="lead">Le compte est un tableau regroupant toutes les opérations concernant un même élément ou poste du bilan.</p>
-
-      <h3>Terminologie essentielle</h3>
-      <table><thead><tr><th>Terme</th><th>Définition</th></tr></thead><tbody>
-        <tr><td>Imputation</td><td>Inscription au débit ou au crédit d'un compte</td></tr>
-        <tr><td>Solde</td><td>TD − TC. Si TD &gt; TC : débiteur · si TC &gt; TD : créditeur · si TD = TC : soldé</td></tr>
-        <tr><td>Arrêt</td><td>Clôture : on inscrit le solde du côté opposé, on totalise et on souligne de 2 traits</td></tr>
-        <tr><td>Réouverture</td><td>On reporte le solde du côté de sa nature</td></tr>
-      </tbody></table>
-
-      <h3>Les 3 tracés de compte</h3>
-      <ul>
-        <li><strong>Tracé classique :</strong> colonnes Dates / Libellés / Montants au débit et au crédit.</li>
-        <li><strong>Tracé à colonnes mariées :</strong> ajoute le solde après chaque opération.</li>
-        <li><strong>Tracé schématique (compte en T) :</strong> montants seuls, débit à gauche, crédit à droite.</li>
-      </ul>
-
-      <h3>Règles de fonctionnement</h3>
-      <table><thead><tr><th>Type de compte</th><th>Augmente par</th><th>Diminue par</th></tr></thead><tbody>
-        <tr><td>Actif du bilan (classes 2 à 5 actif)</td><td>Débit</td><td>Crédit</td></tr>
-        <tr><td>Passif du bilan (classes 1, 4, 5 passif)</td><td>Crédit</td><td>Débit</td></tr>
-        <tr><td>Charges (classe 6 et 8 impairs)</td><td>Débit</td><td>Crédit</td></tr>
-        <tr><td>Produits (classe 7 et 8 pairs)</td><td>Crédit</td><td>Débit</td></tr>
-      </tbody></table>
-
-      <div class="callout">
-        <div class="callout-title">Comptes réciproques</div>
-        <p>Deux comptes représentant deux agents différents (un tenu chez chacun) enregistrent les mêmes flux. Arrêtés à la même date, ils présentent le même solde mais de nature opposée (ex : « Fournisseur A » chez B et « Client B » chez A).</p>
-      </div>
-      <p class="tool-link" data-tool="compte-t">Entraînez-vous avec le simulateur de compte en T</p>
-    `
+    "id": "compte",
+    "title": "Le compte et son fonctionnement",
+    "summary": "Imputation, solde, arrêt de compte, tracés (T, colonnes séparées, colonnes mariées) et règles débit/crédit.",
+    "key": false,
+    "minutes": 9,
+    "content": "<p class=\"lead\">Le compte est l'unité de base du traitement comptable. C'est un tableau ouvert pour chaque élément du patrimoine ou de l'activité, permettant d'enregistrer de façon continue les augmentations et les diminutions subies.</p>\n\n<h3>1. Terminologie fondamentale du compte</h3>\n<table>\n  <thead><tr><th>Terme</th><th>Définition technique</th></tr></thead>\n  <tbody>\n    <tr><td><strong>Imputer</strong></td><td>Inscrire un montant au débit ou au crédit d'un compte donné.</td></tr>\n    <tr><td><strong>Débiter un compte</strong></td><td>Porter un montant dans la colonne Débit (à gauche).</td></tr>\n    <tr><td><strong>Créditer un compte</strong></td><td>Porter un montant dans la colonne Crédit (à droite).</td></tr>\n    <tr><td><strong>Total Débit (TD) & Total Crédit (TC)</strong></td><td>Somme arithmétique de toutes les valeurs enregistrées respectivement au débit et au crédit.</td></tr>\n    <tr><td><strong>Solde d'un compte</strong></td><td>Différence entre le Total Débit et le Total Crédit (TD &minus; TC) :<br>&bull; Si TD &gt; TC : <strong>Solde Débiteur (SD)</strong> ;<br>&bull; Si TC &gt; TD : <strong>Solde Créditeur (SC)</strong> ;<br>&bull; Si TD = TC : Le compte est <strong>soldé</strong> (solde nul).</td></tr>\n    <tr><td><strong>Arrêter un compte</strong></td><td>Calculer son solde et inscrire ce solde du côté le plus faible pour équilibrer artificiellement TD et TC en fin de période.</td></tr>\n    <tr><td><strong>Réouvrir un compte</strong></td><td>Inscrire le solde à nouveau (RAN) de départ du côté normal (SD au débit, SC au crédit) pour la nouvelle période.</td></tr>\n  </tbody>\n</table>\n\n<h3>2. Les tracés de compte</h3>\n<p>Il existe plusieurs manières de matérialiser un compte :</p>\n<ul>\n  <li><strong>Le compte schématique en T</strong> : outil pédagogique rapide présentant une barre horizontale et une séparation centrale (Débit à gauche, Crédit à droite).</li>\n  <li><strong>Le tracé à colonnes séparées (classique)</strong> : sépare nettement la page en deux moitiés indépendantes (Débit : Date, Libellé, Montant | Crédit : Date, Libellé, Montant).</li>\n  <li><strong>Le tracé à colonnes mariées avec colonnes de soldes</strong> : regroupe les dates et libellés dans un tronc commun et fait apparaître après chaque opération le nouveau solde débiteur ou créditeur. C'est le tracé universel des relevés bancaires modernes.</li>\n</ul>\n\n<h3>3. Règles d'imputation Débit / Crédit selon la nature</h3>\n<table>\n  <thead><tr><th>Nature du compte</th><th>Sens d'augmentation</th><th>Sens de diminution</th><th>Solde normal</th></tr></thead>\n  <tbody>\n    <tr><td><strong>Comptes d'Actif (Classes 2, 3, 4 débiteur, 5 actif)</strong></td><td>Augmentent au <strong>DÉBIT</strong></td><td>Diminuent au <strong>CRÉDIT</strong></td><td>Débiteur</td></tr>\n    <tr><td><strong>Comptes de Passif (Classes 1, 4 créditeur, 5 passif)</strong></td><td>Augmentent au <strong>CRÉDIT</strong></td><td>Diminuent au <strong>DÉBIT</strong></td><td>Créditeur</td></tr>\n    <tr><td><strong>Comptes de Charges (Classe 6 et Charges 8)</strong></td><td>Augmentent au <strong>DÉBIT</strong></td><td>Diminuent au <strong>CRÉDIT</strong></td><td>Débiteur</td></tr>\n    <tr><td><strong>Comptes de Produits (Classe 7 et Produits 8)</strong></td><td>Augmentent au <strong>CRÉDIT</strong></td><td>Diminuent au <strong>DÉBIT</strong></td><td>Créditeur</td></tr>\n  </tbody>\n</table>\n\n<div class=\"callout\"><div class=\"callout-title\">Règle de synthèse</div><p>Comptes d'Emplois (Actif et Charges) : <strong>+ au Débit / &minus; au Crédit</strong> &rarr; Solde débiteur.<br>\nComptes de Ressources (Passif et Produits) : <strong>&minus; au Débit / + au Crédit</strong> &rarr; Solde créditeur.</p></div>",
+    "recap": [
+      "Le compte récapitule les mouvements concernant un élément homogène.",
+      "Débiter = inscrire à gauche. Créditer = inscrire à droite.",
+      "Solde = Total Débit - Total Crédit.",
+      "Un compte d'actif ou de charge augmente au Débit et a un solde normal débiteur.",
+      "Un compte de passif ou de produit augmente au Crédit et a un solde normal créditeur.",
+      "Arrêter un compte consiste à inscrire son solde du côté opposé pour équilibrer les totaux.",
+      "Les tracés courants sont le compte en T, les colonnes séparées et les colonnes mariées avec soldes."
+    ]
   },
   {
-    id: "facture",
-    title: "La facture, les réductions et les achats / ventes",
-    summary: "Facture de doit et d'avoir, rabais, remise, ristourne, escompte et comptabilisation.",
-    key: true,
-    minutes: 8,
-    content: `
-      <h3>Deux types de factures</h3>
-      <table><thead><tr><th>Facture de doit</th><th>Facture d'avoir</th></tr></thead><tbody>
-        <tr><td>Établie par le fournisseur · constate une vente · fait ressortir le <strong>Net à payer (NAP)</strong></td><td>Établie par le fournisseur · constate une réduction de prix · fait ressortir le <strong>Net à déduire</strong></td></tr>
-      </tbody></table>
-
-      <h3>Les réductions</h3>
-      <ul>
-        <li><strong>Commerciales (3R) :</strong> Rabais (défaut de qualité) · Remise (importance ou régularité des achats) · Ristourne (chiffre d'affaires périodique). Exprimées en % et calculées <em>en cascade</em>.</li>
-        <li><strong>Financière :</strong> Escompte de règlement (paiement anticipé), calculé <em>toujours sur le Net commercial (NC)</em>, après toutes les réductions commerciales.</li>
-      </ul>
-
-      <h3>Schéma général d'une facture</h3>
-      <div class="formula steps">
-        <div><span>Montant brut (MB)</span></div>
-        <div class="minus"><span>Rabais</span></div>
-        <div class="minus"><span>Remise(s) en cascade</span></div>
-        <div class="total"><span>Net commercial (NC)</span></div>
-        <div class="minus"><span>Escompte (% du NC)</span></div>
-        <div class="total"><span>Net financier (NF)</span></div>
-        <div class="plus"><span>Port HT (si applicable)</span></div>
-        <div class="total"><span>Sous-total HT</span></div>
-        <div class="plus"><span>TVA 18 %</span></div>
-        <div class="total strong"><span>Net à payer (NAP)</span></div>
-      </div>
-
-      <div class="callout warn">
-        <div class="callout-title">Règle importante</div>
-        <p>Les 3R figurant <strong>sur</strong> la facture de doit ne sont <strong>pas comptabilisés</strong> (déjà déduits dans le NC). Un avoir pour réduction obtenue hors facture (a posteriori) <strong>est</strong> comptabilisé.</p>
-      </div>
-
-      <h3>Comptabilisation achat / vente (inventaire permanent)</h3>
-      <table><thead><tr><th>Chez le client</th><th>Chez le fournisseur</th></tr></thead><tbody>
-        <tr><td>D 601/602/604 NC · C 4011 NAP · C 773 Escompte obtenu</td><td>D 4111 NAP · D 673 Escompte accordé · C 701/702 NC</td></tr>
-        <tr><td>D 31/36/37 CA · C 6031/73 CA (entrée en stock)</td><td>D 6031/73 CAMV · C 31/32/37 CAMV (sortie de stock)</td></tr>
-      </tbody></table>
-
-      <div class="example">
-        <div class="example-title">Exemple — Facture ABC vers BAC</div>
-        <p>MB = 1 000 000 · Rabais 150 000 · NC = 850 000 · Escompte 1 % = 8 500 · NF = 841 500 · Port = 70 000 · Sous-total = 911 500 · TVA 18 % = 164 070 · <strong>NAP = 1 075 570</strong></p>
-      </div>
-      <p class="tool-link" data-tool="facture">Refaire ce calcul avec le calculateur de facture</p>
-    `
+    "id": "facture",
+    "title": "La facture, les réductions et les achats / ventes",
+    "summary": "Factures de doit et d'avoir, réductions commerciales (3R) et financières (escompte), cascade et comptabilisation.",
+    "key": true,
+    "minutes": 10,
+    "content": "<p class=\"lead\">La facture est la pièce justificative comptable fondamentale constatant l'accord de vente ou de prestation entre le vendeur et l'acheteur. Elle formalise les réductions commerciales et financières et fixe le montant net exigible.</p>\n\n<h3>1. Facture de Doit et Facture d'Avoir</h3>\n<table>\n  <thead><tr><th>Facture de Doit</th><th>Facture d'Avoir (Note de crédit)</th></tr></thead>\n  <tbody>\n    <tr><td>Établie lors de la vente initiale par le fournisseur.</td><td>Établie postérieurement par le fournisseur pour régulariser une situation.</td></tr>\n    <tr><td>Constate ce que le client <strong>doit</strong> payer.</td><td>Constate ce que le fournisseur <strong>doit déduire</strong> de sa créance (ou rembourser).</td></tr>\n    <tr><td>Fait ressortir le <strong>Net à Payer (NAP)</strong>.</td><td>Fait ressortir le <strong>Net à Déduire (ou Net à votre crédit)</strong>.</td></tr>\n    <tr><td>Déclenchée par l'expédition ou la livraison des marchandises.</td><td>Déclenchée par : un retour de marchandises non conformes, ou une réduction commerciale accordée hors facture de doit.</td></tr>\n  </tbody>\n</table>\n\n<h3>2. La hiérarchie des réductions sur facture</h3>\n<h4>A. Les réductions à caractère commercial (les \"3 R\")</h4>\n<ul>\n  <li><strong>Le Rabais :</strong> réduction accordée pour défaut de conformité, retard de livraison ou vice de fabrication constaté sur les biens livrés.</li>\n  <li><strong>La Remise :</strong> réduction accordée en considération de l'importance du volume acheté ou de la qualité du client (fidélité, profession).</li>\n  <li><strong>La Ristourne :</strong> réduction globale périodique (annuelle ou trimestrielle) calculée sur le volume d'affaires total réalisé avec le client.</li>\n</ul>\n\n<h4>B. La réduction à caractère financier : l'Escompte de règlement</h4>\n<p>L'<strong>escompte</strong> est une réduction consentie au client qui règle sa dette par anticipation (au comptant ou avant l'échéance normale). C'est un coût financier pour le vendeur (charge financière <code>673</code>) et un gain financier pour l'acheteur (produit financier <code>773</code>).</p>\n\n<h3>3. Ordre logique et cascade de calcul</h3>\n<div class=\"formula steps\">\n  <div><span>Montant brut des marchandises (MB)</span></div>\n  <div class=\"minus\"><span>&minus; Rabais (% ou montant fixe)</span></div>\n  <div class=\"minus\"><span>&minus; Remise 1 (% sur la base résiduelle)</span></div>\n  <div class=\"minus\"><span>&minus; Remise 2 (% en cascade)</span></div>\n  <div class=\"total\"><span>= Net commercial (NC)</span></div>\n  <div class=\"minus\"><span>&minus; Escompte financier (% calculé sur le Net commercial)</span></div>\n  <div class=\"total\"><span>= Net financier (NF)</span></div>\n  <div class=\"plus\"><span>+ Port et frais accessoires (si facturés)</span></div>\n  <div class=\"total\"><span>= Total Hors Taxes (HT)</span></div>\n  <div class=\"plus\"><span>+ TVA 18 %</span></div>\n  <div class=\"total strong\"><span>= Net à payer TTC (NAP)</span></div>\n</div>\n\n<div class=\"callout warn\"><div class=\"callout-title\">Règle d'or de comptabilisation des 3 R</div><p>Les réductions commerciales (3 R) figurant <strong>sur la facture de doit</strong> ne sont <strong>JAMAIS enregistrées</strong> dans un compte distinct. Les achats (compte <code>601</code>) et les ventes (compte <code>701</code>) sont inscrits directement pour leur <strong>Net commercial</strong>.<br>\nEn revanche, l'<strong>escompte de règlement</strong> est toujours comptabilisé (en <code>673</code> chez le fournisseur, en <code>773</code> chez le client).</p></div>\n\n<h3>4. Les schémas d'écritures de la facture de doit</h3>\n<p>Pour une vente comportant Net commercial (NC), Escompte (ESC), Port facturé (PORT), TVA et Net à payer (NAP) :</p>\n<table class=\"journal\">\n  <thead><tr><th>Chez l'Acheteur (Client)</th><th>Débit</th><th>Crédit</th></tr></thead>\n  <tbody>\n    <tr><td><code>601</code> Achats de marchandises (pour le Net commercial)</td><td>NC</td><td></td></tr>\n    <tr><td><code>6015</code> Frais sur achats / Port</td><td>PORT</td><td></td></tr>\n    <tr><td><code>445</code> État, TVA récupérable</td><td>TVA</td><td></td></tr>\n    <tr><td><code>401</code> Fournisseurs (dette totale TTC)</td><td></td><td>NAP</td></tr>\n    <tr><td><code>773</code> Escomptes obtenus</td><td></td><td>ESC</td></tr>\n  </tbody>\n</table>\n\n<table class=\"journal\">\n  <thead><tr><th>Chez le Vendeur (Fournisseur)</th><th>Débit</th><th>Crédit</th></tr></thead>\n  <tbody>\n    <tr><td><code>411</code> Clients (créance totale TTC)</td><td>NAP</td><td></td></tr>\n    <tr><td><code>673</code> Escomptes accordés</td><td>ESC</td><td></td></tr>\n    <tr><td><code>701</code> Ventes de marchandises (pour le Net commercial)</td><td></td><td>NC</td></tr>\n    <tr><td><code>7071</code> Ports facturés et frais accessoires</td><td></td><td>PORT</td></tr>\n    <tr><td><code>443</code> État, TVA facturée</td><td></td><td>TVA</td></tr>\n  </tbody>\n</table>\n\n<h3>5. La facture d'avoir (Retours de marchandises & 3R hors facture)</h3>\n<p>Lors d'un retour de marchandises ou de l'accord d'une réduction hors facture de doit, le fournisseur émet une facture d'avoir :</p>\n<ul>\n  <li><strong>Pour retour de marchandises :</strong> l'écriture initiale est purement et simplement passée en sens inverse (contre-passation).</li>\n  <li><strong>Pour 3 R accordés hors facture :</strong> on utilise les comptes spécifiques de déduction : <code>6019</code> Rabais, remises et ristournes obtenus chez le client, et <code>7019</code> Rabais, remises et ristournes accordés chez le fournisseur.</li>\n</ul>",
+    "recap": [
+      "La facture de doit constate une vente et dégage le Net à Payer (NAP).",
+      "La facture d'avoir constate une réduction ou un retour et dégage le Net à Déduire.",
+      "Les réductions commerciales (Rabais, Remise, Ristourne) se calculent en cascade successive.",
+      "Le Net commercial sert de base de calcul à l'escompte de règlement financier.",
+      "Les 3R sur facture de doit ne se comptabilisent pas : 601 et 701 s'enregistrent au Net commercial.",
+      "L'escompte se comptabilise toujours : 673 Escomptes accordés (vendeur) et 773 Escomptes obtenus (acheteur).",
+      "Les retours de marchandises font l'objet d'une contre-passation exacte de la facture initiale.",
+      "Les 3R accordés hors facture s'enregistrent en 6019 chez l'acheteur et 7019 chez le vendeur."
+    ]
   },
   {
-    id: "transport",
-    title: "Les frais de transport",
-    summary: "Port dû, port payé, port forfaitaire, transport sur ventes et frais de réexpédition.",
-    key: false,
-    minutes: 5,
-    content: `
-      <p class="lead">Le SYSCOHADA révisé a supprimé le compte 611 « Transports sur achats ». Les comptes <code>6015</code>, <code>6025</code>, <code>6045</code> et <code>6085</code> sont utilisés à la place.</p>
-
-      <h3>Frais à la charge du client — 3 cas</h3>
-      <table><thead><tr><th>Cas</th><th>Mécanisme</th><th>Chez le client</th><th>Chez le fournisseur</th></tr></thead><tbody>
-        <tr><td><strong>Port dû</strong></td><td>Le client paie directement le transporteur</td><td>D 60*5 / C 401 ou 52/57</td><td>Aucune écriture de transport</td></tr>
-        <tr><td><strong>Port payé (récupéré)</strong></td><td>Le fournisseur avance et récupère sur facture</td><td>D 60*5 (compris dans le NAP)</td><td>D 613 / C 52 puis D 411 / C 7071</td></tr>
-        <tr><td><strong>Port forfaitaire</strong></td><td>Le fournisseur transporte avec ses propres camions</td><td>D 60*5 (compris dans le NAP)</td><td>C <strong>707</strong> (produit accessoire)</td></tr>
-      </tbody></table>
-
-      <h3>Frais à la charge du fournisseur</h3>
-      <p>Transport vers le client : D <code>612</code> Transports sur ventes / C 401 ou 52/57. Ces frais ne figurent pas sur la facture de vente.</p>
-
-      <h3>Frais de réexpédition lors d'un retour</h3>
-      <ul>
-        <li>Le client engage les frais : D 613 / C 57 (caisse).</li>
-        <li>Récupération via facture d'avoir : le client crédite 781 ou 7071 · le fournisseur débite 612.</li>
-      </ul>
-
-      <div class="example">
-        <div class="example-title">Exemple — Paul / Coffi (retour du 12/3)</div>
-        <p>Retour brut 200 000 · NC = 190 000 · Escompte repris = 1 900 · Port de réexpédition = 50 000 · <strong>Net à déduire = 238 100</strong></p>
-      </div>
-    `
+    "id": "transport",
+    "title": "Les frais de transport",
+    "summary": "Port forfaitaire, port payé (débours), clauses franco, comptabilisation client et fournisseur.",
+    "key": false,
+    "minutes": 8,
+    "content": "<p class=\"lead\">L'acheminement des marchandises vendues entraîne des frais de transport dont le traitement comptable diffère selon qu'il incombe au fournisseur ou au client, et selon les moyens mis en œuvre.</p>\n\n<h3>1. Les clauses juridiques de livraison</h3>\n<ul>\n  <li><strong>Vente Franco de port (départ fournisseur) :</strong> les frais de transport sont à la charge intégrale du fournisseur jusqu'au lieu convenu. Aucun frais de port n'est réclamé au client sur la facture.</li>\n  <li><strong>Vente Port dû (départ usine / magasin) :</strong> les frais de transport incombent au client, qui paie directement le transporteur à la livraison.</li>\n  <li><strong>Vente Port facturé (forfaitaire) :</strong> le fournisseur assure lui-même le transport avec son propre matériel et facture un service accessoire forfaitaire au client.</li>\n  <li><strong>Vente Port payé / récupéré (débours) :</strong> le fournisseur paie d'avance un transporteur tiers pour le compte du client et récupère exactement cette somme sur la facture de vente.</li>\n</ul>\n\n<h3>2. Traitement du Port Forfaitaire (moyens propres du vendeur)</h3>\n<p>Le transport constitue une vente accessoire de service :</p>\n<ul>\n  <li>Chez le fournisseur : crédité au compte <code>7071</code> Ports, emballages perdus et autres frais facturés.</li>\n  <li>Chez le client : débité au compte <code>6015</code> Frais sur achats (ou incorporé directement au compte <code>601</code>).</li>\n</ul>\n\n<h3>3. Traitement du Port Récupéré (Débours / Port payé pour compte de tiers)</h3>\n<p>Le fournisseur n'est qu'un intermédiaire financier :</p>\n<ul>\n  <li>Au paiement initial du transporteur par le vendeur : Débit <code>612</code> Transports sur ventes (ou <code>419</code> Tiers) / Crédit Banque ou Caisse.</li>\n  <li>Sur la facture adressée au client : récupération du débours au compte <code>7072</code> ou contre-passation du compte <code>612</code>.</li>\n  <li>Chez le client : débit du compte <code>611</code> Transports sur achats (ou <code>6015</code>) / Crédit Fournisseur.</li>\n</ul>\n\n<h3>4. Incidences de la TVA et de l'escompte</h3>\n<div class=\"callout\"><div class=\"callout-title\">Règles fondamentales</div><p>1. <strong>TVA sur les transports :</strong> Les frais de port facturés sont passibles de la TVA au taux de droit commun (18 % au Bénin), tout comme les marchandises.<br>\n2. <strong>Assiette de l'escompte :</strong> L'escompte financier ne rémunère que le paiement anticipé des marchandises : il se calcule sur le Net commercial <strong>avant</strong> l'addition des frais de port.</p></div>",
+    "recap": [
+      "Franco de port signifie que le transport est intégralement pris en charge par le fournisseur.",
+      "Le port forfaitaire correspond au transport assuré par les moyens propres du vendeur (compte 7071).",
+      "Le port débours (ou port payé) correspond au remboursement exact d'un transporteur tiers payé d'avance.",
+      "Chez le client, le port s'enregistre au compte 6015 Frais sur achats ou 611 Transports sur achats.",
+      "L'escompte financier de règlement se calcule sur le Net commercial, pas sur le port.",
+      "Les frais de port facturés sont soumis à la TVA au taux normal de 18 %."
+    ]
   },
   {
-    id: "tva",
-    title: "La TVA",
-    summary: "Champ d'application, taux béninois, comptes 443 / 445 / 4441 / 4449 et liquidation.",
-    key: true,
-    minutes: 6,
-    content: `
-      <p class="lead">La TVA est un impôt indirect frappant les livraisons de biens et prestations de services à titre onéreux. Elle est supportée par le consommateur final mais collectée par les entreprises assujetties.</p>
-
-      <ul>
-        <li><strong>Exonérations :</strong> opérations dans le champ de la TVA, mais non taxées par décision de l'État.</li>
-        <li><strong>Exemptions :</strong> opérations hors du champ d'application de la TVA.</li>
-      </ul>
-
-      <div class="callout">
-        <div class="callout-title">Taux en vigueur au Bénin : 18 %</div>
-        <p>La TVA se calcule sur le <strong>Net financier (NF) + Port HT</strong> s'il figure sur la facture.</p>
-      </div>
-
-      <h3>Comptes de TVA</h3>
-      <table><thead><tr><th>Compte</th><th>Rôle</th></tr></thead><tbody>
-        <tr><td><code>443</code> TVA facturée</td><td>Dette envers l'État (TVA collectée sur les ventes)</td></tr>
-        <tr><td><code>445</code> TVA récupérable</td><td>Créance sur l'État (TVA déductible sur achats)</td></tr>
-        <tr><td><code>645</code> Impôts et taxes indirects</td><td>Charge si l'entreprise n'est <strong>pas</strong> assujettie</td></tr>
-        <tr><td><code>4441</code> TVA due</td><td>Solde à payer (TVA facturée &gt; TVA récupérable)</td></tr>
-        <tr><td><code>4449</code> Crédit de TVA</td><td>Solde reportable (TVA récupérable &gt; TVA facturée)</td></tr>
-      </tbody></table>
-
-      <h3>Liquidation mensuelle — TVA due</h3>
-      <table class="journal"><thead><tr><th>Compte</th><th>Débit</th><th>Crédit</th></tr></thead><tbody>
-        <tr><td>443 État, TVA facturée</td><td>TVA facturée</td><td></td></tr>
-        <tr><td>445 État, TVA récupérable</td><td></td><td>TVA récupérable</td></tr>
-        <tr><td>4441 État, TVA due</td><td></td><td>Différence</td></tr>
-      </tbody></table>
-      <p>Au paiement : D <code>4441</code> / C <code>52</code> (banque).</p>
-
-      <h3>Liquidation mensuelle — Crédit de TVA</h3>
-      <table class="journal"><thead><tr><th>Compte</th><th>Débit</th><th>Crédit</th></tr></thead><tbody>
-        <tr><td>443 État, TVA facturée</td><td>TVA facturée</td><td></td></tr>
-        <tr><td>4449 État, crédit de TVA</td><td>Différence</td><td></td></tr>
-        <tr><td>445 État, TVA récupérable</td><td></td><td>TVA récupérable</td></tr>
-      </tbody></table>
-    `
+    "id": "tva",
+    "title": "La TVA",
+    "summary": "Principes, calcul au taux béninois de 18 %, TVA facturée, TVA déductible et liquidation mensuelle.",
+    "key": true,
+    "minutes": 8,
+    "content": "<p class=\"lead\">La Taxe sur la Valeur Ajoutée (TVA) est un impôt indirect général sur la consommation supporté par le consommateur final et collecté à chaque stade par les entreprises assujetties pour le compte de l'État.</p>\n\n<h3>1. Mécanisme de collecte et de déduction</h3>\n<p>L'entreprise assujettie joue le rôle d'intermédiaire collecteur pour l'administration fiscale :</p>\n<ul>\n  <li>Lors des ventes : elle facture la <strong>TVA collectée (ou facturée)</strong> au compte <code>443</code> (dette envers le Trésor public).</li>\n  <li>Lors des achats professionnels : elle récupère la <strong>TVA déductible</strong> au compte <code>445</code> (créance sur le Trésor public).</li>\n  <li>À la fin de chaque mois : elle liquide la taxe en compensant TVA facturée et TVA récupérable.</li>\n</ul>\n\n<h3>2. Taux et assiette au Bénin</h3>\n<ul>\n  <li><strong>Taux normal en vigueur au Bénin :</strong> <strong>18 %</strong>.</li>\n  <li><strong>Assiette de calcul sur facture :</strong> la TVA s'applique sur le <em>Net financier</em> majoré des frais accessoires (ports, emballages perdus) :<br>\n  <strong>Base HT = Net financier + Frais accessoires HT</strong><br>\n  <strong>TVA = Base HT &times; 18 %</strong></li>\n</ul>\n\n<h3>3. Déclaration mensuelle et liquidation (Compte 444)</h3>\n<p>À la clôture de chaque période mensuelle :</p>\n\n<h4>Cas A : TVA due (TVA facturée &gt; TVA récupérable)</h4>\n<p>L'entreprise a collecté plus d'impôt qu'elle n'en a payé à ses fournisseurs : elle doit verser la différence à l'État au plus tard le 15 du mois suivant.</p>\n<table class=\"journal\">\n  <thead><tr><th>Liquidation — Constatation de la TVA due</th><th>Débit</th><th>Crédit</th></tr></thead>\n  <tbody>\n    <tr><td><code>443</code> État, TVA facturée (pour solde)</td><td>Total facturé</td><td></td></tr>\n    <tr><td><code>445</code> État, TVA récupérable (pour solde)</td><td></td><td>Total récupérable</td></tr>\n    <tr><td><code>4441</code> État, TVA due (solde à payer au fisc)</td><td></td><td>Différence</td></tr>\n  </tbody>\n</table>\n<p>Au règlement au Trésor public : <strong>Débit 4441 / Crédit 521 (Banque)</strong>.</p>\n\n<h4>Cas B : Crédit de TVA (TVA récupérable &gt; TVA facturée)</h4>\n<p>L'entreprise a payé plus de TVA qu'elle n'en a collectée (investissements importants, stocks) : elle détient une créance sur l'État à reporter sur les déclarations suivantes.</p>\n<table class=\"journal\">\n  <thead><tr><th>Liquidation — Constatation du Crédit de TVA</th><th>Débit</th><th>Crédit</th></tr></thead>\n  <tbody>\n    <tr><td><code>443</code> État, TVA facturée (pour solde)</td><td>Total facturé</td><td></td></tr>\n    <tr><td><code>4449</code> État, crédit de TVA à reporter (créance)</td><td>Différence</td><td></td></tr>\n    <tr><td><code>445</code> État, TVA récupérable (pour solde)</td><td></td><td>Total récupérable</td></tr>\n  </tbody>\n</table>\n\n<div class=\"callout\"><div class=\"callout-title\">À retenir</div><p>La TVA est un impôt <strong>neutre</strong> pour l'entreprise assujettie : elle ne constitue ni une charge ni un produit d'exploitation direct. Seul le consommateur final supporte définitivement la charge de la taxe.</p></div>",
+    "recap": [
+      "La TVA est un impôt indirect supporté par le consommateur final et neutre pour l'entreprise.",
+      "Taux normal au Bénin : 18 % sur le montant hors taxe.",
+      "Compte 443 État, TVA facturée : dette envers l'État lors des ventes.",
+      "Compte 445 État, TVA récupérable : créance sur l'État lors des achats professionnels.",
+      "Si TVA facturée > TVA récupérable : TVA due (compte 4441 crédité).",
+      "Si TVA récupérable > TVA facturée : Crédit de TVA à reporter (compte 4449 débité)."
+    ]
+  },
+  {
+    "id": "emballages",
+    "title": "Les emballages commerciaux",
+    "summary": "Emballages perdus et récupérables, consignation, déconsignation (boni/mali) et conservation.",
+    "key": false,
+    "minutes": 8,
+    "content": "<div class=\"callout warn\"><div class=\"callout-title\">Chapitre complémentaire au programme</div><p>Ce chapitre figure au programme officiel de L1 Informatique mais n'était pas détaillé dans le polycopié scanné. Il a été fidèlement rédigé selon le référentiel du SYSCOHADA révisé.</p></div>\n\n<p class=\"lead\">Les emballages sont des objets destinés à contenir, protéger, conditionner et faciliter la manutention des marchandises. Leur traitement comptable dépend de leur nature (perdus ou récupérables) et du recours à la consignation.</p>\n\n<h3>1. Classification des emballages</h3>\n<table>\n  <thead><tr><th>Catégorie</th><th>Définition et régime</th><th>Comptabilisation</th></tr></thead>\n  <tbody>\n    <tr><td><strong>Emballages perdus (irrécupérables)</strong></td><td>Emballages vendus avec la marchandise sans restitution possible (cartons jetables, sachets, canettes).</td><td>Inclus dans le prix de vente ou facturés en produits accessoires (<code>7071</code>). Chez le client : charge d'achat (<code>601</code> ou <code>6043</code>).</td></tr>\n    <tr><td><strong>Emballages récupérables identifiables</strong></td><td>Grands contenants durables de valeur unitaire élevée (citernes, conteneurs spéciaux, fûts métalliques numérotés).</td><td>Considérés comme des immobilisations corporelles amortissables (Compte <code>243</code> Matériel d'emballage récupérable).</td></tr>\n    <tr><td><strong>Emballages récupérables non identifiables</strong></td><td>Objets banalisés prêtés ou consignés aux clients (bouteilles en verre standard, palettes, casiers).</td><td>Enregistrés en stocks (Compte <code>335</code> Emballages récupérables) et faisant l'objet de consignation.</td></tr>\n  </tbody>\n</table>\n\n<h3>2. Le mécanisme de la consignation</h3>\n<p>La <strong>consignation</strong> est un prêt d'emballages assorti d'un dépôt de garantie financier versé par le client :</p>\n<ul>\n  <li>Ce n'est <strong>pas une vente</strong> : aucune TVA n'est exigible au moment de la consignation.</li>\n  <li>Chez le <strong>fournisseur</strong> : il a une dette conditionnelle envers le client. On crédite le compte <code>4194</code> Clients, dettes pour emballages et matériels consignés.</li>\n  <li>Chez le <strong>client</strong> : il détient une créance conditionnelle sur le fournisseur. On débite le compte <code>4094</code> Fournisseurs, créances pour emballages et matériels à rendre.</li>\n</ul>\n\n<h3>3. La déconsignation (restitution des emballages)</h3>\n<p>Trois situations peuvent se présenter lors du retour :</p>\n<ul>\n  <li><strong>1er cas : Reprise au prix de consignation (intégrale)</strong><br>\n  Le client restitue les emballages en bon état dans les délais convenus. Les écritures initiales sont exactement contre-passées (Débit 4194 / Crédit 411 chez le vendeur).</li>\n  <li><strong>2e cas : Reprise à un prix inférieur (Mali pour le client / Boni pour le vendeur)</strong><br>\n  Le fournisseur retient une somme pour dépréciation ou usure. Cette différence constitue un service de location facturé soumis à la TVA (<code>7074</code> Bonis sur reprise d'emballages chez le vendeur, <code>6224</code> Malis sur emballages chez le client).</li>\n  <li><strong>3e cas : Non-restitution (Emballages conservés ou détruits par le client)</strong><br>\n  La consignation se transforme en vente ferme d'emballages perdus, avec application de la TVA au taux de 18 %.</li>\n</ul>",
+    "recap": [
+      "Les emballages perdus sont consommés avec la marchandise (achats stockés ou non).",
+      "Les emballages récupérables de valeur durable sont immobilisés (compte 243).",
+      "La consignation est un prêt garanti par un dépôt financier non assujetti à la TVA.",
+      "Compte 4194 (Fournisseur) : dettes pour emballages consignés aux clients.",
+      "Compte 4094 (Client) : créances pour emballages à rendre aux fournisseurs.",
+      "Une reprise à un prix inférieur génère un Boni (produit 7074) pour le vendeur et un Mali (charge 6224) pour l'acheteur."
+    ]
+  },
+  {
+    "id": "effets",
+    "title": "Les effets de commerce",
+    "summary": "Lettre de change, billet à ordre, création, encaissement, endossement et négociation à l'escompte.",
+    "key": false,
+    "minutes": 8,
+    "content": "<div class=\"callout warn\"><div class=\"callout-title\">Chapitre complémentaire au programme</div><p>Ce chapitre figure au programme officiel de L1 Informatique mais n'était pas détaillé dans le polycopié scanné. Il a été fidèlement rédigé selon le référentiel du SYSCOHADA révisé.</p></div>\n\n<p class=\"lead\">L'effet de commerce est un titre négociable représentant une créance de somme d'argent payable à court terme. Il constitue à la fois un instrument de paiement et un instrument de crédit fondamental du commerce ouest-africain.</p>\n\n<h3>1. Les deux formes usuelles d'effets de commerce</h3>\n<table>\n  <thead><tr><th>Instrument</th><th>Créateur / Émetteur</th><th>Mécanisme</th></tr></thead>\n  <tbody>\n    <tr><td><strong>La Lettre de Change (ou Traite)</strong></td><td>Créée par le <strong>Fournisseur (Tireur)</strong></td><td>Ordre écrit donné par le tireur à son client débiteur (Tiré) de payer une somme fixée à une date convenue (l'échéance) à un bénéficiaire (souvent le tireur lui-même).</td></tr>\n    <tr><td><strong>Le Billet à Ordre</strong></td><td>Créé par le <strong>Client (Souscripteur)</strong></td><td>Promesse écrite souscrite par le débiteur de payer une somme déterminée à une date précise à l'ordre de son créancier (Bénéficiaire).</td></tr>\n  </tbody>\n</table>\n\n<h3>2. Création et acceptation de l'effet</h3>\n<p>À la réception de la traite acceptée ou du billet à ordre souscrit :</p>\n<ul>\n  <li>Chez le bénéficiaire (fournisseur) : on transforme la créance ordinaire en créance cambiaire garantie :<br>\n  <strong>Débit <code>412</code> Clients, effets à recevoir / Crédit <code>411</code> Clients</strong>.</li>\n  <li>Chez le tiré (client) : on transforme la dette ordinaire en dette cambiaire :<br>\n  <strong>Débit <code>401</code> Fournisseurs / Crédit <code>402</code> Fournisseurs, effets à payer</strong>.</li>\n</ul>\n\n<h3>3. Utilisation de l'effet par le créancier</h3>\n<p>Le détenteur d'un effet dispose de trois possibilités d'action :</p>\n<ol>\n  <li><strong>Conservation jusqu'à l'échéance :</strong> l'effet est remis directement à l'encaissement quelques jours avant l'échéance (compte <code>511</code> ou <code>512</code> Effets à l'encaissement).</li>\n  <li><strong>Négociation à l'escompte bancaire :</strong> pour obtenir des liquidités immédiates sans attendre l'échéance, l'entreprise remet l'effet à sa banque à l'escompte. La banque verse le net sous déduction des <em>agios</em> (intérêts d'escompte en <code>675</code> et commissions de service en <code>631</code>).</li>\n  <li><strong>Endossement à l'ordre d'un tiers :</strong> l'effet est transmis à un autre fournisseur en règlement d'une dette propre.</li>\n</ol>\n\n<div class=\"callout\"><div class=\"callout-title\">À retenir</div><p>Le compte <code>412</code> (Effets à recevoir) est un actif circulant.<br>\nLe compte <code>402</code> (Effets à payer) est un passif circulant.<br>\nL'escompte d'effet de commerce fait supporter à l'entreprise des charges financières (intérêts d'escompte) inscrites en classe 6.</p></div>",
+    "recap": [
+      "La lettre de change est tirée par le fournisseur ; le billet à ordre est souscrit par le client.",
+      "À l'acceptation : Débit 412 Clients, effets à recevoir (Actif) / Crédit 411 Clients.",
+      "Chez le client : Débit 401 Fournisseurs / Crédit 402 Fournisseurs, effets à payer (Passif).",
+      "L'effet peut être gardé jusqu'à l'échéance, endossé à un tiers ou remis à l'escompte bancaire.",
+      "L'escompte d'effet génère des agios comprenant des intérêts bancaires (compte 675) et des commissions de service (compte 631)."
+    ]
   }
 ];
 
-/* ── Extrait du plan comptable (fiches + recherche) ─────────── */
+/* ── Plan des comptes enrichi (SYSCOHADA révisé) ───────────── */
 COURSE.accounts = [
-  { n: "10",   l: "Capital",                                  c: 1 },
-  { n: "11",   l: "Réserves",                                 c: 1 },
-  { n: "13",   l: "Résultat net de l'exercice",               c: 1 },
-  { n: "16",   l: "Emprunts et dettes assimilées",            c: 1 },
-  { n: "21",   l: "Immobilisations incorporelles",            c: 2 },
-  { n: "22",   l: "Terrains",                                 c: 2 },
-  { n: "23",   l: "Bâtiments, installations techniques et agencements", c: 2 },
-  { n: "24",   l: "Matériel, mobilier et actifs biologiques", c: 2 },
-  { n: "245",  l: "Matériel de transport",                    c: 2 },
-  { n: "2845", l: "Amortissements du matériel de transport",  c: 2 },
-  { n: "31",   l: "Marchandises",                             c: 3 },
-  { n: "32",   l: "Matières premières et fournitures liées",  c: 3 },
-  { n: "36",   l: "Produits finis",                           c: 3 },
-  { n: "39",   l: "Dépréciations des stocks",                 c: 3 },
-  { n: "401",  l: "Fournisseurs, dettes en compte",           c: 4 },
-  { n: "411",  l: "Clients",                                  c: 4 },
-  { n: "4191", l: "Clients, avances et acomptes reçus",       c: 4 },
-  { n: "443",  l: "État, TVA facturée",                       c: 4 },
-  { n: "445",  l: "État, TVA récupérable",                    c: 4 },
-  { n: "4441", l: "État, TVA due",                            c: 4 },
-  { n: "4449", l: "État, crédit de TVA à reporter",           c: 4 },
-  { n: "52",   l: "Banques",                                  c: 5 },
-  { n: "57",   l: "Caisse",                                   c: 5 },
-  { n: "601",  l: "Achats de marchandises",                   c: 6 },
-  { n: "602",  l: "Achats de matières premières et fournitures liées", c: 6 },
-  { n: "6031", l: "Variations des stocks de marchandises",    c: 6 },
-  { n: "612",  l: "Transports sur ventes",                    c: 6 },
-  { n: "613",  l: "Transports pour le compte de tiers",       c: 6 },
-  { n: "645",  l: "Impôts et taxes indirects",                c: 6 },
-  { n: "66",   l: "Charges de personnel",                     c: 6 },
-  { n: "673",  l: "Escomptes accordés",                       c: 6 },
-  { n: "68",   l: "Dotations aux amortissements",             c: 6 },
-  { n: "701",  l: "Ventes de marchandises",                   c: 7 },
-  { n: "702",  l: "Ventes de produits finis",                 c: 7 },
-  { n: "707",  l: "Produits accessoires",                     c: 7 },
-  { n: "773",  l: "Escomptes obtenus",                        c: 7 },
-  { n: "781",  l: "Transferts de charges d'exploitation",     c: 7 },
-  { n: "81",   l: "Valeurs comptables des cessions d'immobilisations", c: 8 },
-  { n: "82",   l: "Produits des cessions d'immobilisations",  c: 8 },
-  { n: "84",   l: "Produits HAO",                             c: 8 }
+  {
+    "n": "101",
+    "l": "Capital social",
+    "c": 1
+  },
+  {
+    "n": "102",
+    "l": "Capital par dotation",
+    "c": 1
+  },
+  {
+    "n": "103",
+    "l": "Capital personnel",
+    "c": 1
+  },
+  {
+    "n": "111",
+    "l": "Réserve légale",
+    "c": 1
+  },
+  {
+    "n": "112",
+    "l": "Réserves statutaires ou contractuelles",
+    "c": 1
+  },
+  {
+    "n": "118",
+    "l": "Autres réserves",
+    "c": 1
+  },
+  {
+    "n": "121",
+    "l": "Report à nouveau créditeur",
+    "c": 1
+  },
+  {
+    "n": "129",
+    "l": "Report à nouveau débiteur",
+    "c": 1
+  },
+  {
+    "n": "131",
+    "l": "Résultat net : Bénéfice",
+    "c": 1
+  },
+  {
+    "n": "139",
+    "l": "Résultat net : Perte",
+    "c": 1
+  },
+  {
+    "n": "161",
+    "l": "Emprunts obligataires",
+    "c": 1
+  },
+  {
+    "n": "162",
+    "l": "Emprunts et dettes auprès des établissements de crédit",
+    "c": 1
+  },
+  {
+    "n": "191",
+    "l": "Provisions pour litiges",
+    "c": 1
+  },
+  {
+    "n": "211",
+    "l": "Frais de développement",
+    "c": 1
+  },
+  {
+    "n": "212",
+    "l": "Brevets, licences, concessions et droits similaires",
+    "c": 1
+  },
+  {
+    "n": "215",
+    "l": "Fonds commercial",
+    "c": 1
+  },
+  {
+    "n": "221",
+    "l": "Terrains agricoles et forestiers",
+    "c": 1
+  },
+  {
+    "n": "222",
+    "l": "Terrains nus",
+    "c": 1
+  },
+  {
+    "n": "223",
+    "l": "Terrains bâtis",
+    "c": 1
+  },
+  {
+    "n": "231",
+    "l": "Bâtiments industriels, agricoles, administratifs et commerciaux",
+    "c": 2
+  },
+  {
+    "n": "232",
+    "l": "Bâtiments affectés au logement du personnel",
+    "c": 2
+  },
+  {
+    "n": "241",
+    "l": "Matériel et outillage industriel et commercial",
+    "c": 2
+  },
+  {
+    "n": "244",
+    "l": "Matériel et mobilier de bureau",
+    "c": 2
+  },
+  {
+    "n": "245",
+    "l": "Matériel de transport",
+    "c": 2
+  },
+  {
+    "n": "243",
+    "l": "Matériel d'emballage récupérable et identifiable",
+    "c": 2
+  },
+  {
+    "n": "261",
+    "l": "Titres de participation",
+    "c": 2
+  },
+  {
+    "n": "271",
+    "l": "Prêts accordés",
+    "c": 2
+  },
+  {
+    "n": "275",
+    "l": "Dépôts et cautionnements versés",
+    "c": 2
+  },
+  {
+    "n": "281",
+    "l": "Amortissements des immobilisations incorporelles",
+    "c": 2
+  },
+  {
+    "n": "283",
+    "l": "Amortissements des bâtiments",
+    "c": 2
+  },
+  {
+    "n": "284",
+    "l": "Amortissements du matériel",
+    "c": 2
+  },
+  {
+    "n": "2845",
+    "l": "Amortissements du matériel de transport",
+    "c": 2
+  },
+  {
+    "n": "311",
+    "l": "Marchandises A",
+    "c": 3
+  },
+  {
+    "n": "312",
+    "l": "Marchandises B",
+    "c": 3
+  },
+  {
+    "n": "321",
+    "l": "Matières premières",
+    "c": 3
+  },
+  {
+    "n": "335",
+    "l": "Emballages récupérables non identifiables",
+    "c": 3
+  },
+  {
+    "n": "361",
+    "l": "Produits finis",
+    "c": 3
+  },
+  {
+    "n": "391",
+    "l": "Dépréciations des stocks de marchandises",
+    "c": 3
+  },
+  {
+    "n": "401",
+    "l": "Fournisseurs, dettes en compte",
+    "c": 4
+  },
+  {
+    "n": "4011",
+    "l": "Fournisseurs d'exploitation",
+    "c": 4
+  },
+  {
+    "n": "402",
+    "l": "Fournisseurs, effets à payer",
+    "c": 4
+  },
+  {
+    "n": "4091",
+    "l": "Fournisseurs, avances et acomptes versés",
+    "c": 4
+  },
+  {
+    "n": "4094",
+    "l": "Fournisseurs, créances pour emballages et matériels à rendre",
+    "c": 4
+  },
+  {
+    "n": "411",
+    "l": "Clients",
+    "c": 4
+  },
+  {
+    "n": "4111",
+    "l": "Clients ordinaires",
+    "c": 4
+  },
+  {
+    "n": "412",
+    "l": "Clients, effets à recevoir",
+    "c": 4
+  },
+  {
+    "n": "4191",
+    "l": "Clients, avances et acomptes reçus",
+    "c": 4
+  },
+  {
+    "n": "4194",
+    "l": "Clients, dettes pour emballages et matériels consignés",
+    "c": 4
+  },
+  {
+    "n": "422",
+    "l": "Personnel, rémunérations dues",
+    "c": 4
+  },
+  {
+    "n": "431",
+    "l": "Sécurité sociale (CNSS)",
+    "c": 4
+  },
+  {
+    "n": "442",
+    "l": "État, impôts et taxes recouvrables sur des tiers (AIB)",
+    "c": 4
+  },
+  {
+    "n": "443",
+    "l": "État, TVA facturée",
+    "c": 4
+  },
+  {
+    "n": "445",
+    "l": "État, TVA récupérable",
+    "c": 4
+  },
+  {
+    "n": "4441",
+    "l": "État, TVA due",
+    "c": 4
+  },
+  {
+    "n": "4449",
+    "l": "État, crédit de TVA à reporter",
+    "c": 4
+  },
+  {
+    "n": "481",
+    "l": "Fournisseurs d'investissements",
+    "c": 4
+  },
+  {
+    "n": "491",
+    "l": "Dépréciations des comptes clients",
+    "c": 4
+  },
+  {
+    "n": "501",
+    "l": "Titres du Trésor",
+    "c": 5
+  },
+  {
+    "n": "511",
+    "l": "Valeurs à l'encaissement",
+    "c": 5
+  },
+  {
+    "n": "512",
+    "l": "Effets à l'encaissement",
+    "c": 5
+  },
+  {
+    "n": "521",
+    "l": "Banques locales",
+    "c": 5
+  },
+  {
+    "n": "531",
+    "l": "Chèques postaux (CCP)",
+    "c": 5
+  },
+  {
+    "n": "561",
+    "l": "Crédits de trésorerie (découverts)",
+    "c": 5
+  },
+  {
+    "n": "571",
+    "l": "Caisse",
+    "c": 5
+  },
+  {
+    "n": "601",
+    "l": "Achats de marchandises",
+    "c": 6
+  },
+  {
+    "n": "6015",
+    "l": "Frais sur achats de marchandises (Port)",
+    "c": 6
+  },
+  {
+    "n": "6019",
+    "l": "Rabais, remises et ristournes obtenus sur achats",
+    "c": 6
+  },
+  {
+    "n": "602",
+    "l": "Achats de matières premières",
+    "c": 6
+  },
+  {
+    "n": "603",
+    "l": "Variations des stocks de biens achetés",
+    "c": 6
+  },
+  {
+    "n": "604",
+    "l": "Achats stockés de matières et fournitures consommables",
+    "c": 6
+  },
+  {
+    "n": "605",
+    "l": "Achats non stockés de matières et fournitures (eau, électricité)",
+    "c": 6
+  },
+  {
+    "n": "611",
+    "l": "Transports sur achats",
+    "c": 6
+  },
+  {
+    "n": "612",
+    "l": "Transports sur ventes",
+    "c": 6
+  },
+  {
+    "n": "622",
+    "l": "Locations et charges locatives",
+    "c": 6
+  },
+  {
+    "n": "6224",
+    "l": "Malis sur emballages",
+    "c": 6
+  },
+  {
+    "n": "624",
+    "l": "Entretien, réparations et maintenance",
+    "c": 6
+  },
+  {
+    "n": "625",
+    "l": "Primes d'assurance",
+    "c": 6
+  },
+  {
+    "n": "627",
+    "l": "Publicité, publications, relations publiques",
+    "c": 6
+  },
+  {
+    "n": "631",
+    "l": "Frais bancaires et commissions",
+    "c": 6
+  },
+  {
+    "n": "632",
+    "l": "Rémunérations d'intermédiaires et honoraires",
+    "c": 6
+  },
+  {
+    "n": "641",
+    "l": "Impôts et taxes directs (Patente)",
+    "c": 6
+  },
+  {
+    "n": "661",
+    "l": "Rémunérations directes versées au personnel national",
+    "c": 6
+  },
+  {
+    "n": "664",
+    "l": "Charges sociales patronales (CNSS)",
+    "c": 6
+  },
+  {
+    "n": "671",
+    "l": "Intérêts des emprunts",
+    "c": 6
+  },
+  {
+    "n": "673",
+    "l": "Escomptes accordés aux clients",
+    "c": 6
+  },
+  {
+    "n": "675",
+    "l": "Escomptes des effets de commerce",
+    "c": 6
+  },
+  {
+    "n": "681",
+    "l": "Dotations aux amortissements d'exploitation",
+    "c": 6
+  },
+  {
+    "n": "701",
+    "l": "Ventes de marchandises",
+    "c": 7
+  },
+  {
+    "n": "7019",
+    "l": "Rabais, remises et ristournes accordés sur ventes",
+    "c": 7
+  },
+  {
+    "n": "702",
+    "l": "Ventes de produits finis",
+    "c": 7
+  },
+  {
+    "n": "706",
+    "l": "Services vendus",
+    "c": 7
+  },
+  {
+    "n": "7071",
+    "l": "Ports, emballages perdus et autres frais facturés",
+    "c": 7
+  },
+  {
+    "n": "7074",
+    "l": "Bonis sur reprise d'emballages consignés",
+    "c": 7
+  },
+  {
+    "n": "711",
+    "l": "Subventions d'exploitation",
+    "c": 7
+  },
+  {
+    "n": "771",
+    "l": "Intérêts de prêts et créances",
+    "c": 7
+  },
+  {
+    "n": "773",
+    "l": "Escomptes obtenus des fournisseurs",
+    "c": 7
+  },
+  {
+    "n": "781",
+    "l": "Transferts de charges d'exploitation",
+    "c": 7
+  },
+  {
+    "n": "811",
+    "l": "Valeurs comptables des cessions d'immobilisations corporelles",
+    "c": 8
+  },
+  {
+    "n": "821",
+    "l": "Produits des cessions d'immobilisations corporelles",
+    "c": 8
+  },
+  {
+    "n": "831",
+    "l": "Charges HAO constatées",
+    "c": 8
+  },
+  {
+    "n": "841",
+    "l": "Produits HAO constatés",
+    "c": 8
+  },
+  {
+    "n": "891",
+    "l": "Impôts sur les bénéfices de l'exercice (BIC)",
+    "c": 8
+  }
 ];
 
+/* ── Intitulés des classes ─────────────────────────────────── */
 COURSE.classNames = {
-  1: "Ressources durables", 2: "Actif immobilisé", 3: "Stocks", 4: "Tiers",
-  5: "Trésorerie", 6: "Charges AO", 7: "Produits AO", 8: "Autres charges et produits (HAO)"
+  "1": "Ressources durables (Capitaux propres et dettes financières)",
+  "2": "Actif immobilisé (Immobilisations incorporelles, corporelles et financières)",
+  "3": "Stocks (Marchandises, matières premières, produits)",
+  "4": "Tiers (Créances clients, dettes fournisseurs, personnel, État)",
+  "5": "Trésorerie (Titres de placement, banques, caisse, découverts)",
+  "6": "Charges des activités ordinaires (Exploitation et financier)",
+  "7": "Produits des activités ordinaires (Exploitation et financier)",
+  "8": "Autres charges et autres produits (Hors Activités Ordinaires - HAO)",
+  "9": "Engagements hors bilan et comptabilité analytique"
 };
 
-/* ── Exercice : classer au bilan ────────────────────────────── */
+/* ── Postes pour l'outil de tri du bilan ───────────────────── */
 COURSE.bilanItems = [
-  { l: "Capital social",            s: "passif" },
-  { l: "Bâtiment",                  s: "actif"  },
-  { l: "Emprunt bancaire (5 ans)",  s: "passif" },
-  { l: "Stock de marchandises",     s: "actif"  },
-  { l: "Dettes fournisseurs",       s: "passif" },
-  { l: "Créances clients",          s: "actif"  },
-  { l: "Caisse",                    s: "actif"  },
-  { l: "Matériel de transport",     s: "actif"  },
-  { l: "Réserves",                  s: "passif" },
-  { l: "Découvert bancaire",        s: "passif" },
-  { l: "Dettes fiscales (TVA due)", s: "passif" },
-  { l: "Logiciel acquis",           s: "actif"  }
+  {
+    "l": "Fonds commercial",
+    "s": "actif"
+  },
+  {
+    "l": "Terrains nus",
+    "s": "actif"
+  },
+  {
+    "l": "Bâtiments administratifs",
+    "s": "actif"
+  },
+  {
+    "l": "Matériel de transport",
+    "s": "actif"
+  },
+  {
+    "l": "Stocks de marchandises",
+    "s": "actif"
+  },
+  {
+    "l": "Créances clients",
+    "s": "actif"
+  },
+  {
+    "l": "Banques (avoirs)",
+    "s": "actif"
+  },
+  {
+    "l": "Caisse",
+    "s": "actif"
+  },
+  {
+    "l": "Capital social",
+    "s": "passif"
+  },
+  {
+    "l": "Réserves statutaires",
+    "s": "passif"
+  },
+  {
+    "l": "Résultat net (bénéfice)",
+    "s": "passif"
+  },
+  {
+    "l": "Emprunt bancaire à 5 ans",
+    "s": "passif"
+  },
+  {
+    "l": "Dettes fournisseurs",
+    "s": "passif"
+  },
+  {
+    "l": "TVA due à l'État",
+    "s": "passif"
+  },
+  {
+    "l": "Avances reçues des clients",
+    "s": "passif"
+  },
+  {
+    "l": "Crédits de trésorerie (découverts)",
+    "s": "passif"
+  }
 ];
 
-/* ── Questions du quiz ──────────────────────────────────────── */
-/* ch = identifiant du chapitre à réviser en cas d'erreur          */
+/* ── Banque globale de questions QCM ───────────────────────── */
 COURSE.questions = [
-  { ch: "generalites", q: "En quelle année le SYSCOA a-t-il été créé, suite à la dévaluation du franc CFA ?", o: ["1990", "1994", "1998", "2000"], a: 1, e: "Le SYSCOA a été créé en 1994 par l'UEMOA, et rendu applicable dès le 1er janvier 1998." },
-  { ch: "generalites", q: "Combien d'États sont aujourd'hui membres de l'OHADA ?", o: ["8", "14", "16", "17"], a: 3, e: "L'OHADA compte 17 États membres depuis l'adhésion de la République démocratique du Congo en 2012." },
-  { ch: "generalites", q: "Quelle est l'hypothèse de base de la présentation des états financiers ?", o: ["La prudence", "La continuité de l'exploitation", "La permanence des méthodes", "Le coût historique"], a: 1, e: "L'hypothèse de base est la continuité de l'exploitation." },
-  { ch: "generalites", q: "Quel postulat énonce que le résultat d'un exercice est indépendant de celui qui précède et de celui qui suit ?", o: ["Postulat de l'entité", "Postulat de la comptabilité d'engagement", "Postulat de spécialisation des exercices", "Postulat de la permanence des méthodes"], a: 2, e: "Le postulat de spécialisation des exercices stipule que le résultat de chaque exercice est indépendant des autres." },
-  { ch: "cadre", q: "Dans la lecture verticale du bilan, le bas du bilan comprend les classes :", o: ["1 et 2", "3, 4 et 5", "6, 7 et 8", "9 uniquement"], a: 1, e: "Le haut du bilan comprend les classes 1 et 2, le bas comprend les classes 3, 4 et 5." },
-  { ch: "cadre", q: "Le compte 2845 correspond à :", o: ["Matériel de transport", "Amortissements du matériel de transport", "Dépréciation du matériel", "Achat de matériel de transport"], a: 1, e: "Le chiffre 8 en 2e position de la classe 2 indique l'amortissement (245 devient 2845)." },
-  { ch: "cadre", q: "Le chiffre 9 en 3e position d'un compte indique :", o: ["Une provision", "Un amortissement", "Un caractère opposant au sens normal du compte", "Un compte résiduel"], a: 2, e: "Le chiffre 9 en 3e position implique un sens opposé au sens normal du compte (ex : 4191)." },
-  { ch: "charges-produits", q: "Parmi ces comptes, lequel enregistre une charge des activités ordinaires ?", o: ["701", "601", "82", "88"], a: 1, e: "601 = Achats de marchandises, charge des activités ordinaires (classe 6)." },
-  { ch: "charges-produits", q: "Le compte 84 correspond à :", o: ["Charges HAO", "Produits HAO", "Dotations HAO", "Reprises HAO"], a: 1, e: "84 = Produits HAO (en classe 8, les comptes pairs sont des produits)." },
-  { ch: "cadre", q: "Dans le PCE, l'analyse par fonction ne concerne que :", o: ["Les classes 1 à 5", "Les classes 6, 7 et 8", "La classe 9 uniquement", "Toutes les classes"], a: 1, e: "La subdivision par fonction n'a de sens que pour les comptes de charges et produits (classes 6, 7, 8)." },
-  { ch: "bilan", q: "Le compte Capital est crédité lors :", o: ["D'une absorption de pertes", "D'un retrait définitif", "D'un nouvel apport des associés", "D'un remboursement aux associés"], a: 2, e: "Le compte Capital est crédité lors des augmentations de capital (nouveaux apports, incorporation de bénéfices)." },
-  { ch: "bilan", q: "Dans le bilan, la partie Actif fait apparaître :", o: ["Les ressources", "Les emplois", "Le résultat uniquement", "Les charges"], a: 1, e: "L'actif fait apparaître les emplois ; le passif retrace les ressources." },
-  { ch: "bilan", q: "La situation nette (SN) est égale à :", o: ["L'actif total", "Le passif exigible", "Les capitaux propres", "Le résultat de l'exercice"], a: 2, e: "SN = Actif réel − Passif exigible = Capitaux propres." },
-  { ch: "compte", q: "Si le total débit (TD) d'un compte est supérieur au total crédit (TC), le solde est :", o: ["Créditeur", "Nul", "Débiteur", "Indéterminé"], a: 2, e: "Si TD > TC, le solde = TD − TC et il est dit débiteur." },
-  { ch: "compte", q: "Le tracé qui fait apparaître le solde après chaque opération est appelé :", o: ["Tracé classique", "Tracé à colonnes mariées", "Tracé schématique", "Tracé en T"], a: 1, e: "Le tracé à colonnes mariées fait apparaître le solde après chaque opération." },
-  { ch: "compte", q: "Les comptes de l'actif du bilan augmentent par :", o: ["Le crédit", "Le débit", "Le virement", "L'arrêt"], a: 1, e: "Les comptes d'actif augmentent par le débit et diminuent par le crédit." },
-  { ch: "facture", q: "Sur une facture de doit, l'escompte se calcule :", o: ["Sur le montant brut", "Avant les réductions commerciales", "Après toutes les réductions commerciales (sur le NC)", "Sur le net à payer"], a: 2, e: "L'escompte se calcule toujours après toutes les réductions commerciales, sur le Net commercial." },
-  { ch: "facture", q: "Les 3R figurant sur une facture de doit sont :", o: ["Comptabilisés au débit du 601", "Comptabilisés au crédit du 701", "Non comptabilisés (déjà déduits du NC)", "Comptabilisés en TVA"], a: 2, e: "Les réductions commerciales figurant sur la facture de doit ne sont pas comptabilisées." },
-  { ch: "transport", q: "Lorsque le fournisseur transporte avec ses propres camions (port forfaitaire), ce produit est enregistré chez lui au crédit du compte :", o: ["612", "613", "707", "6015"], a: 2, e: "Le port forfaitaire est un produit accessoire, enregistré au crédit du compte 707." },
-  { ch: "tva", q: "Le taux de TVA en vigueur au Bénin est de :", o: ["10 %", "15 %", "18 %", "20 %"], a: 2, e: "Le taux de TVA en vigueur au Bénin est de 18 %." },
+  {
+    "q": "Selon l'Acte uniforme de l'OHADA, quel état financier a remplacé le TAFIRE dans le SYSCOHADA révisé ?",
+    "o": [
+      "Le Tableau des flux de trésorerie (TFT)",
+      "Le Bilan financier condensé",
+      "Le Grand Livre analytique",
+      "Le Tableau d'amortissement linéaire"
+    ],
+    "a": 0,
+    "e": "Le SYSCOHADA révisé a substitué le Tableau des flux de trésorerie (TFT) à l'ancien TAFIRE pour décrire les flux de liquidités.",
+    "calc": false,
+    "ch": "generalites"
+  },
+  {
+    "q": "Quel postulat comptable impose que le résultat d'un exercice soit strictement indépendant de celui qui précède et de celui qui suit ?",
+    "o": [
+      "La permanence des méthodes",
+      "La spécialisation des exercices",
+      "La prééminence de la réalité économique",
+      "Le postulat de l'entité"
+    ],
+    "a": 1,
+    "e": "Le postulat de spécialisation des exercices stipule que la vie de l'entreprise est découpée en périodes annuelles autonomes auxquelles on rattache charges et produits propres.",
+    "calc": false,
+    "ch": "generalites"
+  },
+  {
+    "q": "Quel principe comptable interdit d'anticiper l'enregistrement d'un gain probable tout en imposant la prise en compte de toute perte prévisible ?",
+    "o": [
+      "La convention du coût historique",
+      "Le postulat de l'entité",
+      "La convention de prudence",
+      "La continuité de l'exploitation"
+    ],
+    "a": 2,
+    "e": "La prudence commande d'inscrire les risques et dépréciations dès qu'ils sont prévisibles, alors que les bénéfices ne sont comptabilisés que lorsqu'ils sont définitivement réalisés.",
+    "calc": false,
+    "ch": "generalites"
+  },
+  {
+    "q": "Combien d'États membres compte aujourd'hui l'espace juridique et comptable de l'OHADA ?",
+    "o": [
+      "8 États",
+      "15 États",
+      "17 États",
+      "24 États"
+    ],
+    "a": 2,
+    "e": "L'OHADA compte 17 États membres signataires du traité de Port-Louis.",
+    "calc": false,
+    "ch": "generalites"
+  },
+  {
+    "q": "Parmi les documents suivants, lequel N'EST PAS un livre comptable obligatoire prévu par l'Acte Uniforme ?",
+    "o": [
+      "Le Livre-Journal",
+      "Le Grand-Livre",
+      "Le Livre d'inventaire",
+      "Le Journal des prévisions budgétaires"
+    ],
+    "a": 3,
+    "e": "Le journal budgétaire relève de la gestion interne facultative. Les 4 documents obligatoires sont le Journal, le Grand-Livre, la Balance et le Livre d'inventaire.",
+    "calc": false,
+    "ch": "generalites"
+  },
+  {
+    "q": "Quelle est l'hypothèse de base sous-jacente à l'établissement des états financiers en SYSCOHADA ?",
+    "o": [
+      "La liquidation imminente de l'actif",
+      "La continuité de l'exploitation",
+      "La constance de la valeur monétaire",
+      "La neutralité fiscale"
+    ],
+    "a": 1,
+    "e": "La continuité de l'exploitation est l'hypothèse fondamentale présumant que l'entité poursuivra ses activités dans un avenir prévisible.",
+    "calc": false,
+    "ch": "generalites"
+  },
+  {
+    "q": "Que prévoit la convention de correspondance entre le bilan de clôture et le bilan d'ouverture ?",
+    "o": [
+      "Le bilan d'ouverture d'un exercice doit correspondre exactement au bilan de clôture précédent",
+      "Le bénéfice doit être égal aux capitaux propres d'ouverture",
+      "Le total actif doit être multiplié par le taux d'inflation",
+      "Les créances d'ouverture doivent être soldées en clôture"
+    ],
+    "a": 0,
+    "e": "Ce principe d'intangibilité garantit que le bilan d'ouverture N est la copie conforme du bilan de clôture N-1 sans omission ni décalage.",
+    "calc": false,
+    "ch": "generalites"
+  },
+  {
+    "q": "Le postulat de prééminence de la réalité économique sur l'apparence juridique autorise notamment :",
+    "o": [
+      "L'enregistrement d'opérations selon leur substance économique réelle (ex: crédit-bail)",
+      "L'omission des factures non payées",
+      "La non-déclaration de la TVA",
+      "La tenue de comptabilités parallèles"
+    ],
+    "a": 0,
+    "e": "La prééminence de la substance économique conduit à inscrire certains biens loués en crédit-bail à l'actif de l'utilisateur comme s'il en était propriétaire.",
+    "calc": false,
+    "ch": "generalites"
+  },
+  {
+    "q": "Dans quelle classe du SYSCOHADA enregistre-t-on les capitaux propres et les emprunts à long terme ?",
+    "o": [
+      "Classe 1",
+      "Classe 2",
+      "Classe 4",
+      "Classe 5"
+    ],
+    "a": 0,
+    "e": "La classe 1 regroupe les ressources durables : capitaux propres (10, 11, 13) et dettes financières stables (16).",
+    "calc": false,
+    "ch": "cadre"
+  },
+  {
+    "q": "Quel est le numéro du compte d'amortissement correspondant au compte 245 'Matériel de transport' ?",
+    "o": [
+      "2845",
+      "2945",
+      "2458",
+      "6812"
+    ],
+    "a": 0,
+    "e": "En insérant un 8 en 2e position dans la classe 2, on obtient le compte d'amortissement correspondant : 2845.",
+    "calc": false,
+    "ch": "cadre"
+  },
+  {
+    "q": "Le compte 4191 'Clients, avances et acomptes reçus' est de quelle nature dans le bilan ?",
+    "o": [
+      "Une ressource (passif circulant)",
+      "Un emploi (actif immobilisé)",
+      "Une charge d'exploitation",
+      "Une disponibilité de trésorerie"
+    ],
+    "a": 0,
+    "e": "Le chiffre 9 en 3e position indique un compte à solde opposé : 4191 représente une dette envers le client pour l'argent reçu avant livraison, donc un passif.",
+    "calc": false,
+    "ch": "cadre"
+  },
+  {
+    "q": "Que désigne le chiffre 9 en deuxième position d'un compte de bilan (ex: 391, 491) ?",
+    "o": [
+      "Une dépréciation ou provision",
+      "Un amortissement linéaire",
+      "Une créance irrécouvrable définitive",
+      "Un produit exceptionnel"
+    ],
+    "a": 0,
+    "e": "Le chiffre 9 en 2e position signale une dépréciation constatant la perte de valeur probable d'un actif.",
+    "calc": false,
+    "ch": "cadre"
+  },
+  {
+    "q": "Parmi les classes suivantes, laquelle est facultative dans le SYSCOHADA ?",
+    "o": [
+      "Classe 5",
+      "Classe 8",
+      "Classe 9",
+      "Classe 3"
+    ],
+    "a": 2,
+    "e": "La classe 9, réservée aux engagements hors bilan et à la comptabilité analytique de gestion, est d'usage facultatif.",
+    "calc": false,
+    "ch": "cadre"
+  },
+  {
+    "q": "Quel compte représente les 'Marchandises' au bilan ?",
+    "o": [
+      "Compte 31",
+      "Compte 601",
+      "Compte 701",
+      "Compte 401"
+    ],
+    "a": 0,
+    "e": "Le compte 31 Marchandises est le compte de stock d'actif. 601 est la charge d'achat et 701 le produit de vente.",
+    "calc": false,
+    "ch": "cadre"
+  },
+  {
+    "q": "Le compte 4091 'Fournisseurs, avances et acomptes versés' se classe :",
+    "o": [
+      "À l'actif circulant (créance sur le fournisseur)",
+      "Au passif circulant (dette envers le fournisseur)",
+      "En capitaux propres",
+      "En trésorerie active"
+    ],
+    "a": 0,
+    "e": "L'avance versée au fournisseur confère à l'entreprise un droit de créance jusqu'à réception de la facture, donc un élément d'actif.",
+    "calc": false,
+    "ch": "cadre"
+  },
+  {
+    "q": "Dans le PCE (Plan Comptable d'Entreprise), comment peut-on codifier la fonction d'une charge ?",
+    "o": [
+      "En ajoutant deux chiffres de fonction aux classes 6, 7 et 8",
+      "En changeant le premier chiffre du compte",
+      "En utilisant exclusivement des lettres",
+      "Ce procédé est formellement interdit"
+    ],
+    "a": 0,
+    "e": "Le SYSCOHADA permet d'ajouter 2 chiffres de fonction (ex: .03 service comptabilité) aux charges et produits pour l'analyse par destination.",
+    "calc": false,
+    "ch": "cadre"
+  },
+  {
+    "q": "Où s'enregistre normalement l'augmentation d'un compte de charge de la classe 6 ?",
+    "o": [
+      "Au Débit",
+      "Au Crédit",
+      "Au Passif du bilan",
+      "En compte de tiers"
+    ],
+    "a": 0,
+    "e": "Les comptes de charges représentent des emplois d'appauvrissement : ils augmentent toujours au débit.",
+    "calc": false,
+    "ch": "charges-produits"
+  },
+  {
+    "q": "Quel compte utilise-t-on pour comptabiliser les escomptes financiers obtenus de nos fournisseurs ?",
+    "o": [
+      "773 Escomptes obtenus",
+      "673 Escomptes accordés",
+      "601 Achats de marchandises",
+      "707 Produits accessoires"
+    ],
+    "a": 0,
+    "e": "L'escompte obtenu réduit notre dette et constitue un produit financier pour l'acheteur, crédité au compte 773.",
+    "calc": false,
+    "ch": "charges-produits"
+  },
+  {
+    "q": "Dans quelle classe enregistre-t-on la vente occasionnelle d'un véhicule de livraison par une entreprise commerciale ?",
+    "o": [
+      "Classe 8 (Produits HAO 82)",
+      "Classe 7 (Ventes 701)",
+      "Classe 2 (Immobilisations)",
+      "Classe 1 (Capitaux)"
+    ],
+    "a": 0,
+    "e": "La cession d'une immobilisation ne fait pas partie de l'activité ordinaire : le prix de vente s'enregistre au compte 82 Produits des cessions d'immobilisations.",
+    "calc": false,
+    "ch": "charges-produits"
+  },
+  {
+    "q": "Que représente le solde du compte 603 'Variations des stocks de biens achetés' ?",
+    "o": [
+      "La différence entre Stock Initial et Stock Final",
+      "Le total des achats de l'année",
+      "Le bénéfice brut de vente",
+      "La dépréciation des stocks"
+    ],
+    "a": 0,
+    "e": "Le compte 603 ajuste les achats de la période en calculant Stock Initial - Stock Final pour déterminer les achats consommés réels.",
+    "calc": false,
+    "ch": "charges-produits"
+  },
+  {
+    "q": "Les salaires bruts versés aux employés de l'entité sont enregistrés au débit du compte :",
+    "o": [
+      "661 Rémunérations directes versées au personnel",
+      "422 Personnel, rémunérations dues",
+      "706 Prestations de services",
+      "101 Capital social"
+    ],
+    "a": 0,
+    "e": "Le compte 661 est le compte de charge de personnel constatant l'emploi du travail.",
+    "calc": false,
+    "ch": "charges-produits"
+  },
+  {
+    "q": "Si le total des produits d'une entité s'élève à 18 500 000 F et le total des charges à 14 200 000 F, l'entreprise réalise :",
+    "o": [
+      "Un bénéfice net de 4 300 000 F",
+      "Une perte nette de 4 300 000 F",
+      "Un excédent brut de 32 700 000 F",
+      "Un équilibre nul"
+    ],
+    "a": 0,
+    "e": "Résultat = 18 500 000 - 14 200 000 = +4 300 000 F CFA. Les produits excèdent les charges, il s'agit d'un bénéfice.",
+    "calc": true,
+    "ch": "charges-produits"
+  },
+  {
+    "q": "Dans l'analyse comptable, comment définit-on la 'Ressource' d'une opération ?",
+    "o": [
+      "L'origine ou le moyen qui a financé l'opération",
+      "La destination finale de la dépense",
+      "Le bénéfice retiré de la vente",
+      "La taxe versée à l'État"
+    ],
+    "a": 0,
+    "e": "La ressource représente le moyen ou le point de départ du flux économique qui a permis de réaliser l'opération.",
+    "calc": false,
+    "ch": "partie-double"
+  },
+  {
+    "q": "Une entreprise achète un camion de livraison à crédit auprès d'un fournisseur d'immobilisations. Quel est l'emploi ?",
+    "o": [
+      "L'entrée du matériel de transport dans l'actif (Compte 245)",
+      "La dette envers le fournisseur (Compte 481)",
+      "Le compte de banque",
+      "Les intérêts de retard"
+    ],
+    "a": 0,
+    "e": "L'emploi est l'utilisation faite de la ressource : ici, l'acquisition et l'entrée dans le patrimoine du matériel de transport.",
+    "calc": false,
+    "ch": "partie-double"
+  },
+  {
+    "q": "Que stipule le principe fondamental de la partie double ?",
+    "o": [
+      "Pour chaque écriture, la somme des débits doit être égale à la somme des crédits",
+      "L'entreprise doit tenir deux comptabilités distinctes",
+      "Le résultat doit être divisé par deux associés",
+      "Chaque facture doit comporter deux signatures"
+    ],
+    "a": 0,
+    "e": "La partie double impose l'égalité arithmétique absolue : Total Débit = Total Crédit pour toute opération.",
+    "calc": false,
+    "ch": "partie-double"
+  },
+  {
+    "q": "L'achat de matières premières payé en espèces constitue :",
+    "o": [
+      "Un flux réel d'entrée (matières) et un flux financier de sortie (espèces)",
+      "Deux flux financiers réciproques",
+      "Un flux purement interne",
+      "Un flux sans contrepartie monétaire"
+    ],
+    "a": 0,
+    "e": "L'arrivée des matières constitue un flux réel (physique) et le règlement en monnaie constitue un flux financier en sens inverse.",
+    "calc": false,
+    "ch": "partie-double"
+  },
+  {
+    "q": "Lors du règlement par chèque bancaire d'une dette envers un fournisseur, quel est le compte crédité ?",
+    "o": [
+      "521 Banques (Ressource)",
+      "401 Fournisseurs (Emploi)",
+      "601 Achats de marchandises",
+      "571 Caisse"
+    ],
+    "a": 0,
+    "e": "La banque est la ressource qui procure les fonds : son compte diminue par le crédit. Le fournisseur est débité pour annuler la dette.",
+    "calc": false,
+    "ch": "partie-double"
+  },
+  {
+    "q": "Dans quelle masse du bilan classe-t-on un emprunt bancaire contracté pour une durée de 5 ans ?",
+    "o": [
+      "Ressources stables (Classe 1)",
+      "Passif circulant (Classe 4)",
+      "Trésorerie-Passif",
+      "Actif immobilisé"
+    ],
+    "a": 0,
+    "e": "Les dettes financières à plus d'un an (compte 16) sont des ressources stables finançant durablement l'entité.",
+    "calc": false,
+    "ch": "bilan"
+  },
+  {
+    "q": "Où figure une perte nette constatée à la clôture de l'exercice dans le bilan ?",
+    "o": [
+      "Au passif, dans les capitaux propres, avec un signe négatif (compte 139)",
+      "À l'actif immobilisé",
+      "Dans les dettes fournisseurs",
+      "Elle ne figure pas au bilan"
+    ],
+    "a": 0,
+    "e": "Une perte réduit les capitaux propres de l'entité et s'inscrit donc au passif avec une valeur négative ou entre parenthèses.",
+    "calc": false,
+    "ch": "bilan"
+  },
+  {
+    "q": "Une entreprise présente un Actif total de 30 000 000 F CFA et un total de dettes exigibles de 12 000 000 F CFA. Quelle est sa situation nette ?",
+    "o": [
+      "18 000 000 F CFA",
+      "42 000 000 F CFA",
+      "30 000 000 F CFA",
+      "12 000 000 F CFA"
+    ],
+    "a": 0,
+    "e": "Situation Nette = Actif total - Dettes exigibles = 30 000 000 - 12 000 000 = 18 000 000 F CFA.",
+    "calc": true,
+    "ch": "bilan"
+  },
+  {
+    "q": "Parmi les postes suivants, lequel appartient à l'Actif circulant ?",
+    "o": [
+      "Stocks de marchandises",
+      "Bâtiments industriels",
+      "Emprunt bancaire à 7 ans",
+      "Fonds de commerce"
+    ],
+    "a": 0,
+    "e": "Les stocks de marchandises (compte 31) sont destinés à être vendus rapidement au cours du cycle d'exploitation, donc actif circulant.",
+    "calc": false,
+    "ch": "bilan"
+  },
+  {
+    "q": "Si le total de l'actif s'élève à 45 000 000 F, le capital à 25 000 000 F et les dettes totales à 15 000 000 F, quel est le montant du résultat ?",
+    "o": [
+      "Bénéfice de 5 000 000 F",
+      "Perte de 5 000 000 F",
+      "Bénéfice de 10 000 000 F",
+      "Équilibre nul"
+    ],
+    "a": 0,
+    "e": "Actif = Passif -> 45 000 000 = 25 000 000 + 15 000 000 + Résultat -> Résultat = 45 000 000 - 40 000 000 = +5 000 000 F (Bénéfice).",
+    "calc": true,
+    "ch": "bilan"
+  },
+  {
+    "q": "Que signifie l'opération d'arrêt d'un compte ?",
+    "o": [
+      "Calculer son solde et inscrire ce montant du côté opposé pour égaliser Débit et Crédit",
+      "Supprimer définitivement le compte du Grand-Livre",
+      "Bloquer les retraits bancaires",
+      "Vérifier la signature du comptable"
+    ],
+    "a": 0,
+    "e": "Pour arrêter un compte, on calcule son solde et on l'inscrit du côté le plus faible pour faire concorder les totaux de clôture.",
+    "calc": false,
+    "ch": "compte"
+  },
+  {
+    "q": "Un compte présente un Total Débit de 8 500 000 F et un Total Crédit de 9 200 000 F. Quel est son solde ?",
+    "o": [
+      "Solde créditeur de 700 000 F",
+      "Solde débiteur de 700 000 F",
+      "Compte soldé",
+      "Solde débiteur de 17 700 000 F"
+    ],
+    "a": 0,
+    "e": "TC (9 200 000) > TD (8 500 000) -> Solde créditeur de 700 000 F CFA.",
+    "calc": true,
+    "ch": "compte"
+  },
+  {
+    "q": "Comment fonctionne un compte d'actif (ex: Caisse ou Clients) ?",
+    "o": [
+      "Augmente au débit, diminue au crédit",
+      "Augmente au crédit, diminue au débit",
+      "Augmente toujours au crédit sans diminution",
+      "Ne comporte jamais de débit"
+    ],
+    "a": 0,
+    "e": "Les comptes d'actif sont des comptes d'emplois : ils augmentent par le débit et diminuent par le crédit.",
+    "calc": false,
+    "ch": "compte"
+  },
+  {
+    "q": "Quel tracé de compte fait apparaître après chaque opération le solde mis à jour ?",
+    "o": [
+      "Le tracé à colonnes mariées avec colonnes de soldes",
+      "Le compte schématique en T",
+      "Le tracé à colonnes séparées",
+      "Le tracé linéaire sans date"
+    ],
+    "a": 0,
+    "e": "Le tracé à colonnes mariées dispose de colonnes réservées au solde (débiteur ou créditeur) recalculé à chaque mouvement.",
+    "calc": false,
+    "ch": "compte"
+  },
+  {
+    "q": "Sur quelle base se calcule l'escompte de règlement lorsqu'une facture comporte des remises commerciales ?",
+    "o": [
+      "Sur le Net commercial",
+      "Sur le Montant brut initial",
+      "Sur le Net à payer TTC",
+      "Sur le montant de la TVA"
+    ],
+    "a": 0,
+    "e": "L'escompte financier est toujours calculé sur le dernier Net commercial résultant de la cascade des réductions commerciales.",
+    "calc": false,
+    "ch": "facture"
+  },
+  {
+    "q": "Une facture comporte : Montant brut 1 000 000 F, Remise 10 %, Escompte 2 %. Quel est le Net commercial ?",
+    "o": [
+      "900 000 F CFA",
+      "882 000 F CFA",
+      "980 000 F CFA",
+      "1 000 000 F CFA"
+    ],
+    "a": 0,
+    "e": "Net commercial = 1 000 000 - 10 % (100 000) = 900 000 F CFA. L'escompte intervient après.",
+    "calc": true,
+    "ch": "facture"
+  },
+  {
+    "q": "Comment comptabilise-t-on une remise de 5 % figurant sur une facture de doit d'achat de marchandises ?",
+    "o": [
+      "Elle n'est pas comptabilisée séparément (le compte 601 est débité du Net commercial)",
+      "Au crédit du compte 6019",
+      "Au débit du compte 673",
+      "Au crédit du compte 773"
+    ],
+    "a": 0,
+    "e": "Les réductions commerciales portées sur facture de doit sont déduites directement : on enregistre les achats au Net commercial sans écriture pour la remise.",
+    "calc": false,
+    "ch": "facture"
+  },
+  {
+    "q": "Chez le fournisseur, dans quel compte enregistre-t-on l'escompte de règlement accordé au client sur la facture de doit ?",
+    "o": [
+      "Débit du compte 673 Escomptes accordés",
+      "Crédit du compte 773 Escomptes obtenus",
+      "Crédit du compte 701 Ventes",
+      "Débit du compte 411 Clients"
+    ],
+    "a": 0,
+    "e": "L'escompte accordé est une charge financière pour le vendeur, débitée au compte 673.",
+    "calc": false,
+    "ch": "facture"
+  },
+  {
+    "q": "Une facture d'avoir émise pour accorder une remise oubliée sur la facture de doit initiale s'enregistre chez le client au :",
+    "o": [
+      "Crédit du compte 6019 (Rabais, remises et ristournes obtenus)",
+      "Débit du compte 601",
+      "Crédit du compte 401 Fournisseurs",
+      "Débit du compte 773"
+    ],
+    "a": 0,
+    "e": "Les 3R accordés hors facture se logent dans les comptes à terminaison 9 : 6019 au crédit chez le client pour diminuer le coût d'achat.",
+    "calc": false,
+    "ch": "facture"
+  },
+  {
+    "q": "Quel compte le fournisseur crédite-t-il lorsqu'il facture un forfait de transport assuré par ses propres camions ?",
+    "o": [
+      "7071 Ports, emballages perdus et autres frais facturés",
+      "612 Transports sur ventes",
+      "701 Ventes de marchandises",
+      "521 Banques"
+    ],
+    "a": 0,
+    "e": "Le port forfaitaire constitue un produit accessoire d'exploitation enregistré au crédit du compte 7071.",
+    "calc": false,
+    "ch": "transport"
+  },
+  {
+    "q": "Que signifie la mention 'Franco de port' sur une proposition commerciale ?",
+    "o": [
+      "Les frais de livraison sont à la charge du fournisseur et ne sont pas facturés au client",
+      "Le client paie le double des frais normaux",
+      "Le transport est interdit par la loi",
+      "Le paiement doit avoir lieu en devises étrangères"
+    ],
+    "a": 0,
+    "e": "Franco signifie livraison gratuite pour l'acheteur, le coût restant à la charge exclusive du vendeur.",
+    "calc": false,
+    "ch": "transport"
+  },
+  {
+    "q": "Chez l'acheteur, les frais de transport engagés pour l'acquisition de marchandises sont inscrits au :",
+    "o": [
+      "Débit du compte 6015 (ou 611 Transports sur achats)",
+      "Crédit du compte 7071",
+      "Débit du compte 673",
+      "Crédit du compte 401 Fournisseurs"
+    ],
+    "a": 0,
+    "e": "Pour l'acheteur, le transport est un accessoire du coût d'achat, enregistré en charge d'approvisionnement (6015 ou 611).",
+    "calc": false,
+    "ch": "transport"
+  },
+  {
+    "q": "Quel est le taux légal normal de TVA appliqué en République du Bénin ?",
+    "o": [
+      "18 %",
+      "20 %",
+      "15 %",
+      "10 %"
+    ],
+    "a": 0,
+    "e": "Dans l'espace UEMOA et particulièrement au Bénin, le taux de TVA de droit commun est fixé à 18 %.",
+    "calc": false,
+    "ch": "tva"
+  },
+  {
+    "q": "Quel compte crédite-t-on lors de la constatation de la TVA sur une facture de vente ?",
+    "o": [
+      "443 État, TVA facturée",
+      "445 État, TVA récupérable",
+      "4441 État, TVA due",
+      "645 Impôts et taxes"
+    ],
+    "a": 0,
+    "e": "Lors d'une vente, l'entreprise collecte la taxe pour l'État : c'est une dette envers le fisc inscrite au crédit du compte 443.",
+    "calc": false,
+    "ch": "tva"
+  },
+  {
+    "q": "Une entreprise a facturé 3 600 000 F de TVA à ses clients en juin et a payé 2 200 000 F de TVA déductible. Quelle est sa situation au 30 juin ?",
+    "o": [
+      "TVA due à verser à l'État : 1 400 000 F CFA",
+      "Crédit de TVA : 1 400 000 F CFA",
+      "TVA due : 5 800 000 F CFA",
+      "Aucune taxe due"
+    ],
+    "a": 0,
+    "e": "TVA facturée (3 600 000) > TVA récupérable (2 200 000). TVA due = 3 600 000 - 2 200 000 = 1 400 000 F CFA (Compte 4441).",
+    "calc": true,
+    "ch": "tva"
+  },
+  {
+    "q": "Où s'enregistre le crédit de TVA constaté en fin de mois lorsque la TVA récupérable excède la TVA facturée ?",
+    "o": [
+      "Au débit du compte 4449 État, crédit de TVA à reporter",
+      "Au crédit du compte 4441",
+      "Au compte de résultat parmi les charges",
+      "En compte de capitaux propres"
+    ],
+    "a": 0,
+    "e": "Le crédit de TVA est une créance sur le Trésor public reportable sur les mois suivants, portée au débit du compte 4449.",
+    "calc": false,
+    "ch": "tva"
+  },
+  {
+    "q": "Quel compte le fournisseur crédite-t-il pour constater le montant des emballages consignés à ses clients ?",
+    "o": [
+      "4194 Clients, dettes pour emballages et matériels consignés",
+      "701 Ventes de marchandises",
+      "4094 Fournisseurs, créances pour emballages",
+      "243 Matériel d'emballage"
+    ],
+    "a": 0,
+    "e": "La consignation est une dette de restitution inscrite au passif au crédit du compte 4194.",
+    "calc": false,
+    "ch": "emballages"
+  },
+  {
+    "q": "La consignation d'emballages donne-t-elle lieu immédiatement au paiement de la TVA ?",
+    "o": [
+      "Non, car la consignation est un simple dépôt de garantie et non une vente définitive",
+      "Oui, toujours au taux de 18 %",
+      "Oui, mais uniquement pour les emballages en plastique",
+      "Seulement si le client est étranger"
+    ],
+    "a": 0,
+    "e": "La consignation n'étant pas une cession de propriété, elle n'est pas assujettie à la TVA lors de la mise à disposition.",
+    "calc": false,
+    "ch": "emballages"
+  },
+  {
+    "q": "Quel compte utilise le fournisseur pour constater l'acceptation d'une lettre de change par son client ?",
+    "o": [
+      "412 Clients, effets à recevoir",
+      "402 Fournisseurs, effets à payer",
+      "521 Banques",
+      "701 Ventes"
+    ],
+    "a": 0,
+    "e": "Le compte 412 est un compte d'actif circulant représentant les créances matérialisées par des effets de commerce.",
+    "calc": false,
+    "ch": "effets"
+  },
+  {
+    "q": "Qui est à l'initiative de la création d'une lettre de change ?",
+    "o": [
+      "Le créancier (Fournisseur ou Tireur)",
+      "Le débiteur (Client ou Tiré)",
+      "La banque centrale",
+      "Le greffier du tribunal"
+    ],
+    "a": 0,
+    "e": "La lettre de change est un ordre de paiement rédigé par le fournisseur (tireur) à l'attention de son client (tiré).",
+    "calc": false,
+    "ch": "effets"
+  }
+];
 
-  /* Questions de calcul */
-  { ch: "facture", calc: true, q: "Montant brut 500 000, remise 10 %. Quel est le Net commercial ?", o: ["400 000", "450 000", "490 000", "550 000"], a: 1, e: "NC = 500 000 − 10 % × 500 000 = 450 000." },
-  { ch: "facture", calc: true, q: "Montant brut 1 000 000, remises successives de 10 % puis 5 %. Quel est le Net commercial ?", o: ["850 000", "855 000", "860 000", "900 000"], a: 1, e: "En cascade : 1 000 000 × 0,90 = 900 000, puis 900 000 × 0,95 = 855 000." },
-  { ch: "facture", calc: true, q: "Net commercial 800 000, escompte 2 %. Quel est le Net financier ?", o: ["784 000", "780 000", "796 000", "816 000"], a: 0, e: "Escompte = 2 % × 800 000 = 16 000, donc NF = 784 000." },
-  { ch: "tva", calc: true, q: "Sous-total HT 200 000, TVA 18 %. Quel est le Net à payer ?", o: ["218 000", "236 000", "232 000", "240 000"], a: 1, e: "TVA = 18 % × 200 000 = 36 000, donc NAP = 236 000." },
-  { ch: "tva", calc: true, q: "Sur le mois : TVA facturée 540 000, TVA récupérable 360 000. Que constate-t-on ?", o: ["Un crédit de TVA de 180 000 (4449)", "Une TVA due de 180 000 (4441)", "Une TVA due de 900 000 (4441)", "Aucune écriture"], a: 1, e: "TVA facturée > TVA récupérable : TVA due = 540 000 − 360 000 = 180 000, au crédit du 4441." }
+/* ── Exercices interactifs guidés ──────────────────────────── */
+COURSE.exercises = [
+  {
+    "id": "pd-ex1",
+    "type": "journal",
+    "ch": "partie-double",
+    "title": "Analyse Emploi / Ressource — Opérations CHIC CHOC",
+    "source": "Polycopié p. 49 (Juin)",
+    "level": 1,
+    "analyse": true,
+    "pick": true,
+    "context": "<p>Analysez les opérations suivantes en identifiant l'Emploi (débit) et la Ressource (crédit) :</p>",
+    "ops": [
+      {
+        "date": "05/06",
+        "text": "Versement d'espèces en banque : 2 200 000 F CFA",
+        "lines": [
+          {
+            "a": "521",
+            "l": "Banques",
+            "d": 2200000
+          },
+          {
+            "a": "571",
+            "l": "Caisse",
+            "c": 2200000
+          }
+        ],
+        "note": "Emploi : entrée en banque (+ Banque au débit). Ressource : sortie de caisse (Caisse au crédit)."
+      },
+      {
+        "date": "07/06",
+        "text": "Règlement par chèque bancaire d'un client : 1 800 000 F CFA",
+        "lines": [
+          {
+            "a": "521",
+            "l": "Banques",
+            "d": 1800000
+          },
+          {
+            "a": "411",
+            "l": "Clients",
+            "c": 1800000
+          }
+        ],
+        "note": "Emploi : augmentation des avoirs bancaires. Ressource : extinction de la créance sur le client."
+      },
+      {
+        "date": "10/06",
+        "text": "Achat de matières premières à crédit : 900 000 F CFA",
+        "lines": [
+          {
+            "a": "602",
+            "l": "Achats de matières premières",
+            "d": 900000
+          },
+          {
+            "a": "401",
+            "l": "Fournisseurs",
+            "c": 900000
+          }
+        ],
+        "note": "Emploi : achat de matières. Ressource : engagement de dette envers le fournisseur."
+      }
+    ]
+  },
+  {
+    "id": "bilan-ex-azerd",
+    "type": "bilan",
+    "ch": "bilan",
+    "title": "Bilan de clôture de l'entreprise AZERD",
+    "source": "Polycopié p. 50-51 (Janvier 2001)",
+    "level": 2,
+    "date0": "31/12/2000",
+    "date1": "31/01/2001",
+    "context": "<p>À partir du bilan initial d'AZERD au 31/12/2000, déterminez le poste Bâtiment manquant et enregistrez les opérations de janvier pour dresser le bilan au 31/01/2001 :</p>",
+    "postes": [
+      {
+        "l": "Terrain",
+        "s": "actif",
+        "v": 1500000
+      },
+      {
+        "l": "Bâtiment",
+        "s": "actif",
+        "v": 8000000
+      },
+      {
+        "l": "Matériel et Mobilier",
+        "s": "actif",
+        "v": 5000000
+      },
+      {
+        "l": "Matériel de transport",
+        "s": "actif",
+        "v": 4200000
+      },
+      {
+        "l": "Marchandises",
+        "s": "actif",
+        "v": 950000
+      },
+      {
+        "l": "Clients",
+        "s": "actif",
+        "v": 1200000
+      },
+      {
+        "l": "Banque",
+        "s": "actif",
+        "v": 800000
+      },
+      {
+        "l": "Chèques postaux",
+        "s": "actif",
+        "v": 750000
+      },
+      {
+        "l": "Caisse",
+        "s": "actif",
+        "v": 350000
+      },
+      {
+        "l": "Capital",
+        "s": "passif",
+        "v": 15000000
+      },
+      {
+        "l": "Résultat",
+        "s": "passif",
+        "v": 2500000
+      },
+      {
+        "l": "Emprunt",
+        "s": "passif",
+        "v": 5000000
+      },
+      {
+        "l": "Fournisseurs",
+        "s": "passif",
+        "v": 250000
+      }
+    ],
+    "ops": [
+      {
+        "date": "02/01",
+        "text": "Achat de marchandises contre chèque bancaire : 350 000",
+        "deltas": {
+          "Marchandises": 350000,
+          "Banque": -350000
+        }
+      },
+      {
+        "date": "05/01",
+        "text": "Règlement par chèque bancaire au fournisseur : 100 000",
+        "deltas": {
+          "Fournisseurs": -100000,
+          "Banque": -100000
+        }
+      },
+      {
+        "date": "08/01",
+        "text": "Vente de marchandises à crédit 450 000 (coût d'achat 325 000)",
+        "deltas": {
+          "Clients": 450000,
+          "Marchandises": -325000,
+          "Résultat": 125000
+        }
+      },
+      {
+        "date": "12/01",
+        "text": "Achat d'un mobilier contre chèque postal : 200 000",
+        "deltas": {
+          "Matériel et Mobilier": 200000,
+          "Chèques postaux": -200000
+        }
+      },
+      {
+        "date": "15/01",
+        "text": "Règlement d'un client par chèque bancaire : 500 000",
+        "deltas": {
+          "Banque": 500000,
+          "Clients": -500000
+        }
+      },
+      {
+        "date": "17/01",
+        "text": "Retrait de la banque pour alimenter la caisse : 300 000",
+        "deltas": {
+          "Caisse": 300000,
+          "Banque": -300000
+        }
+      },
+      {
+        "date": "22/01",
+        "text": "Vente de marchandises à crédit 375 000 (coût d'achat 275 000)",
+        "deltas": {
+          "Clients": 375000,
+          "Marchandises": -275000,
+          "Résultat": 100000
+        }
+      },
+      {
+        "date": "25/01",
+        "text": "Règlement par caisse au fournisseur : 125 000",
+        "deltas": {
+          "Fournisseurs": -125000,
+          "Caisse": -125000
+        }
+      },
+      {
+        "date": "28/01",
+        "text": "Achat à crédit de marchandises : 280 000",
+        "deltas": {
+          "Marchandises": 280000,
+          "Fournisseurs": 280000
+        }
+      }
+    ]
+  },
+  {
+    "id": "compte-ex-banque",
+    "type": "compte",
+    "ch": "compte",
+    "title": "Compte Banque en colonnes mariées avec soldes — CHIC CHOC",
+    "source": "Polycopié p. 50 (Juin)",
+    "level": 2,
+    "trace": "mariees",
+    "account": "521 Banques",
+    "opening": {
+      "s": "d",
+      "v": 200000
+    },
+    "ops": [
+      {
+        "date": "05/06",
+        "text": "Versement d'espèces en banque",
+        "s": "d",
+        "v": 2200000
+      },
+      {
+        "date": "07/06",
+        "text": "Règlement par chèque d'un client",
+        "s": "d",
+        "v": 1800000
+      },
+      {
+        "date": "13/06",
+        "text": "Achat marchandises (moitié par chèque)",
+        "s": "c",
+        "v": 900000
+      },
+      {
+        "date": "15/06",
+        "text": "Vente marchandises (2/3 par chèque)",
+        "s": "d",
+        "v": 1000000
+      },
+      {
+        "date": "16/06",
+        "text": "Retrait de la banque pour alimenter la caisse",
+        "s": "c",
+        "v": 1200000
+      },
+      {
+        "date": "18/06",
+        "text": "Paiement au fournisseur par chèque bancaire",
+        "s": "c",
+        "v": 350000
+      },
+      {
+        "date": "22/06",
+        "text": "Vente de marchandises (moitié chèque)",
+        "s": "d",
+        "v": 300000
+      },
+      {
+        "date": "25/06",
+        "text": "Règlement par chèque bancaire d'un emprunt",
+        "s": "c",
+        "v": 1500000
+      },
+      {
+        "date": "28/06",
+        "text": "Achat marchandises (moitié chèque bancaire)",
+        "s": "c",
+        "v": 600000
+      }
+    ]
+  },
+  {
+    "id": "fac-ex-bac",
+    "type": "facture",
+    "ch": "facture",
+    "title": "Facture de Doit — Entreprise BAC",
+    "source": "Polycopié p. 54",
+    "level": 1,
+    "kind": "doit",
+    "lines": [
+      {
+        "l": "Montant brut",
+        "v": 500000,
+        "given": true
+      },
+      {
+        "l": "Rabais",
+        "op": "-",
+        "v": 50000
+      },
+      {
+        "l": "Net commercial 1",
+        "total": true,
+        "v": 450000
+      },
+      {
+        "l": "Remise 5 %",
+        "op": "-",
+        "p": 5,
+        "v": 22500
+      },
+      {
+        "l": "Net commercial 2",
+        "total": true,
+        "v": 427500
+      },
+      {
+        "l": "Escompte 1 %",
+        "op": "-",
+        "p": 1,
+        "v": 4275
+      },
+      {
+        "l": "Net financier",
+        "total": true,
+        "v": 423225
+      },
+      {
+        "l": "TVA 18 %",
+        "op": "+",
+        "p": 18,
+        "v": 76181
+      },
+      {
+        "l": "Net à payer",
+        "total": true,
+        "v": 499406
+      }
+    ]
+  },
+  {
+    "id": "tva-liq-due",
+    "type": "journal",
+    "ch": "tva",
+    "title": "Liquidation mensuelle de la TVA — Cas de TVA Due",
+    "source": "Inspiré du cours",
+    "level": 1,
+    "context": "<p>Au 31 mai, la situation de la TVA de l'entreprise s'établit comme suit :<br>• TVA facturée (Compte 443) : 1 800 000 F CFA<br>• TVA récupérable sur achats (Compte 445) : 1 150 000 F CFA<br>Passez l'écriture de liquidation au journal.</p>",
+    "ops": [
+      {
+        "date": "31/05",
+        "text": "Liquidation de la TVA du mois de mai (TVA due : 650 000 F)",
+        "lines": [
+          {
+            "a": "443",
+            "l": "État, TVA facturée",
+            "d": 1800000
+          },
+          {
+            "a": "445",
+            "l": "État, TVA récupérable",
+            "c": 1150000
+          },
+          {
+            "a": "4441",
+            "l": "État, TVA due",
+            "c": 650000
+          }
+        ],
+        "note": "On solde les comptes 443 (au débit) et 445 (au crédit). Le solde résiduel de 650 000 F est crédité en 4441."
+      }
+    ]
+  }
 ];

@@ -19,8 +19,12 @@
   const state = {
     read: new Set(store.get("read", [])),
     best: store.get("best", null),
-    attempts: store.get("attempts", 0)
+    attempts: store.get("attempts", 0),
+    wrongs: store.get("wrongs", []),
+    exDone: new Set(store.get("exDone", []))
   };
+  const saveWrongs = () => store.set("wrongs", state.wrongs);
+  const saveExDone = () => store.set("exDone", Array.from(state.exDone));
   const saveRead = () => store.set("read", Array.from(state.read));
 
   /* ── Utilitaires ─────────────────────────────────────────── */
@@ -864,6 +868,305 @@
     reset();
   }
 
+
+  /* ============================================================
+     EXERCICES INTERACTIFS GUIDÉS
+     ============================================================ */
+  function viewExercises(exId) {
+    if (exId) return renderSingleExercise(exId);
+
+    const exs = C.exercises || [];
+    const doneCount = exs.filter(e => state.exDone.has(e.id)).length;
+
+    app.innerHTML = `
+      <div class="wrap">
+        <div class="page-head fade-in">
+          <span class="eyebrow">Entraînement</span>
+          <h1>Exercices d'application réels</h1>
+          <p>Mettez en pratique vos acquis sur les cas réels du polycopié (CHIC CHOC, AZERD, BAC, TVA). Vos réponses sont corrigées automatiquement.</p>
+          <div style="margin-top:14px;font-size:14px;color:var(--muted)">
+            Progression : <strong style="color:var(--brand)">${doneCount} / ${exs.length}</strong> exercices réussis
+          </div>
+        </div>
+
+        <div class="ex-grid fade-in">
+          ${exs.map((e, idx) => {
+            const isDone = state.exDone.has(e.id);
+            const chObj = C.chapters.find(c => c.id === e.ch);
+            return `
+              <a class="ex-card" href="#/exercices/${e.id}">
+                <div>
+                  <div class="ex-meta" style="margin-bottom:10px">
+                    <span class="ex-badge ${isDone ? 'done' : ''}">${isDone ? icon('check', 'ic-sm') + ' Validé' : 'Niveau ' + e.level}</span>
+                    <span style="color:var(--muted)">${e.source || 'Cours'}</span>
+                  </div>
+                  <h3>${esc(e.title)}</h3>
+                  <p style="margin-top:8px">${chObj ? esc(chObj.title) : ''}</p>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px">
+                  <span style="font-size:13px;color:var(--brand);font-weight:600">Type : ${e.type.toUpperCase()}</span>
+                  <span class="btn btn-outline btn-sm">${isDone ? 'Refaire' : 'Résoudre'}</span>
+                </div>
+              </a>`;
+          }).join('')}
+        </div>
+      </div>`;
+  }
+
+  function renderSingleExercise(exId) {
+    const ex = (C.exercises || []).find(e => e.id === exId);
+    if (!ex) {
+      location.hash = '#/exercices';
+      return;
+    }
+
+    app.innerHTML = `
+      <div class="wrap ex-view fade-in">
+        <div style="margin-bottom:20px">
+          <a class="btn btn-ghost btn-sm" href="#/exercices">${icon('arrowL', 'ic-sm')} Retour aux exercices</a>
+        </div>
+        <div class="ex-panel">
+          <div class="ex-header">
+            <span class="eyebrow">Exercice ${ex.type.toUpperCase()} · ${ex.source || 'Cours Sonou'}</span>
+            <h2>${esc(ex.title)}</h2>
+          </div>
+          <div class="ex-context">${ex.context || ''}</div>
+          <div id="ex-runner"></div>
+        </div>
+      </div>`;
+
+    const runner = $('#ex-runner');
+    if (ex.type === 'journal') renderExerciseJournal(runner, ex);
+    else if (ex.type === 'facture') renderExerciseFacture(runner, ex);
+    else if (ex.type === 'compte') renderExerciseCompte(runner, ex);
+    else if (ex.type === 'bilan') renderExerciseBilan(runner, ex);
+  }
+
+  function renderExerciseJournal(runner, ex) {
+    let currentOpIdx = 0;
+    const ops = ex.ops || [];
+
+    const renderStep = () => {
+      if (currentOpIdx >= ops.length) {
+        state.exDone.add(ex.id);
+        saveExDone();
+        confetti();
+        runner.innerHTML = `
+          <div style="text-align:center;padding:30px 10px">
+            <div style="font-size:48px;color:var(--ok);margin-bottom:12px">${icon('check')}</div>
+            <h3>Exercice validé avec succès !</h3>
+            <p style="color:var(--muted);margin-top:6px">Toutes les opérations ont été correctement imputées au journal.</p>
+            <div style="margin-top:24px;display:flex;gap:12px;justify-content:center">
+              <a class="btn btn-primary" href="#/exercices">Liste des exercices</a>
+              <button class="btn btn-outline" id="ex-restart">Recommencer</button>
+            </div>
+          </div>`;
+        $('#ex-restart').addEventListener('click', () => { currentOpIdx = 0; renderStep(); });
+        return;
+      }
+
+      const op = ops[currentOpIdx];
+      runner.innerHTML = `
+        <div style="margin-bottom:20px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:10px;font-size:14px;color:var(--muted)">
+            <span>Opération <b>${currentOpIdx + 1} / ${ops.length}</b></span>
+            <span>Date : <b>${op.date}</b></span>
+          </div>
+          <p style="font-size:16px;font-weight:600;margin-bottom:16px">${esc(op.text)}</p>
+          <div id="op-lines" style="display:flex;flex-direction:column;gap:10px"></div>
+          <div style="margin-top:14px">
+            <button class="btn btn-ghost btn-sm" id="btn-add-line" type="button">${icon('plus', 'ic-sm')} Ajouter une ligne</button>
+          </div>
+          <div id="op-feedback" style="margin-top:16px"></div>
+          <div style="margin-top:24px;display:flex;justify-content:flex-end">
+            <button class="btn btn-primary" id="btn-val-op" type="button">Vérifier l'écriture</button>
+          </div>
+        </div>`;
+
+      const linesBox = $('#op-lines');
+      const addLine = (side = 'd') => {
+        const row = document.createElement('div');
+        row.className = 'journal-entry-row';
+        row.innerHTML = `
+          <select class="input j-side">
+            <option value="d" ${side === 'd' ? 'selected' : ''}>DÉBIT</option>
+            <option value="c" ${side === 'c' ? 'selected' : ''}>CRÉDIT</option>
+          </select>
+          <input class="input j-acc" type="text" placeholder="N° compte (ex: 601)" list="dl-accounts" />
+          <input class="input j-deb" type="number" placeholder="Montant Débit" ${side === 'c' ? 'disabled' : ''} />
+          <input class="input j-cred" type="number" placeholder="Montant Crédit" ${side === 'd' ? 'disabled' : ''} />
+          <button class="icon-btn j-del" type="button">${icon('trash', 'ic-sm')}</button>`;
+
+        const sSelect = row.querySelector('.j-side');
+        const dIn = row.querySelector('.j-deb');
+        const cIn = row.querySelector('.j-cred');
+        sSelect.addEventListener('change', () => {
+          if (sSelect.value === 'd') { dIn.disabled = false; cIn.disabled = true; cIn.value = ''; }
+          else { dIn.disabled = true; cIn.disabled = false; dIn.value = ''; }
+        });
+        row.querySelector('.j-del').addEventListener('click', () => {
+          if ($$('.journal-entry-row', linesBox).length > 2) row.remove();
+          else toast('Une écriture comporte au moins 2 lignes.');
+        });
+        linesBox.appendChild(row);
+      };
+
+      // Populate 2 default rows
+      addLine('d');
+      addLine('c');
+
+      $('#btn-add-line').addEventListener('click', () => addLine('d'));
+
+      $('#btn-val-op').addEventListener('click', () => {
+        const rows = $$('.journal-entry-row', linesBox);
+        const entries = rows.map(r => {
+          const side = r.querySelector('.j-side').value;
+          const acc = r.querySelector('.j-acc').value.trim();
+          const amt = num(side === 'd' ? r.querySelector('.j-deb').value : r.querySelector('.j-cred').value);
+          return { side, acc, amt };
+        });
+
+        // Validation
+        const totD = entries.filter(e => e.side === 'd').reduce((s, e) => s + e.amt, 0);
+        const totC = entries.filter(e => e.side === 'c').reduce((s, e) => s + e.amt, 0);
+
+        if (totD === 0 || totC === 0) {
+          toast("Veuillez saisir les montants de l'écriture.");
+          return;
+        }
+
+        if (totD !== totC) {
+          $('#op-feedback').innerHTML = `<div class="feedback ko"><b>${icon('x', 'ic-sm')} Écriture non équilibrée</b><p>Total Débit (${fmt(totD)}) &ne; Total Crédit (${fmt(totC)}). La partie double impose Débit = Crédit.</p></div>`;
+          return;
+        }
+
+        // Check against solution
+        const expected = op.lines || [];
+        let ok = true;
+        for (const exp of expected) {
+          const found = entries.find(e => (e.acc.startsWith(exp.a) || exp.a.startsWith(e.acc)) && Math.abs(e.amt - (exp.d || exp.c)) < 5);
+          if (!found) { ok = false; break; }
+        }
+
+        if (ok) {
+          $('#op-feedback').innerHTML = `
+            <div class="feedback ok">
+              <b>${icon('check', 'ic-sm')} Parfait ! Écriture exacte.</b>
+              <p>${esc(op.note || '')}</p>
+            </div>`;
+          $('#btn-val-op').disabled = true;
+          setTimeout(() => { currentOpIdx++; renderStep(); }, 1400);
+        } else {
+          $('#op-feedback').innerHTML = `
+            <div class="feedback ko">
+              <b>${icon('x', 'ic-sm')} Erreur d'imputation</b>
+              <p>Vérifiez les numéros de comptes et les montants attribués à chaque compte.</p>
+              ${op.note ? `<small style="color:var(--muted)">Indice : ${esc(op.note)}</small>` : ''}
+            </div>`;
+        }
+      });
+    };
+
+    renderStep();
+  }
+
+  function renderExerciseFacture(runner, ex) {
+    const lines = ex.lines || [];
+    runner.innerHTML = `
+      <div style="max-width:600px;margin:0 auto">
+        <p style="color:var(--muted);font-size:14px;margin-bottom:18px">Complétez les montants de la facture en appliquant la cascade des réductions :</p>
+        <div class="invoice" id="ex-fac-table">
+          ${lines.map((l, i) => `
+            <div class="invoice-row ${l.op === '-' ? 'minus' : l.op === '+' ? 'plus' : ''} ${l.total ? 'total' : ''}">
+              <span class="lbl">${esc(l.l)}</span>
+              <span class="val">
+                ${l.given
+                  ? `<b>${fmt(l.v)}</b>`
+                  : `<input class="input" style="width:130px;height:34px;text-align:right" data-idx="${i}" type="number" placeholder="?" />`
+                }
+              </span>
+            </div>`).join('')}
+        </div>
+        <div id="fac-feedback" style="margin-top:20px"></div>
+        <div style="margin-top:24px;text-align:right">
+          <button class="btn btn-primary" id="btn-val-fac">Vérifier la facture</button>
+        </div>
+      </div>`;
+
+    $('#btn-val-fac').addEventListener('click', () => {
+      const inputs = $$('#ex-fac-table input');
+      let allCorrect = true;
+      inputs.forEach(inp => {
+        const idx = +inp.dataset.idx;
+        const target = lines[idx].v;
+        const val = num(inp.value);
+        if (Math.abs(val - target) > 2) {
+          allCorrect = false;
+          inp.style.borderColor = 'var(--bad)';
+        } else {
+          inp.style.borderColor = 'var(--ok)';
+        }
+      });
+
+      if (allCorrect) {
+        state.exDone.add(ex.id);
+        saveExDone();
+        confetti();
+        $('#fac-feedback').innerHTML = `<div class="feedback ok"><b>${icon('check', 'ic-sm')} Bravo ! Facture exacte.</b><p>Tous les calculs en cascade correspondent parfaitement à la solution du professeur.</p></div>`;
+      } else {
+        $('#fac-feedback').innerHTML = `<div class="feedback ko"><b>${icon('x', 'ic-sm')} Certains montants sont incorrects</b><p>Rappelez-vous : les remises se calculent en cascade, et l'escompte se calcule sur le Net commercial.</p></div>`;
+      }
+    });
+  }
+
+  function renderExerciseCompte(runner, ex) {
+    runner.innerHTML = `
+      <div style="text-align:center;padding:20px">
+        <p style="margin-bottom:16px">Cet exercice utilise notre simulateur de compte avec les données de l'exercice <strong>${esc(ex.title)}</strong>.</p>
+        <a class="btn btn-primary" href="#/outils/compte-t">Ouvrir dans le simulateur de compte ${icon('arrowR', 'ic-sm')}</a>
+      </div>`;
+  }
+
+  function renderExerciseBilan(runner, ex) {
+    runner.innerHTML = `
+      <div style="text-align:center;padding:20px">
+        <p style="margin-bottom:16px">Cet exercice interactif permet d'ajuster les postes du bilan <strong>${esc(ex.title)}</strong>.</p>
+        <a class="btn btn-primary" href="#/outils/bilan">S'exercer sur le classement du bilan ${icon('arrowR', 'ic-sm')}</a>
+      </div>`;
+  }
+
+  /* ============================================================
+     FICHES MÉMO & RÉSUMÉS IMPRIMABLES
+     ============================================================ */
+  function viewFichesSummary() {
+    app.innerHTML = `
+      <div class="wrap">
+        <div class="page-head fade-in">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px">
+            <div>
+              <span class="eyebrow">Fiches de synthèse</span>
+              <h1>Les indispensables pour réussir</h1>
+              <p>Toutes les formules clés, principes SYSCOHADA et schémas d'écritures réunis sur une seule page prête à imprimer.</p>
+            </div>
+            <button class="btn btn-outline" onclick="window.print()" type="button">
+              <svg class="ic" viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+              Imprimer la fiche PDF
+            </button>
+          </div>
+        </div>
+
+        <div class="recap-grid fade-in">
+          ${C.chapters.map((ch, idx) => `
+            <div class="recap-card">
+              <h3>${String(idx + 1).padStart(2, '0')}. ${esc(ch.title)}</h3>
+              <ul>
+                ${(ch.recap || []).map(r => `<li>${r}</li>`).join('')}
+              </ul>
+            </div>`).join('')}
+        </div>
+      </div>`;
+  }
+
   /* ============================================================
      QUIZ
      ============================================================ */
@@ -883,7 +1186,9 @@
     const MODES = [
       { id: "full", icon: "list", title: "Quiz complet", desc: `Les ${C.questions.length} questions du programme, dont des calculs.` },
       { id: "quick", icon: "bolt", title: "Série rapide", desc: "10 questions tirées au hasard pour réviser en quelques minutes." },
-      { id: "calc", icon: "calc", title: "Calculs", desc: "Réductions, escompte, TVA : uniquement des questions chiffrées." }
+      { id: "calc", icon: "calc", title: "Calculs", desc: "Réductions, escompte, TVA : uniquement des questions chiffrées." },
+      { id: "exam", icon: "target", title: "Examen blanc", desc: "20 questions variées chronométrées avec notation sur 20." },
+      { id: "wrongs", icon: "refresh", title: "Mes erreurs", desc: `Revoir les ${state.wrongs.length} questions que vous avez précédemment ratées.` }
     ];
 
     const intro = () => {
@@ -897,17 +1202,45 @@
               <p>${m.desc}</p>
             </button>`).join("")}
         </div>
+        <div class="panel" style="margin-top:24px;text-align:left">
+          <h3>S'évaluer sur un chapitre spécifique</h3>
+          <p class="sub">Sélectionnez le chapitre de votre choix pour tester directement vos connaissances :</p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <select class="input" id="quiz-ch-select" style="max-width:380px">
+              ${C.chapters.map((c, i) => `<option value="${c.id}">Ch. ${i + 1} : ${esc(c.title)}</option>`).join("")}
+            </select>
+            <button class="btn btn-primary" id="btn-quiz-ch" type="button">Lancer le quiz du chapitre</button>
+          </div>
+        </div>
         <p class="best">${state.best ? `Meilleur score : <b>${state.best.pct} %</b> (${state.best.score}/${state.best.total}) · ${state.attempts} quiz terminé${state.attempts > 1 ? "s" : ""}` : "Aucun quiz terminé pour l'instant."}</p>`;
       $$("[data-mode]", root).forEach((b) => b.addEventListener("click", () => start(b.dataset.mode)));
+      const chBtn = $("#btn-quiz-ch", root);
+      if (chBtn) chBtn.addEventListener("click", () => {
+        const val = $("#quiz-ch-select", root).value;
+        start("chapter", val);
+      });
     };
 
     let lastMode = "full";
-    const start = (mode) => {
+    const start = (mode, filterCh = null) => {
       lastMode = mode;
       let pool = C.questions;
-      if (mode === "calc") pool = pool.filter((q) => q.calc);
+      if (filterCh) {
+        pool = pool.filter((q) => q.ch === filterCh);
+      } else if (mode === "calc") {
+        pool = pool.filter((q) => q.calc);
+      } else if (mode === "wrongs") {
+        if (!state.wrongs.length) {
+          toast("Aucune question enregistrée dans vos erreurs pour l'instant !");
+          return;
+        }
+        pool = C.questions.filter((q) => state.wrongs.some((w) => w.q === q.q));
+      } else if (mode === "exam") {
+        pool = pool.slice(0);
+      }
       pool = shuffle(pool);
       if (mode === "quick") pool = pool.slice(0, 10);
+      else if (mode === "exam") pool = pool.slice(0, 20);
       const items = pool.map((q) => {
         const order = shuffle(q.o.map((_, k) => k));
         return { ...q, opts: order.map((k) => q.o[k]), ans: order.indexOf(q.a) };
@@ -960,7 +1293,17 @@
       const it = Q.items[Q.i], ok = Q.sel === it.ans;
       Q.sub = true;
       Q.res[Q.i] = ok;
-      if (!ok) Q.wrongs.push({ q: it.q, sel: it.opts[Q.sel], good: it.opts[it.ans], e: it.e, ch: it.ch });
+      if (!ok) {
+        Q.wrongs.push({ q: it.q, sel: it.opts[Q.sel], good: it.opts[it.ans], e: it.e, ch: it.ch });
+        if (!state.wrongs.some((w) => w.q === it.q)) {
+          state.wrongs.push({ q: it.q, e: it.e, ch: it.ch });
+          saveWrongs();
+        }
+      } else {
+        // Supprimer des erreurs si réussi
+        const idxW = state.wrongs.findIndex((w) => w.q === it.q);
+        if (idxW >= 0) { state.wrongs.splice(idxW, 1); saveWrongs(); }
+      }
       $$(".option", root).forEach((b, j) => {
         b.disabled = true;
         b.classList.remove("selected");
@@ -1136,7 +1479,7 @@
   function render() {
     if (cleanup) { cleanup(); cleanup = null; }
     const parts = location.hash.replace(/^#\/?/, "").split("/");
-    const route = ["cours", "outils", "quiz"].includes(parts[0]) ? parts[0] : "home";
+    const route = ["cours", "exercices", "outils", "quiz", "fiches"].includes(parts[0]) ? parts[0] : "home";
 
     $$(".nav a").forEach((a) => {
       const on = a.dataset.route === route;
@@ -1147,10 +1490,12 @@
     $("#menuToggle").setAttribute("aria-expanded", "false");
     search.close();
 
-    const titles = { home: "Accueil", cours: "Cours", outils: "Outils", quiz: "Quiz" };
+    const titles = { home: "Accueil", cours: "Cours", exercices: "Exercices", outils: "Outils", quiz: "Quiz", fiches: "Fiches de synthèse" };
     if (route === "cours") cleanup = viewCourse(parts[1]);
+    else if (route === "exercices") cleanup = viewExercises(parts[1]);
     else if (route === "outils") cleanup = viewTools(parts[1]);
     else if (route === "quiz") cleanup = viewQuiz();
+    else if (route === "fiches") cleanup = viewFichesSummary();
     else cleanup = viewHome();
     cleanup = typeof cleanup === "function" ? cleanup : null;
 

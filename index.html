@@ -18,6 +18,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="styles.css" />
 
   <!-- Microsoft Clarity -->
@@ -58,8 +59,10 @@
       <nav class="nav" id="nav" aria-label="Navigation principale">
         <a href="#/" data-route="home">Accueil</a>
         <a href="#/cours" data-route="cours">Cours</a>
+        <a href="#/exercices" data-route="exercices">Exercices</a>
         <a href="#/outils" data-route="outils">Outils</a>
         <a href="#/quiz" data-route="quiz">Quiz</a>
+        <a href="#/fiches" data-route="fiches">Fiches</a>
       </nav>
 
       <div class="topbar-actions">
@@ -115,5 +118,12 @@
 
   <script src="data.js" defer></script>
   <script src="app.js" defer></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
+    }
+  </script>
 </body>
 </html>
