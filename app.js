@@ -1011,7 +1011,7 @@
         linesBox.appendChild(row);
       };
 
-      // Populate 2 default rows
+      // Initialise deux lignes de saisie par défaut (une au débit, une au crédit)
       addLine('d');
       addLine('c');
 
@@ -1026,7 +1026,7 @@
           return { side, acc, amt };
         });
 
-        // Validation
+        // Contrôle de complétude et d'équilibre de la partie double
         const totD = entries.filter(e => e.side === 'd').reduce((s, e) => s + e.amt, 0);
         const totC = entries.filter(e => e.side === 'c').reduce((s, e) => s + e.amt, 0);
 
@@ -1040,7 +1040,7 @@
           return;
         }
 
-        // Check against solution
+        // Vérification de la conformité des comptes et des montants avec le corrigé
         const expected = op.lines || [];
         let ok = true;
         for (const exp of expected) {
@@ -1300,7 +1300,7 @@
           saveWrongs();
         }
       } else {
-        // Supprimer des erreurs si réussi
+        // En cas de bonne réponse ultérieure, retire la question de la liste des erreurs
         const idxW = state.wrongs.findIndex((w) => w.q === it.q);
         if (idxW >= 0) { state.wrongs.splice(idxW, 1); saveWrongs(); }
       }
