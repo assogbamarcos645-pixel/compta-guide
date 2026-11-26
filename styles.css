@@ -912,7 +912,7 @@ select.input { font-family: var(--sans); }
   .footer-meta { text-align: left; }
 }
 
-/* ===== STYLES COMPLÃ‰MENTAIRES NOUVELLES FONCTIONNALITÃ‰S ===== */
+/* ===== STYLES COMPLÉMENTAIRES NOUVELLES FONCTIONNALITÉS ===== */
 
 /* Section Exercices & Fiches */
 .ex-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 18px; margin-top: 24px; }
@@ -939,18 +939,18 @@ select.input { font-family: var(--sans); }
 .journal-entry-row input { height: 38px; }
 .journal-entry-row select { height: 38px; }
 
-/* Fiches mÃ©mo imprimables */
+/* Fiches mémo imprimables */
 .recap-grid { display: grid; grid-template-columns: 1fr; gap: 24px; margin-top: 24px; }
 .recap-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px 28px; box-shadow: var(--shadow-sm); }
 .recap-card h3 { font-size: 20px; color: var(--brand); margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
 .recap-card ul { padding-left: 20px; list-style: disc; margin: 0; }
 .recap-card li { margin-bottom: 8px; font-size: 15px; color: var(--ink-2); line-height: 1.6; }
 
-/* SÃ©lecteur de mode de quiz Ã©tendu */
+/* Sélecteur de mode de quiz étendu */
 .quiz-mode-select { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
 .quiz-ch-picker { margin-top: 20px; display: flex; flex-direction: column; gap: 8px; }
 
-/* Impression optimisÃ©e pour fiches de rÃ©vision */
+/* Impression optimisée pour fiches de révision */
 @media print {
   .topbar, .footer, .skip-link, .topbar-actions, .quiz-actions, .btn, #bgCanvas, #confetti { display: none !important; }
   body { background: #fff !important; color: #000 !important; }
