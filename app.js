@@ -1,667 +1,1178 @@
 /* ============================================================
-   app.js — Comptabilité Générale (SYSCOHADA / OHADA)
-   Guide enrichi + Quiz QCM interactif
+   app.js — Comptabilité Générale I (SYSCOHADA / OHADA)
+   Application sans dépendance : routage, cours, outils, quiz
    ============================================================ */
 
-// ── Génération des particules de fond ──────────────────────
-const createParticles = () => {
-  const container = document.getElementById('particles');
-  if (!container) return;
-  for (let i = 0; i < 50; i++) {
-    const p = document.createElement('span');
-    const size = Math.random() * 3 + 1;
-    p.style.width  = `${size}px`;
-    p.style.height = `${size}px`;
-    p.style.left   = `${Math.random() * 100}%`;
-    p.style.animationDelay    = `${Math.random() * 20}s`;
-    p.style.animationDuration = `${Math.random() * 10 + 10}s`;
-    container.appendChild(p);
-  }
-};
+(() => {
+  "use strict";
 
-// ── Composant section dépliable ────────────────────────────
-const GuideSection = ({ title, content, isImportant = false, index }) => {
-  const [isOpen, setIsOpen] = React.useState(false);
+  const C = window.COURSE;
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+  const app = $("#app");
 
-  return (
-    <div className="mb-4">
-      <div className={`glass-card overflow-hidden ${isImportant ? 'border-l-4 border-l-orange-500' : ''}`}>
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="w-full p-5 text-left flex justify-between items-center hover:bg-gray-50 transition-all duration-300"
-        >
-          <div className="flex items-center space-x-3">
-            <div className={`w-1 rounded-full transition-all duration-300 ${isImportant ? 'bg-orange-500' : 'bg-indigo-500'} ${isOpen ? 'h-12' : 'h-8'}`}></div>
-            <h3 className={`font-semibold text-lg ${isImportant ? 'text-orange-800' : 'text-gray-800'}`}>
-              {title}
-            </h3>
-            {isImportant && (
-              <span className="badge-pro text-white text-xs px-3 py-1 rounded-full font-medium">⭐ Important</span>
-            )}
+  /* ── Stockage local ──────────────────────────────────────── */
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem("cg1-" + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem("cg1-" + k, JSON.stringify(v)); } catch (e) {} }
+  };
+  const state = {
+    read: new Set(store.get("read", [])),
+    best: store.get("best", null),
+    attempts: store.get("attempts", 0)
+  };
+  const saveRead = () => store.set("read", Array.from(state.read));
+
+  /* ── Utilitaires ─────────────────────────────────────────── */
+  const ICONS = {
+    check: '<path d="M5 12.5l4.5 4.5L19 7"/>',
+    x: '<path d="M6 6l12 12M18 6 6 18"/>',
+    arrowR: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+    arrowL: '<path d="M19 12H5M11 6l-6 6 6 6"/>',
+    book: '<path d="M4 4h10a4 4 0 0 1 4 4v12H8a4 4 0 0 1-4-4z"/><path d="M8 8h6M8 12h6"/>',
+    calc: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h1M12 11h1M16 11h0M8 15h1M12 15h1M8 18h1M12 18h1M16 15v3"/>',
+    t: '<path d="M4 6h16M12 6v14"/><path d="M6 10h4M14 10h4M6 13h3M15 13h3"/>',
+    cards: '<rect x="3" y="6" width="14" height="14" rx="2"/><path d="M7 3h12a2 2 0 0 1 2 2v12"/>',
+    sort: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M12 4v16M6 9h3M15 9h3M6 13h3M15 13h3"/>',
+    clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    plus: '<path d="M12 5v14M5 12h14"/>',
+    trash: '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
+    refresh: '<path d="M20 11a8 8 0 0 0-14.9-3M4 13a8 8 0 0 0 14.9 3"/><path d="M4 4v4h4M20 20v-4h-4"/>',
+    bolt: '<path d="M13 3 5 14h6l-1 7 8-11h-6z"/>',
+    list: '<path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/>',
+    target: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>'
+  };
+  const icon = (n, cls = "") => `<svg class="ic ${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n]}</svg>`;
+
+  const fmt = (n) => Math.round(n).toLocaleString("fr-FR");
+  const num = (v) => { const x = parseFloat(String(v).replace(/\s/g, "").replace(",", ".")); return isFinite(x) ? x : 0; };
+  const norm = (s) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const shuffle = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const chapterIndex = (id) => C.chapters.findIndex((c) => c.id === id);
+
+  const ring = (pct, r, label) => {
+    const len = 2 * Math.PI * r, size = (r + 8) * 2;
+    return `<svg viewBox="0 0 ${size} ${size}">
+      <defs>
+        <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#667eea"/>
+          <stop offset="100%" stop-color="#764ba2"/>
+        </linearGradient>
+      </defs>
+      <circle class="track" cx="${size / 2}" cy="${size / 2}" r="${r}"/>
+      <circle class="val" cx="${size / 2}" cy="${size / 2}" r="${r}" stroke-dasharray="${len}" stroke-dashoffset="${len * (1 - pct / 100)}"/></svg>
+      <span>${label}</span>`;
+  };
+
+  /* ── Particules flottantes en fond ───────────────────────── */
+  const initParticles = () => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const canvas = $("#bgCanvas");
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    let width = (canvas.width = innerWidth);
+    let height = (canvas.height = innerHeight);
+
+    const onResize = () => {
+      width = canvas.width = innerWidth;
+      height = canvas.height = innerHeight;
+    };
+    window.addEventListener("resize", onResize, { passive: true });
+
+    const particleCount = Math.min(40, Math.floor(width / 32));
+    const colors = ["102, 126, 234", "118, 75, 162", "245, 158, 11", "251, 191, 36"];
+    const particles = Array.from({ length: particleCount }, () => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      r: Math.random() * 2.5 + 1,
+      vx: (Math.random() - 0.5) * 0.4,
+      vy: (Math.random() - 0.5) * 0.4,
+      alpha: Math.random() * 0.35 + 0.15,
+      color: colors[Math.floor(Math.random() * colors.length)]
+    }));
+
+    const render = () => {
+      ctx.clearRect(0, 0, width, height);
+      particles.forEach((p) => {
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0) p.x = width;
+        if (p.x > width) p.x = 0;
+        if (p.y < 0) p.y = height;
+        if (p.y > height) p.y = 0;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${p.color}, ${p.alpha})`;
+        ctx.fill();
+      });
+      requestAnimationFrame(render);
+    };
+    render();
+  };
+
+  let toastTimer;
+  const toast = (msg) => {
+    const t = $("#toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove("show"), 2600);
+  };
+
+  /* Chapitre lié à un numéro de compte (pour la recherche) */
+  const accountChapter = (n) => {
+    if (["443", "445", "4441", "4449", "645"].includes(n)) return "tva";
+    if (["612", "613", "707", "781"].includes(n)) return "transport";
+    if (["673", "773"].includes(n)) return "facture";
+    if (/^[678]/.test(n)) return "charges-produits";
+    return "cadre";
+  };
+
+  /* ── Confettis ───────────────────────────────────────────── */
+  const confetti = () => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const cv = $("#confetti"), ctx = cv.getContext("2d");
+    const dpr = window.devicePixelRatio || 1;
+    cv.width = innerWidth * dpr; cv.height = innerHeight * dpr; ctx.scale(dpr, dpr);
+    const colors = ["#667eea", "#764ba2", "#f59e0b", "#fbbf24", "#d97706", "#818cf8"];
+    const parts = Array.from({ length: 160 }, () => ({
+      x: innerWidth / 2 + (Math.random() - .5) * 200, y: innerHeight * .35,
+      vx: (Math.random() - .5) * 14, vy: Math.random() * -14 - 4,
+      w: Math.random() * 8 + 4, h: Math.random() * 5 + 3,
+      r: Math.random() * Math.PI, vr: (Math.random() - .5) * .3,
+      c: colors[Math.floor(Math.random() * colors.length)]
+    }));
+    const t0 = performance.now();
+    const step = (t) => {
+      ctx.clearRect(0, 0, innerWidth, innerHeight);
+      parts.forEach((p) => {
+        p.vy += .35; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.r += p.vr;
+        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.fillStyle = p.c;
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); ctx.restore();
+      });
+      if (t - t0 < 3200) requestAnimationFrame(step);
+      else ctx.clearRect(0, 0, innerWidth, innerHeight);
+    };
+    requestAnimationFrame(step);
+  };
+
+  /* ============================================================
+     ACCUEIL
+     ============================================================ */
+  const TOOLS = [
+    { id: "facture", label: "Calculateur de facture", icon: "calc", desc: "Du montant brut au net à payer, étape par étape, avec l'écriture au journal." },
+    { id: "compte-t", label: "Compte en T", icon: "t", desc: "Passez des opérations au débit ou au crédit et observez le solde évoluer." },
+    { id: "fiches", label: "Fiches du plan comptable", icon: "cards", desc: "Mémorisez les numéros de comptes essentiels avec des cartes à retourner." },
+    { id: "bilan", label: "Classer au bilan", icon: "sort", desc: "Rangez chaque poste à l'actif ou au passif et vérifiez vos réflexes." }
+  ];
+
+  function viewHome() {
+    const total = C.chapters.length;
+    const read = C.chapters.filter((c) => state.read.has(c.id)).length;
+    const pct = Math.round((read / total) * 100);
+    const next = C.chapters.find((c) => !state.read.has(c.id)) || C.chapters[0];
+    const best = state.best ? state.best.pct + " %" : "—";
+
+    app.innerHTML = `
+      <section class="hero">
+        <div class="wrap hero-grid">
+          <div class="fade-in">
+            <span class="eyebrow">L1 Informatique · SYSCOHADA révisé</span>
+            <h1>Maîtrisez les bases de la <em>comptabilité générale</em>.</h1>
+            <p class="hero-lead">Un cours clair en ${total} chapitres, des outils pour s'exercer sur de vrais calculs et un quiz pour vérifier ce que vous avez retenu.</p>
+            <div class="hero-cta">
+              <a class="btn btn-primary" href="#/cours/${next.id}">${read ? "Reprendre le cours" : "Commencer le cours"} ${icon("arrowR", "ic-sm")}</a>
+              <a class="btn btn-outline" href="#/quiz">Tester mes connaissances</a>
+            </div>
+            <div class="hero-meta">
+              <div><strong>${total}</strong><span>chapitres</span></div>
+              <div><strong>${C.questions.length}</strong><span>questions de quiz</span></div>
+              <div><strong>${TOOLS.length}</strong><span>outils interactifs</span></div>
+            </div>
           </div>
-          <div className={`transform transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}>
-            <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </div>
-        </button>
-        <div className={`overflow-hidden transition-all duration-500 ease-in-out ${isOpen ? 'max-h-[4000px] opacity-100' : 'max-h-0 opacity-0'}`}>
-          <div className="p-5 pt-0 border-t border-gray-100">
-            <div className="prose max-w-none mt-4" dangerouslySetInnerHTML={{ __html: content }} />
+
+          <div class="hero-art fade-in" style="animation-delay:.12s" aria-hidden="true">
+            <div class="hero-tag one"><span class="dot"></span>Débit = emplois · Crédit = ressources</div>
+            <div class="t-card">
+              <div class="t-card-head"><b>Banques</b><span>Compte 52</span></div>
+              <div class="t-grid">
+                <div>
+                  <div class="t-side d">Débit</div>
+                  <div class="t-line"><span>Apport en capital</span><span>2 000 000</span></div>
+                  <div class="t-line"><span>Vente encaissée</span><span>450 000</span></div>
+                </div>
+                <div>
+                  <div class="t-side c">Crédit</div>
+                  <div class="t-line"><span>Achat marchandises</span><span>350 000</span></div>
+                  <div class="t-line"><span>Salaires</span><span>200 000</span></div>
+                </div>
+              </div>
+              <div class="t-foot"><span>Solde débiteur</span><b>1 900 000</b></div>
+            </div>
+            <div class="hero-tag two"><code>4441</code> État, TVA due</div>
           </div>
         </div>
-      </div>
-    </div>
-  );
-};
+      </section>
 
-// ── Données du guide (enrichies depuis le document) ────────
-const guideContent = [
-  {
-    title: "Chapitre 1 — Généralités sur la comptabilité",
-    isImportant: true,
-    content: `
-      <p>La comptabilité est une technique née dans l'Antiquité pour tracer créances, dettes et patrimoine. Elle est aujourd'hui le moyen de communication et de preuve le plus efficace entre une entreprise et ses partenaires.</p>
-
-      <p><strong>Définition (référentiel OHADA) :</strong> La comptabilité est un système d'organisation financière permettant de :</p>
-      <ul>
-        <li>Saisir, classer et enregistrer des données chiffrées de base ;</li>
-        <li>Fournir, après traitement, des informations conformes aux besoins des utilisateurs.</li>
-      </ul>
-
-      <p><strong>Les 4 états financiers indissociables :</strong></p>
-      <table><thead><tr><th>État</th><th>Rôle</th></tr></thead><tbody>
-        <tr><td>Bilan</td><td>Situation patrimoniale à une date donnée</td></tr>
-        <tr><td>Compte de résultat</td><td>Richesse créée/détruite sur la période</td></tr>
-        <tr><td>TAFIRE</td><td>Tableau de flux de trésorerie</td></tr>
-        <tr><td>Notes annexes</td><td>Informations complémentaires significatives</td></tr>
-      </tbody></table>
-
-      <p><strong>Historique OHADA / SYSCOA :</strong></p>
-      <ul>
-        <li>1993 — Traité OHADA signé à Port-Louis (entré en vigueur le 18/09/1995)</li>
-        <li>1994 — Suite à la dévaluation du franc CFA, l'UEMOA crée le <strong>SYSCOA</strong></li>
-        <li>1998 — Application obligatoire du SYSCOA (1er janvier)</li>
-        <li>2000 — Acte Uniforme OHADA (24 mars) pour l'harmonisation sur 16 pays</li>
-      </ul>
-
-      <p><strong>7 utilisateurs de l'information comptable (SYSCOA) :</strong> l'entreprise elle-même, clients/fournisseurs, associés/banques, personnel, État, Centrale des Bilans, partenaires hors UEMOA (FMI, Banque Mondiale).</p>
-
-      <p><strong>Livres obligatoires :</strong> Livre-journal, Grand livre, Balance générale (6 colonnes), Livre d'inventaire — sans blanc ni altération.</p>
-
-      <p><strong>Principes comptables — 3 familles :</strong></p>
-      <table><thead><tr><th>Famille</th><th>Contenu</th></tr></thead><tbody>
-        <tr><td><strong>Hypothèse</strong></td><td>Continuité de l'exploitation (présomption de poursuite des activités)</td></tr>
-        <tr><td><strong>Postulats (5)</strong></td><td>Entité · Comptabilité d'engagement · Spécialisation des exercices · Permanence des méthodes · Prééminence de la réalité économique</td></tr>
-        <tr><td><strong>Conventions</strong></td><td>Coût historique · Prudence · Régularité et transparence · Correspondance bilan clôture/ouverture · Importance significative</td></tr>
-      </tbody></table>
-
-      <p><strong>Focus — Postulat de spécialisation des exercices :</strong> Le résultat de chaque exercice est <em>indépendant</em> de celui qui précède et de celui qui suit.</p>
-    `
-  },
-  {
-    title: "Chapitre 2 — Le cadre comptable SYSCOHADA",
-    isImportant: true,
-    content: `
-      <p><strong>Plan des comptes — 9 classes :</strong></p>
-      <table><thead><tr><th>Classes</th><th>Nature</th><th>Usage</th></tr></thead><tbody>
-        <tr><td>1 à 5</td><td>Comptes de situation (bilan)</td><td>Obligatoire</td></tr>
-        <tr><td>6, 7, 8</td><td>Comptes de gestion (résultat)</td><td>Obligatoire</td></tr>
-        <tr><td>9</td><td>Engagements hors bilan + comptabilité analytique</td><td>Facultatif</td></tr>
-      </tbody></table>
-
-      <p><strong>Lecture verticale du bilan :</strong></p>
-      <table><thead><tr><th>ACTIF</th><th>PASSIF</th></tr></thead><tbody>
-        <tr><td>Haut — Classe 2 : Actif Immobilisé</td><td>Haut — Classe 1 : Ressources stables</td></tr>
-        <tr><td rowspan="2">Bas — Classes 3, 4 (débiteur), 5</td><td>Bas — Classe 4 (créditeur), 5</td></tr>
-      </tbody></table>
-
-      <p><strong>Constantes de numérotation :</strong></p>
-      <ul>
-        <li>1er chiffre = la classe</li>
-        <li>Chiffre <strong>8</strong> en 2e position (classe 2) = <strong>amortissement</strong> (ex : 245 Matériel de transport → <code>2845</code> Amortissement matériel de transport)</li>
-        <li>Chiffre <strong>8</strong> en 3e/4e position = compte résiduel ou divers</li>
-        <li>Chiffre <strong>9</strong> en 2e position = <strong>provision/dépréciation</strong> (ex : 69, 39)</li>
-        <li>Chiffre <strong>9</strong> en 3e position = compte <strong>opposant</strong> au sens normal (ex : 411 débiteur, mais <code>4191</code> = avances reçues → créditeur)</li>
-      </ul>
-
-      <p><strong>Plan Comptable d'Entreprise (PCE) — extensions :</strong></p>
-      <ul>
-        <li>+2 chiffres (nature) : ex. <code>6047.18</code> = achat de papier photocopieur</li>
-        <li>+2 chiffres (fonction) : ex. <code>6047.18.03</code> = papier pour le service comptable — uniquement classes 6, 7, 8</li>
-      </ul>
-    `
-  },
-  {
-    title: "Chapitre 3 — Comptes de charges et produits (AO / HAO)",
-    isImportant: false,
-    content: `
-      <p><strong>Activités Ordinaires (AO) :</strong></p>
-      <table><thead><tr><th>Charges (classe 6)</th><th>Produits (classe 7)</th></tr></thead><tbody>
-        <tr><td>601 — Achat de marchandises</td><td>701 — Vente de marchandises</td></tr>
-        <tr><td>602 — Achat de matières premières</td><td>702 — Vente de produits finis</td></tr>
-        <tr><td>603 — Variation de stocks achetés</td><td>71 — Subventions d'exploitation</td></tr>
-        <tr><td>61 — Transports</td><td>75 — Autres produits</td></tr>
-        <tr><td>62/63 — Services extérieurs</td><td>77 — Revenus financiers</td></tr>
-        <tr><td>64 — Impôts et taxes</td><td>78 — Transferts de charges</td></tr>
-        <tr><td>66 — Charges de personnel</td><td>79 — Reprises de provisions</td></tr>
-        <tr><td>67 — Frais financiers</td><td></td></tr>
-        <tr><td>68 — Dotations aux amortissements</td><td></td></tr>
-      </tbody></table>
-
-      <p><strong>Hors Activités Ordinaires (HAO) — classe 8 :</strong><br>
-      Règle : <em>impairs = charges, pairs = produits</em></p>
-      <table><thead><tr><th>Charges HAO (impairs)</th><th>Produits HAO (pairs)</th></tr></thead><tbody>
-        <tr><td>81 — Valeurs comptables des cessions</td><td>82 — Produits des cessions d'immob.</td></tr>
-        <tr><td>83 — Charges HAO</td><td>84 — Produits HAO</td></tr>
-        <tr><td>85 — Dotations HAO</td><td>86 — Reprises HAO</td></tr>
-        <tr><td>87 — Participation des travailleurs</td><td>88 — Subventions d'équipement</td></tr>
-      </tbody></table>
-    `
-  },
-  {
-    title: "Chapitre 4 — L'entité, les flux et la partie double",
-    isImportant: false,
-    content: `
-      <p><strong>Deux catégories d'opérations :</strong></p>
-      <ul>
-        <li><strong>Investissement-financement :</strong> acquisition d'immobilisations financée par le capital ou des emprunts</li>
-        <li><strong>Exploitation :</strong> achats, ventes, prestations quotidiennes</li>
-      </ul>
-
-      <p><strong>Types de flux :</strong></p>
-      <table><thead><tr><th>Type</th><th>Description</th></tr></thead><tbody>
-        <tr><td>Flux externes</td><td>Opérations avec des tiers (les plus nombreux)</td></tr>
-        <tr><td>Flux internes</td><td>Mouvements à l'intérieur (ex : virement caisse → banque)</td></tr>
-        <tr><td>Flux réels</td><td>Portent sur des biens/ressources échangés</td></tr>
-        <tr><td>Flux quasi-réels</td><td>Prestations : banque, personnel, État → entreprise</td></tr>
-        <tr><td>Flux financiers</td><td>Monnaie, créances, dettes</td></tr>
-        <tr><td>Flux de résultat</td><td>Produits − Charges</td></tr>
-      </tbody></table>
-
-      <p><strong>Principe de la partie double :</strong><br>
-      <em>« Une opération comptable entraîne obligatoirement au moins une ressource et un emploi. »</em></p>
-      <table><thead><tr><th>EMPLOIS (Débit)</th><th>RESSOURCES (Crédit)</th></tr></thead><tbody>
-        <tr><td>Acquisition d'immobilisation</td><td>Ventes, prestations facturées</td></tr>
-        <tr><td>Achat de marchandises</td><td>Dettes contractées</td></tr>
-        <tr><td>Charges (salaires, impôts…)</td><td>Créances recouvrées</td></tr>
-        <tr><td>Recettes encaissées</td><td>Dépenses effectuées</td></tr>
-      </tbody></table>
-
-      <p><strong>Incidence sur le résultat :</strong> Les emplois consommés (charges) génèrent des pertes ; les ressources créées (ventes) génèrent des profits. Les emplois/ressources réversibles (achats d'immobilisations, emprunts) n'ont pas d'incidence directe sur le résultat.</p>
-    `
-  },
-  {
-    title: "Chapitre 5 — Le bilan",
-    isImportant: true,
-    content: `
-      <p>Le bilan est un état financier de synthèse décrivant séparément les éléments actifs et passifs à une date donnée.</p>
-
-      <table><thead><tr><th>ACTIF (Emplois)</th><th>PASSIF (Ressources)</th></tr></thead><tbody>
-        <tr><td><strong>Actif immobilisé</strong><br>Immobilisations incorporelles, corporelles, financières, avances sur immob.</td><td><strong>Capitaux propres et assimilés</strong><br>Capital, réserves, résultat, subventions, provisions réglementées</td></tr>
-        <tr><td><strong>Actif circulant</strong><br>Stocks HAO/AO, créances HAO/AO</td><td><strong>Dettes financières</strong><br>Emprunts LT/MT, provisions financières</td></tr>
-        <tr><td><strong>Trésorerie-Actif</strong><br>Titres de placement, valeurs à encaisser, banque, caisse, CCP</td><td><strong>Passif circulant</strong><br>Dettes fournisseurs, dettes sociales/fiscales, passif circ. HAO</td></tr>
-        <tr><td></td><td><strong>Trésorerie-Passif</strong><br>Crédits bancaires CT, découverts bancaires</td></tr>
-        <tr><td><strong>TOTAL ACTIF</strong></td><td><strong>TOTAL PASSIF</strong></td></tr>
-      </tbody></table>
-
-      <p><strong>Formules clés :</strong></p>
-      <div class="formule-box">
-        SN = Actif réel − Passif exigible = Capitaux propres<br>
-        Résultat = Actif − Passif (hors résultat)<br>
-        Bénéfice si Produits &gt; Charges · Perte si Produits &lt; Charges
-      </div>
-
-      <p><strong>Fonctionnement des comptes principaux :</strong></p>
-      <table><thead><tr><th>Compte</th><th>Débité lors de…</th><th>Crédité lors de…</th></tr></thead><tbody>
-        <tr><td><strong>CAPITAL</strong></td><td>Réductions (retrait, absorption de pertes)</td><td>Apports initiaux, augmentations de capital</td></tr>
-        <tr><td><strong>IMMOBILISATIONS</strong></td><td>Acquisition (coût HT + frais accessoires)</td><td>Cessions, destructions, mises au rebut</td></tr>
-        <tr><td><strong>FOURNISSEURS</strong></td><td>Règlements effectués nets d'avoirs</td><td>Achats à crédit, dettes &lt; 1 an</td></tr>
-        <tr><td><strong>CLIENTS</strong></td><td>Créances &lt; 1 an (ventes à crédit)</td><td>Règlements reçus nets d'avoirs</td></tr>
-      </tbody></table>
-
-      <p><strong>Exemple — Bilan AZERD au 31/12/2000 :</strong> Total Actif = Total Passif = 22 750 000. Le bâtiment manquant = 22 750 000 − 14 750 000 = <strong>8 000 000 F</strong></p>
-    `
-  },
-  {
-    title: "Chapitre 6 — Le compte et son fonctionnement",
-    isImportant: false,
-    content: `
-      <p>Le compte est un tableau regroupant toutes les opérations concernant un même élément ou poste du bilan.</p>
-
-      <p><strong>Terminologie essentielle :</strong></p>
-      <table><thead><tr><th>Terme</th><th>Définition</th></tr></thead><tbody>
-        <tr><td>Imputation</td><td>Inscription au débit ou crédit d'un compte</td></tr>
-        <tr><td>Solde</td><td>TD − TC. Si TD&gt;TC → débiteur · Si TC&gt;TD → créditeur · Si TD=TC → soldé</td></tr>
-        <tr><td>Arrêt</td><td>Clôture : on inscrit le solde côté opposé, on totalise et on souligne de 2 traits</td></tr>
-        <tr><td>Réouverture</td><td>On reporte le solde du côté de sa nature</td></tr>
-      </tbody></table>
-
-      <p><strong>3 tracés de compte :</strong></p>
-      <ul>
-        <li><strong>Tracé classique :</strong> colonnes Dates / Libellés / Montants débit et crédit</li>
-        <li><strong>Tracé à colonnes mariées :</strong> ajoute le solde après chaque opération</li>
-        <li><strong>Tracé schématique (compte en T) :</strong> montants seuls, débit à gauche, crédit à droite</li>
-      </ul>
-
-      <p><strong>Règles de fonctionnement :</strong></p>
-      <table><thead><tr><th>Type de compte</th><th>Augmente par</th><th>Diminue par</th></tr></thead><tbody>
-        <tr><td>Actif du bilan (classes 2 à 5 actif)</td><td>Débit</td><td>Crédit</td></tr>
-        <tr><td>Passif du bilan (classes 1, 4, 5 passif)</td><td>Crédit</td><td>Débit</td></tr>
-        <tr><td>Charges (classes 6 et 8 impairs)</td><td>Débit</td><td>Crédit</td></tr>
-        <tr><td>Produits (classes 7 et 8 pairs)</td><td>Crédit</td><td>Débit</td></tr>
-      </tbody></table>
-
-      <p><strong>Comptes réciproques :</strong> deux comptes représentant deux agents différents (un tenu chez chacun) enregistrant les mêmes flux. Arrêtés à la même date, ils présentent le même solde mais de nature opposée (ex : « Fournisseur A » chez B ↔ « Client B » chez A).</p>
-    `
-  },
-  {
-    title: "Chapitre 7 — La facture, les réductions et les achats/ventes",
-    isImportant: true,
-    content: `
-      <p><strong>Deux types de factures :</strong></p>
-      <table><thead><tr><th>Facture de doit</th><th>Facture d'avoir</th></tr></thead><tbody>
-        <tr><td>Établie par le fournisseur · Constate une vente · Fait ressortir le <strong>Net à Payer (NAP)</strong></td><td>Établie par le fournisseur · Constate une réduction du prix · Fait ressortir le <strong>Net à déduire</strong></td></tr>
-      </tbody></table>
-
-      <p><strong>Les réductions :</strong></p>
-      <ul>
-        <li><strong>Commerciales (3R) :</strong> Rabais (défaut qualité) · Remise (importance/régularité achat) · Ristourne (CA périodique) — exprimées en % et calculées <em>en cascade</em></li>
-        <li><strong>Financière :</strong> Escompte de règlement (paiement anticipé) — calculé <em>toujours sur le Net Commercial (NC)</em>, après toutes les réductions commerciales</li>
-      </ul>
-
-      <p><strong>Schéma général d'une facture :</strong></p>
-      <div class="formule-box">
-        MB (Montant Brut)<br>
-        − Rabais<br>
-        − Remise(s) en cascade<br>
-        = NC (Net Commercial)<br>
-        − Escompte (% du NC)<br>
-        = NF (Net Financier)<br>
-        + Port HT (si applicable)<br>
-        = sous-total HT<br>
-        + TVA 18%<br>
-        = NAP (Net à Payer)
-      </div>
-
-      <p><strong>Règle importante — 3R sur facture de doit :</strong> Les 3R figurant SUR la facture de doit <strong>ne sont PAS comptabilisés</strong> (déjà déduits dans le NC). Un avoir pour réduction obtenu hors facture (a posteriori) EST comptabilisé.</p>
-
-      <p><strong>Comptabilisation achat/vente (inventaire permanent) :</strong></p>
-      <table><thead><tr><th>Chez le client</th><th>Chez le fournisseur</th></tr></thead><tbody>
-        <tr><td>D 601/602/604 NC · C 4011 NAP · C 773 Escompte obtenu</td><td>D 4111 NAP · D 673 Escompte accordé · C 701/702 NC</td></tr>
-        <tr><td>D 31/36/37 CA · C 6031/73 CA (entrée en stock)</td><td>D 6031/73 CAMV · C 31/32/37 CAMV (sortie de stock)</td></tr>
-      </tbody></table>
-
-      <p><strong>Exemple — Facture ABC → BAC :</strong> MB = 1 000 000 · Rabais 150 000 · NC = 850 000 · Escompte 1% = 8 500 · NF = 841 500 · Port = 70 000 · Sous-total = 911 500 · TVA 18% = 164 070 · <strong>NAP = 1 075 570</strong></p>
-    `
-  },
-  {
-    title: "Chapitre 8 — Les frais de transport",
-    isImportant: false,
-    content: `
-      <p>Le SYSCOHADA révisé a supprimé le compte 611 « transport sur achat ». Les comptes <code>6015, 6025, 6045, 6085</code> sont utilisés à la place.</p>
-
-      <p><strong>3 cas pour les frais à charge du client :</strong></p>
-      <table><thead><tr><th>Cas</th><th>Mécanisme</th><th>Compte chez le client</th><th>Compte chez le fournisseur</th></tr></thead><tbody>
-        <tr><td><strong>Port dû</strong></td><td>Le client paie directement le transporteur</td><td>D 60*5 / C 401 ou 52/57</td><td>Aucune écriture de transport</td></tr>
-        <tr><td><strong>Port payé (récupéré)</strong></td><td>Le fournisseur avance et récupère sur facture</td><td>D 60*5 (compris dans le NAP)</td><td>D 613 / C 52 puis D 411 / C 7071</td></tr>
-        <tr><td><strong>Port forfaitaire</strong></td><td>Le fournisseur transporte avec ses propres camions</td><td>D 60*5 (compris dans le NAP)</td><td>C <strong>707</strong> (produit accessoire)</td></tr>
-      </tbody></table>
-
-      <p><strong>Frais à charge du fournisseur (transport vers le client) :</strong> D <code>612</code> Transport sur vente / C 401 ou 52/57. Ces frais ne figurent pas sur la facture de vente.</p>
-
-      <p><strong>Frais de réexpédition lors d'un retour :</strong></p>
-      <ul>
-        <li>Le client engage : D 613 / C 57 (caisse)</li>
-        <li>Récupération via facture d'avoir : le client crédite 781 ou 7071 · le fournisseur débite 612</li>
-      </ul>
-
-      <p><strong>Exemple — Paul / Coffi (retour 12/3) :</strong> Retour brut 200 000 · NC = 190 000 · Escompte repris = 1 900 · Port réexpédition = 50 000 · <strong>Net à déduire = 238 100</strong></p>
-    `
-  },
-  {
-    title: "Chapitre 9 — La TVA",
-    isImportant: true,
-    content: `
-      <p>La TVA est un impôt indirect frappant les livraisons de biens et prestations de services à titre onéreux. Elle est supportée par le consommateur final mais collectée par les entreprises assujetties.</p>
-
-      <ul>
-        <li><strong>Exonérations :</strong> opérations dans le champ TVA, mais non taxées par décision de l'État</li>
-        <li><strong>Exemptions :</strong> opérations hors champ d'application de la TVA</li>
-      </ul>
-
-      <p><strong>Taux en vigueur au Bénin : 18%</strong></p>
-      <p>La TVA se calcule sur le <strong>Net Financier (NF) + Port HT</strong> s'il figure sur la facture.</p>
-
-      <p><strong>Comptes de TVA :</strong></p>
-      <table><thead><tr><th>Compte</th><th>Rôle</th></tr></thead><tbody>
-        <tr><td><code>443</code> — TVA facturée</td><td>Dette envers l'État (TVA collectée sur les ventes)</td></tr>
-        <tr><td><code>445</code> — TVA récupérable</td><td>Créance sur l'État (TVA déductible sur achats)</td></tr>
-        <tr><td><code>645</code> — Impôts/taxes indirects</td><td>Charge si l'entreprise N'EST PAS assujettie</td></tr>
-        <tr><td><code>4441</code> — TVA due</td><td>Solde à payer (TVA facturée &gt; TVA récupérable)</td></tr>
-        <tr><td><code>4449</code> — Crédit de TVA</td><td>Solde reportable (TVA récupérable &gt; TVA facturée)</td></tr>
-      </tbody></table>
-
-      <p><strong>Liquidation mensuelle — TVA due (à payer) :</strong></p>
-      <table><thead><tr><th>Compte</th><th>Débit</th><th>Crédit</th></tr></thead><tbody>
-        <tr><td>443 État TVA facturée</td><td>TVA facturée</td><td></td></tr>
-        <tr><td>445 État TVA récupérable</td><td></td><td>TVA récupérable</td></tr>
-        <tr><td>4441 État TVA due</td><td></td><td>Différence</td></tr>
-      </tbody></table>
-
-      <p>Au paiement : D <code>4441</code> / C <code>52</code> (banque)</p>
-
-      <p><strong>Liquidation mensuelle — Crédit de TVA :</strong></p>
-      <table><thead><tr><th>Compte</th><th>Débit</th><th>Crédit</th></tr></thead><tbody>
-        <tr><td>443 État TVA facturée</td><td>TVA facturée</td><td></td></tr>
-        <tr><td>4449 État crédit de TVA</td><td>Différence</td><td></td></tr>
-        <tr><td>445 État TVA récupérable</td><td></td><td>TVA récupérable</td></tr>
-      </tbody></table>
-    `
-  }
-];
-
-// ── Données du quiz (20 questions) ─────────────────────────
-const questions = [
-  { question: "En quelle année le SYSCOA a-t-il été créé, suite à la dévaluation du franc CFA ?", options: ["1990", "1994", "1998", "2000"], correctAnswer: 1, explanation: "Le SYSCOA a été créé en 1994 par l'UEMOA, applicable dès le 1er janvier 1998." },
-  { question: "Combien de pays ont signé et ratifié le traité OHADA ?", options: ["7", "8", "16", "17"], correctAnswer: 2, explanation: "Seize (16) pays africains ont signé et ratifié le traité OHADA." },
-  { question: "Quelle est l'hypothèse de base de la présentation des états financiers ?", options: ["La prudence", "La continuité de l'exploitation", "La permanence des méthodes", "Le coût historique"], correctAnswer: 1, explanation: "L'hypothèse de base est la continuité de l'exploitation." },
-  { question: "Quel postulat énonce que le résultat d'un exercice est indépendant de celui qui précède et de celui qui suit ?", options: ["Postulat de l'entité", "Postulat de la comptabilité d'engagement", "Postulat de spécialisation des exercices", "Postulat de la permanence des méthodes"], correctAnswer: 2, explanation: "Le postulat de spécialisation des exercices stipule que le résultat de chaque exercice est indépendant des autres." },
-  { question: "Dans la lecture verticale du bilan, le bas du bilan comprend les classes :", options: ["1 et 2", "3, 4 et 5", "6, 7 et 8", "9 uniquement"], correctAnswer: 1, explanation: "Le haut du bilan comprend les classes 1 et 2, tandis que le bas comprend les classes 3, 4 et 5." },
-  { question: "Le compte 2845 correspond à :", options: ["Matériel de transport", "Amortissement du matériel de transport", "Provision pour dépréciation du matériel", "Achat de matériel de transport"], correctAnswer: 1, explanation: "Le chiffre 8 en 2ème position de la classe 2 indique l'amortissement (245 → 2845)." },
-  { question: "Le chiffre 9 en 3ème position d'un compte indique :", options: ["Une provision", "Un amortissement", "Un caractère opposant au sens normal du compte", "Un compte résiduel"], correctAnswer: 2, explanation: "Le chiffre 9 en 3ème position implique le caractère opposant au sens normal du compte (ex : 4191)." },
-  { question: "Parmi ces comptes, lequel enregistre une charge des activités ordinaires ?", options: ["701", "601", "82", "88"], correctAnswer: 1, explanation: "601 = Achat de marchandises, qui est une charge des activités ordinaires (classe 6)." },
-  { question: "Le compte 84 correspond à :", options: ["Charges HAO", "Produits HAO", "Dotations HAO", "Reprises HAO"], correctAnswer: 1, explanation: "84 = Produits HAO (comptes pairs = produits en HAO)." },
-  { question: "Dans le PCE, l'analyse par fonction ne concerne que :", options: ["Les classes 1 à 5", "Les classes 6, 7 et 8", "La classe 9 uniquement", "Toutes les classes"], correctAnswer: 1, explanation: "La subdivision par fonction n'a de sens que pour les comptes de charges/produits (classes 6, 7, 8)." },
-  { question: "Le compte CAPITAL est crédité lors :", options: ["D'une absorption de pertes", "D'un retrait définitif", "D'un nouvel apport des associés", "D'un remboursement aux associés"], correctAnswer: 2, explanation: "Le compte capital est crédité lors des augmentations de capital (nouveaux apports, incorporation de bénéfices)." },
-  { question: "Dans le bilan, la partie Actif fait apparaître :", options: ["Les ressources", "Les emplois", "Le résultat uniquement", "Les charges"], correctAnswer: 1, explanation: "L'actif du bilan fait apparaître les emplois ; le passif retrace les ressources." },
-  { question: "La situation nette (SN) est égale à :", options: ["Actif total", "Passif exigible", "Capitaux propres", "Résultat de l'exercice"], correctAnswer: 2, explanation: "SN = Actif réel - Passif exigible = Capitaux propres." },
-  { question: "Si le Total Débit (TD) d'un compte est supérieur au Total Crédit (TC), le solde est :", options: ["Créditeur", "Nul", "Débiteur", "Indéterminé"], correctAnswer: 2, explanation: "Si TD > TC, le solde = TD - TC et est dit débiteur." },
-  { question: "Le tracé qui fait apparaître le solde après chaque opération est appelé :", options: ["Tracé classique", "Tracé à colonnes mariées", "Tracé schématique", "Tracé en T"], correctAnswer: 1, explanation: "Le tracé à colonnes mariées fait apparaître le solde (débiteur/créditeur) après chaque opération." },
-  { question: "Les comptes de l'actif du bilan augmentent par :", options: ["Le crédit", "Le débit", "Le virement", "L'arrêt"], correctAnswer: 1, explanation: "Les comptes de l'actif du bilan augmentent par le débit et diminuent par le crédit." },
-  { question: "Sur une facture de doit, l'escompte se calcule :", options: ["Sur le montant brut", "Avant les réductions commerciales", "Après toutes les réductions commerciales (sur le NC)", "Sur le net à payer"], correctAnswer: 2, explanation: "L'escompte se calcule toujours après toutes les réductions commerciales, sur le Net Commercial." },
-  { question: "Les 3R figurant sur une facture de doit sont :", options: ["Comptabilisés au débit du 601", "Comptabilisés au crédit du 701", "Non comptabilisés (déjà déduits du NC)", "Comptabilisés en TVA"], correctAnswer: 2, explanation: "Les réductions à caractère commercial figurant sur la facture de doit ne sont pas comptabilisées." },
-  { question: "Lorsque le fournisseur réalise le transport avec ses propres camions (port forfaitaire), ce produit est enregistré chez lui au crédit du compte :", options: ["612", "613", "707", "6015"], correctAnswer: 2, explanation: "Le port forfaitaire constitue un produit accessoire enregistré au crédit du compte 707." },
-  { question: "Le taux de TVA en vigueur au Bénin est de :", options: ["10%", "15%", "18%", "20%"], correctAnswer: 2, explanation: "Le taux de TVA en vigueur au Bénin est de 18%." }
-];
-
-// ── Composant Quiz ──────────────────────────────────────────
-const Quiz = () => {
-  const [currentQ, setCurrentQ]     = React.useState(0);
-  const [score, setScore]           = React.useState(0);
-  const [selected, setSelected]     = React.useState(null);
-  const [submitted, setSubmitted]   = React.useState(false);
-  const [showResults, setShowResults] = React.useState(false);
-  const [wrongs, setWrongs]         = React.useState([]);
-  const [loading, setLoading]       = React.useState(false);
-
-  const q        = questions[currentQ];
-  const progress = ((currentQ + 1) / questions.length) * 100;
-
-  const handleSubmit = () => {
-    if (selected === null) return;
-    setLoading(true);
-    setTimeout(() => {
-      if (selected === q.correctAnswer) {
-        setScore(s => s + 1);
-      } else {
-        setWrongs(w => [...w, {
-          question: q.question,
-          selected: q.options[selected],
-          correct:  q.options[q.correctAnswer],
-          explanation: q.explanation
-        }]);
-      }
-      setSubmitted(true);
-      setLoading(false);
-    }, 300);
-  };
-
-  const handleNext = () => {
-    setLoading(true);
-    setTimeout(() => {
-      if (currentQ < questions.length - 1) {
-        setCurrentQ(c => c + 1);
-        setSelected(null);
-        setSubmitted(false);
-      } else {
-        setShowResults(true);
-      }
-      setLoading(false);
-    }, 300);
-  };
-
-  const restart = () => {
-    setCurrentQ(0); setScore(0); setSelected(null);
-    setSubmitted(false); setShowResults(false); setWrongs([]);
-  };
-
-  if (showResults) {
-    const pct = (score / questions.length) * 100;
-    const msg = pct >= 80 ? "🏆 Excellent ! Vous maîtrisez parfaitement le sujet !"
-               : pct >= 60 ? "👍 Très bien ! Continuez à vous entraîner !"
-               : pct >= 40 ? "📚 Bon début ! Révisez les notions clés."
-               : "💪 Ne vous découragez pas ! Une révision s'impose.";
-
-    return (
-      <div className="glass-card p-8 max-w-3xl mx-auto animate-slide-in">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 mb-4">
-            <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+      <section class="section" style="padding-top:8px">
+        <div class="wrap">
+          <div class="progress-panel fade-in">
+            <div class="ring">${ring(pct, 26, pct + "%")}</div>
+            <div>
+              <h3>Votre progression</h3>
+              <p>${read ? `${read} chapitre${read > 1 ? "s" : ""} sur ${total} lu${read > 1 ? "s" : ""}.` : "Vous n'avez pas encore commencé."} ${read < total ? `Prochain : <a href="#/cours/${next.id}">${esc(next.title)}</a>` : "Cours terminé, place au quiz."}</p>
+            </div>
+            <div class="progress-stats">
+              <div><b>${read}/${total}</b><span>chapitres lus</span></div>
+              <div><b>${best}</b><span>meilleur score</span></div>
+              <div><b>${state.attempts}</b><span>quiz terminés</span></div>
+            </div>
           </div>
-          <h2 className="text-3xl font-bold text-gray-800 mb-2">Résultats du Quiz</h2>
-          <p className="text-gray-600">{msg}</p>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="wrap">
+          <div class="section-head">
+            <div>
+              <span class="eyebrow">Programme</span>
+              <h2>Les ${total} chapitres du cours</h2>
+              <p>Des généralités à la TVA, dans l'ordre du programme de L1.</p>
+            </div>
+            <a class="btn btn-outline btn-sm" href="#/cours/${C.chapters[0].id}">Voir le cours ${icon("arrowR", "ic-sm")}</a>
+          </div>
+          <div class="chapter-grid">
+            ${C.chapters.map((c, i) => `
+              <a class="chapter-card" href="#/cours/${c.id}">
+                <span class="num">Chapitre ${String(i + 1).padStart(2, "0")}
+                  ${state.read.has(c.id) ? `<span class="pill ok">${icon("check", "ic-sm")} Lu</span>` : c.key ? `<span class="pill">Essentiel</span>` : ""}
+                </span>
+                <h3>${esc(c.title)}</h3>
+                <p>${esc(c.summary)}</p>
+                <span class="meta">${icon("clock", "ic-sm")} ${c.minutes} min</span>
+              </a>`).join("")}
+          </div>
+        </div>
+      </section>
+
+      <section class="section" style="padding-bottom:72px">
+        <div class="wrap">
+          <div class="section-head">
+            <div>
+              <span class="eyebrow">Pratique</span>
+              <h2>Apprendre en manipulant</h2>
+              <p>Des exercices interactifs pour ancrer les notions du cours.</p>
+            </div>
+          </div>
+          <div class="feature-grid">
+            ${TOOLS.map((t) => `
+              <a class="feature" href="#/outils/${t.id}">
+                <div class="feature-ic">${icon(t.icon)}</div>
+                <h3>${t.label}</h3>
+                <p>${t.desc}</p>
+              </a>`).join("")}
+          </div>
+        </div>
+      </section>`;
+  }
+
+  /* ============================================================
+     COURS
+     ============================================================ */
+  function viewCourse(id) {
+    let i = chapterIndex(id);
+    if (i < 0) i = Math.max(0, chapterIndex(store.get("last", "")));
+    const ch = C.chapters[i];
+    store.set("last", ch.id);
+    const prev = C.chapters[i - 1], next = C.chapters[i + 1];
+
+    app.innerHTML = `
+      <div class="wrap course">
+        <aside class="toc" aria-label="Sommaire">
+          <div class="toc-title">Sommaire</div>
+          <div class="toc-progress" id="tocProgress"></div>
+          <ol id="tocList"></ol>
+        </aside>
+
+        <article class="article fade-in">
+          <div class="toc-mobile">
+            <label class="toc-title" for="chSelect">Chapitre</label>
+            <select class="input" id="chSelect">
+              ${C.chapters.map((c, k) => `<option value="${c.id}" ${k === i ? "selected" : ""}>${k + 1}. ${esc(c.title)}</option>`).join("")}
+            </select>
+          </div>
+
+          <header class="article-head">
+            <span class="eyebrow">Chapitre ${i + 1} sur ${C.chapters.length}</span>
+            <h1>${esc(ch.title)}</h1>
+            <div class="meta">${icon("clock", "ic-sm")} ${ch.minutes} min de lecture ${ch.key ? '<span class="pill">Essentiel</span>' : ""}</div>
+          </header>
+
+          <div class="prose" id="prose">${ch.content}</div>
+
+          <div class="article-actions">
+            <p id="readText"></p>
+            <button class="btn btn-primary" id="markRead" type="button"></button>
+          </div>
+
+          <nav class="pager" aria-label="Chapitres précédent et suivant">
+            ${prev ? `<a class="prev" href="#/cours/${prev.id}"><small>Précédent</small><b>${esc(prev.title)}</b></a>` : ""}
+            ${next
+              ? `<a class="next" href="#/cours/${next.id}"><small>Suivant</small><b>${esc(next.title)}</b></a>`
+              : `<a class="next" href="#/quiz"><small>Étape suivante</small><b>Passer au quiz</b></a>`}
+          </nav>
+        </article>
+      </div>`;
+
+    // Tableaux défilants sur mobile
+    $$("#prose table").forEach((t) => {
+      const w = document.createElement("div");
+      w.className = "table-wrap";
+      t.parentNode.insertBefore(w, t);
+      w.appendChild(t);
+    });
+
+    // Liens vers les outils
+    $$("#prose .tool-link").forEach((el) => {
+      el.setAttribute("role", "link");
+      el.tabIndex = 0;
+      const go = () => { location.hash = "#/outils/" + el.dataset.tool; };
+      el.addEventListener("click", go);
+      el.addEventListener("keydown", (e) => { if (e.key === "Enter") go(); });
+    });
+
+    $("#chSelect").addEventListener("change", (e) => { location.hash = "#/cours/" + e.target.value; });
+
+    const updateRead = () => {
+      const isRead = state.read.has(ch.id);
+      const count = C.chapters.filter((c) => state.read.has(c.id)).length;
+      const pct = Math.round((count / C.chapters.length) * 100);
+      $("#tocProgress").innerHTML = `<div class="bar"><i style="width:${pct}%"></i></div><small>${count} sur ${C.chapters.length} chapitres lus</small>`;
+      $("#tocList").innerHTML = C.chapters.map((c, k) => `
+        <li><a href="#/cours/${c.id}" class="${k === i ? "active" : ""}" ${k === i ? 'aria-current="page"' : ""}>
+          <span class="n">${String(k + 1).padStart(2, "0")}</span>
+          <span>${esc(c.title)}</span>
+          <span class="check ${state.read.has(c.id) ? "done" : ""}">${state.read.has(c.id) ? icon("check") : ""}</span>
+        </a></li>`).join("");
+      const btn = $("#markRead");
+      btn.className = "btn " + (isRead ? "btn-outline done" : "btn-primary");
+      btn.innerHTML = isRead ? `${icon("check", "ic-sm")} Chapitre lu` : "Marquer comme lu";
+      $("#readText").textContent = isRead ? "Vous pouvez annuler en cliquant à nouveau." : "Terminé ? Enregistrez votre progression.";
+    };
+    updateRead();
+
+    $("#markRead").addEventListener("click", () => {
+      if (state.read.has(ch.id)) state.read.delete(ch.id);
+      else {
+        state.read.add(ch.id);
+        toast(state.read.size === C.chapters.length ? "Bravo, vous avez terminé tout le cours." : "Chapitre enregistré comme lu.");
+      }
+      saveRead();
+      updateRead();
+    });
+
+    // Barre de lecture
+    const bar = $("#readProgress");
+    const onScroll = () => {
+      const h = document.documentElement.scrollHeight - innerHeight;
+      bar.style.width = (h > 0 ? Math.min(100, (scrollY / h) * 100) : 0) + "%";
+    };
+    addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => { removeEventListener("scroll", onScroll); bar.style.width = "0"; };
+  }
+
+  /* ============================================================
+     OUTILS
+     ============================================================ */
+  function viewTools(tid) {
+    const t = TOOLS.find((x) => x.id === tid) || TOOLS[0];
+    app.innerHTML = `
+      <div class="wrap">
+        <div class="page-head fade-in">
+          <span class="eyebrow">Outils</span>
+          <h1>S'exercer en manipulant</h1>
+          <p>Chaque outil reprend une notion du cours. Modifiez les valeurs, observez le résultat, recommencez.</p>
+        </div>
+        <nav class="tabs" aria-label="Outils">
+          ${TOOLS.map((x) => `<a class="tab ${x.id === t.id ? "active" : ""}" href="#/outils/${x.id}" ${x.id === t.id ? 'aria-current="page"' : ""}>${icon(x.icon, "ic-sm")} ${x.label}</a>`).join("")}
+        </nav>
+        <div id="toolBody" class="fade-in"></div>
+      </div>`;
+    const el = $("#toolBody");
+    return ({ facture: toolFacture, "compte-t": toolCompteT, fiches: toolFiches, bilan: toolBilan })[t.id](el);
+  }
+
+  /* ── Calculateur de facture ──────────────────────────────── */
+  function toolFacture(el) {
+    const PRESETS = {
+      abc: { mb: 1000000, rabais: 15, remises: [], ristourne: 0, esc: 1, port: 70000, tva: 18 },
+      cascade: { mb: 2500000, rabais: 0, remises: [10, 5], ristourne: 2, esc: 2, port: 0, tva: 18 },
+      zero: { mb: 0, rabais: 0, remises: [], ristourne: 0, esc: 0, port: 0, tva: 18 }
+    };
+    let s = JSON.parse(JSON.stringify(PRESETS.abc));
+    let view = "client";
+
+    el.innerHTML = `
+      <div class="tool">
+        <div class="panel">
+          <h2>Données de la facture</h2>
+          <p class="sub">Les réductions commerciales s'appliquent en cascade. L'escompte se calcule sur le Net commercial.</p>
+          <div class="field"><label for="f-mb">Montant brut (F CFA)</label><input class="input" id="f-mb" type="number" min="0" step="1000"></div>
+          <div class="field-row">
+            <div class="field"><label for="f-rabais">Rabais</label><div class="input-suffix"><input class="input" id="f-rabais" type="number" min="0" max="100" step="0.5"><span>%</span></div></div>
+            <div class="field"><label for="f-ristourne">Ristourne</label><div class="input-suffix"><input class="input" id="f-ristourne" type="number" min="0" max="100" step="0.5"><span>%</span></div></div>
+          </div>
+          <div class="field">
+            <label>Remise(s)</label>
+            <div class="remise-list" id="f-remises"></div>
+            <button class="link-btn" id="f-add" type="button">${icon("plus", "ic-sm")} Ajouter une remise</button>
+          </div>
+          <div class="field-row">
+            <div class="field"><label for="f-esc">Escompte</label><div class="input-suffix"><input class="input" id="f-esc" type="number" min="0" max="100" step="0.5"><span>%</span></div></div>
+            <div class="field"><label for="f-port">Port HT (F CFA)</label><input class="input" id="f-port" type="number" min="0" step="1000"></div>
+          </div>
+          <div class="field"><label for="f-tva">Taux de TVA</label><div class="input-suffix"><input class="input" id="f-tva" type="number" min="0" max="100" step="0.5"><span>%</span></div></div>
+          <div class="field"><label>Exemples</label>
+            <div class="presets">
+              <button class="chip" data-preset="abc" type="button">Facture ABC vers BAC (cours)</button>
+              <button class="chip" data-preset="cascade" type="button">Remises en cascade</button>
+              <button class="chip" data-preset="zero" type="button">Tout effacer</button>
+            </div>
+          </div>
         </div>
 
-        <div className="text-center mb-8">
-          <div className="relative inline-block">
-            <svg className="w-32 h-32 transform -rotate-90">
-              <circle cx="64" cy="64" r="56" fill="none" stroke="#e5e7eb" strokeWidth="8"/>
-              <circle cx="64" cy="64" r="56" fill="none" stroke="url(#grad)" strokeWidth="8"
-                strokeDasharray={2 * Math.PI * 56}
-                strokeDashoffset={2 * Math.PI * 56 * (1 - pct / 100)}
-                style={{ transition: 'stroke-dashoffset 1s ease' }}/>
-              <defs>
-                <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#667eea"/>
-                  <stop offset="100%" stopColor="#764ba2"/>
-                </linearGradient>
-              </defs>
-            </svg>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center">
-                <span className="text-3xl font-bold text-gray-800">{pct.toFixed(0)}%</span>
-                <p className="text-sm text-gray-500">Score</p>
+        <div class="panel">
+          <div class="invoice-head"><h2>Facture de doit</h2><span class="pill brand" id="f-tvapill"></span></div>
+          <div class="invoice" id="f-out"></div>
+          <div class="journal-box">
+            <div class="invoice-head" style="flex-wrap:wrap;gap:12px">
+              <h3>Écriture au journal</h3>
+              <div class="seg" id="f-view" style="min-width:250px">
+                <button type="button" data-v="client">Chez le client</button>
+                <button type="button" data-v="fournisseur">Chez le fournisseur</button>
               </div>
             </div>
+            <div id="f-journal"></div>
           </div>
-          <p className="text-lg mt-4">
-            <span className="font-bold text-green-600 text-2xl">{score}</span>
-            <span className="text-gray-600"> / {questions.length} bonnes réponses</span>
-          </p>
         </div>
+      </div>`;
 
-        {wrongs.length > 0 && (
-          <div className="mb-8">
-            <h3 className="text-lg font-semibold mb-4 text-red-600 flex items-center">
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Questions à réviser ({wrongs.length})
-            </h3>
-            <div className="space-y-3 max-h-96 overflow-y-auto">
-              {wrongs.map((item, i) => (
-                <div key={i} className="p-4 bg-red-50 rounded-xl border border-red-200 hover:shadow-md transition-shadow">
-                  <p className="font-medium text-gray-800">{item.question}</p>
-                  <p className="mt-2 text-sm">
-                    <span className="text-red-600">✗ {item.selected}</span>
-                    <span className="mx-2">→</span>
-                    <span className="text-green-600">✓ {item.correct}</span>
-                  </p>
-                  <p className="mt-2 text-xs text-gray-500">{item.explanation}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+    const ids = ["mb", "rabais", "ristourne", "esc", "port", "tva"];
+    const fill = () => {
+      ids.forEach((k) => { $("#f-" + k).value = s[k] || ""; });
+      $("#f-remises").innerHTML = s.remises.map((r, k) => `
+        <div class="remise-item">
+          <div class="input-suffix"><input class="input" data-remise="${k}" type="number" min="0" max="100" step="0.5" value="${r}" aria-label="Remise ${k + 1}"><span>%</span></div>
+          <button class="icon-btn" data-del="${k}" type="button" aria-label="Supprimer la remise ${k + 1}">${icon("trash", "ic-sm")}</button>
+        </div>`).join("") || `<p class="t-empty" style="padding:0">Aucune remise.</p>`;
+      compute();
+    };
 
-        <div className="flex justify-center space-x-4">
-          <button onClick={restart} className="btn-ripple px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl font-medium hover:shadow-lg transition-all transform hover:-translate-y-0.5">
-            <svg className="inline w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            Recommencer
-          </button>
-        </div>
-      </div>
-    );
+    const row = (cls, lbl, val, sub = "") => `<div class="invoice-row ${cls}"><span class="lbl">${lbl}${sub ? `<small>${sub}</small>` : ""}</span><span class="val">${val}</span></div>`;
+
+    const compute = () => {
+      let base = s.mb, html = row("", "Montant brut", fmt(s.mb));
+      const reduce = (name, pct) => {
+        if (!pct) return;
+        const amt = base * pct / 100;
+        html += row("minus", `${name} ${pct} %`, "− " + fmt(amt), `sur ${fmt(base)}`);
+        base -= amt;
+      };
+      reduce("Rabais", s.rabais);
+      s.remises.forEach((r, k) => reduce(s.remises.length > 1 ? `Remise ${k + 1}` : "Remise", r));
+      reduce("Ristourne", s.ristourne);
+      const nc = base;
+      html += row("total", "Net commercial", fmt(nc));
+      const escompte = nc * s.esc / 100;
+      if (s.esc) html += row("minus", `Escompte ${s.esc} %`, "− " + fmt(escompte), "sur le Net commercial");
+      const nf = nc - escompte;
+      if (s.esc) html += row("total", "Net financier", fmt(nf));
+      if (s.port) html += row("plus", "Port HT", "+ " + fmt(s.port));
+      const ht = nf + s.port;
+      if (s.port) html += row("total", "Sous-total HT", fmt(ht));
+      const tva = ht * s.tva / 100;
+      html += row("plus", `TVA ${s.tva} %`, "+ " + fmt(tva));
+      const nap = ht + tva;
+      html += row("nap", "Net à payer", fmt(nap));
+      $("#f-out").innerHTML = html;
+      $("#f-tvapill").textContent = "TVA " + s.tva + " %";
+
+      const lines = view === "client"
+        ? [
+            ["d", "601", "Achats de marchandises", nc],
+            ["d", "6015", "Frais sur achats (port)", s.port],
+            ["d", "445", "État, TVA récupérable", tva],
+            ["c", "401", "Fournisseurs", nap],
+            ["c", "773", "Escomptes obtenus", escompte]
+          ]
+        : [
+            ["d", "411", "Clients", nap],
+            ["d", "673", "Escomptes accordés", escompte],
+            ["c", "701", "Ventes de marchandises", nc],
+            ["c", "707", "Produits accessoires (port)", s.port],
+            ["c", "443", "État, TVA facturée", tva]
+          ];
+      const shown = lines.filter((l) => Math.round(l[3]) !== 0);
+      const td = shown.filter((l) => l[0] === "d").reduce((a, l) => a + l[3], 0);
+      const tc = shown.filter((l) => l[0] === "c").reduce((a, l) => a + l[3], 0);
+      $("#f-journal").innerHTML = nap > 0 ? `
+        <table class="journal-table">
+          <thead><tr><th>Compte</th><th>Intitulé</th><th style="text-align:right">Débit</th><th style="text-align:right">Crédit</th></tr></thead>
+          <tbody>
+            ${shown.map((l) => `<tr class="${l[0] === "c" ? "cr" : ""}"><td class="acc">${l[1]}</td><td>${l[2]}</td>
+              <td class="num">${l[0] === "d" ? fmt(l[3]) : ""}</td><td class="num">${l[0] === "c" ? fmt(l[3]) : ""}</td></tr>`).join("")}
+            <tr><td></td><td><b>Totaux</b></td><td class="num"><b>${fmt(td)}</b></td><td class="num"><b>${fmt(tc)}</b></td></tr>
+          </tbody>
+        </table>` : `<p class="t-empty">Saisissez un montant brut pour générer l'écriture.</p>`;
+      $$("#f-view button").forEach((b) => b.classList.toggle("on-d", b.dataset.v === view));
+    };
+
+    ids.forEach((k) => $("#f-" + k).addEventListener("input", (e) => { s[k] = num(e.target.value); compute(); }));
+    $("#f-remises").addEventListener("input", (e) => {
+      if (e.target.dataset.remise !== undefined) { s.remises[+e.target.dataset.remise] = num(e.target.value); compute(); }
+    });
+    $("#f-remises").addEventListener("click", (e) => {
+      const b = e.target.closest("[data-del]");
+      if (b) { s.remises.splice(+b.dataset.del, 1); fill(); }
+    });
+    $("#f-add").addEventListener("click", () => {
+      s.remises.push(5); fill();
+      const inputs = $$("#f-remises input"); inputs[inputs.length - 1].focus();
+    });
+    el.addEventListener("click", (e) => {
+      const p = e.target.closest("[data-preset]");
+      if (p) { s = JSON.parse(JSON.stringify(PRESETS[p.dataset.preset])); fill(); }
+      const v = e.target.closest("#f-view button");
+      if (v) { view = v.dataset.v; compute(); }
+    });
+    fill();
   }
 
-  return (
-    <div className="glass-card p-8 max-w-3xl mx-auto animate-slide-in">
-      <div className="mb-6">
-        <div className="flex justify-between items-center mb-3">
-          <span className="text-sm font-medium text-gray-500">Question {currentQ + 1} / {questions.length}</span>
-          <span className="text-sm font-medium text-indigo-600">Score : {score}</span>
-        </div>
-        <div className="progress-bar w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-          <div className="progress-bar-fill h-full rounded-full" style={{ width: `${progress}%` }}></div>
-        </div>
-      </div>
+  /* ── Simulateur de compte en T ───────────────────────────── */
+  function toolCompteT(el) {
+    const ACCOUNTS = {
+      "52": { l: "Banques", type: "actif" },
+      "57": { l: "Caisse", type: "actif" },
+      "411": { l: "Clients", type: "actif" },
+      "401": { l: "Fournisseurs", type: "passif" },
+      "10": { l: "Capital", type: "passif" },
+      "601": { l: "Achats de marchandises", type: "charge" },
+      "701": { l: "Ventes de marchandises", type: "produit" }
+    };
+    const RULES = {
+      actif: "Compte d'actif : il augmente au débit et diminue au crédit. Son solde est normalement débiteur.",
+      passif: "Compte de passif : il augmente au crédit et diminue au débit. Son solde est normalement créditeur.",
+      charge: "Compte de charges : il s'enregistre au débit. Son solde est normalement débiteur.",
+      produit: "Compte de produits : il s'enregistre au crédit. Son solde est normalement créditeur."
+    };
+    const EXAMPLES = [
+      { l: "Apport en capital", v: 2000000, s: "d" },
+      { l: "Vente encaissée", v: 450000, s: "d" },
+      { l: "Achat de marchandises", v: 350000, s: "c" },
+      { l: "Paiement des salaires", v: 200000, s: "c" },
+      { l: "Règlement fournisseur", v: 2100000, s: "c" }
+    ];
+    let acc = "52", entries = [], side = "d";
 
-      <div className="mb-8">
-        <h3 className="text-xl font-semibold text-gray-800 mb-6">{q.question}</h3>
-        <div className="space-y-3">
-          {q.options.map((opt, i) => {
-            let cls = "quiz-option-pro w-full p-4 text-left rounded-xl border-2 transition-all duration-300 ";
-            if (submitted && i === q.correctAnswer)                       cls += "correct border-green-500";
-            else if (submitted && selected === i && i !== q.correctAnswer) cls += "incorrect border-red-500";
-            else if (selected === i && !submitted)                         cls += "selected border-indigo-500 shadow-md";
-            else                                                           cls += "border-gray-200 hover:border-indigo-300 hover:shadow-md";
-
-            return (
-              <button key={i} onClick={() => !submitted && setSelected(i)} disabled={submitted} className={cls}>
-                <div className="flex items-center">
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center mr-3 text-xs font-bold transition-all ${selected === i && !submitted ? 'bg-indigo-500 text-white' : 'bg-gray-100 text-gray-600'}`}>
-                    {String.fromCharCode(65 + i)}
-                  </div>
-                  <span className="flex-1">{opt}</span>
-                  {submitted && i === q.correctAnswer && (
-                    <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  )}
-                  {submitted && selected === i && i !== q.correctAnswer && (
-                    <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  )}
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {!submitted ? (
-        <button onClick={handleSubmit} disabled={selected === null || loading}
-          className={`w-full py-3 rounded-xl text-white font-medium transition-all transform hover:-translate-y-0.5 ${selected === null ? 'bg-gray-300 cursor-not-allowed' : 'bg-gradient-to-r from-indigo-500 to-purple-600 hover:shadow-lg'}`}>
-          {loading ? <div className="spinner mx-auto"></div> : "Valider la réponse"}
-        </button>
-      ) : (
-        <div className="mt-6">
-          <div className={`p-4 rounded-xl mb-4 ${selected === q.correctAnswer ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}`}>
-            <p className={`font-medium ${selected === q.correctAnswer ? 'text-green-700' : 'text-red-700'}`}>
-              {selected === q.correctAnswer ? "✓ Bonne réponse !" : "✗ Mauvaise réponse"}
-            </p>
-            <p className="text-gray-600 mt-1 text-sm">{q.explanation}</p>
+    el.innerHTML = `
+      <div class="tool">
+        <div class="panel">
+          <h2>Nouvelle opération</h2>
+          <p class="sub" id="t-rule"></p>
+          <div class="field"><label for="t-acc">Compte</label>
+            <select class="input" id="t-acc">${Object.entries(ACCOUNTS).map(([n, a]) => `<option value="${n}">${n} — ${a.l}</option>`).join("")}</select>
           </div>
-          <button onClick={handleNext} className="w-full py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl font-medium hover:shadow-lg transition-all transform hover:-translate-y-0.5">
-            {currentQ < questions.length - 1 ? "Question suivante →" : "Voir les résultats →"}
-          </button>
-        </div>
-      )}
-    </div>
-  );
-};
-
-// ── Composant principal App ─────────────────────────────────
-const App = () => {
-  const [activeTab, setActiveTab] = React.useState("guide");
-
-  React.useEffect(() => { createParticles(); }, []);
-
-  return (
-    <div className="container mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="header-wave glass-card mb-8 p-8 text-center animate-slide-in">
-        <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">Comptabilité Générale I</h1>
-        <p className="text-indigo-100 text-lg">Guide professionnel, éducatif et universitaire &amp; Quiz interactif — SYSCOHADA / OHADA</p>
-        <div className="flex justify-center gap-2 mt-4">
-          <span className="px-3 py-1 bg-white/10 rounded-full text-xs text-white">L1 Informatique</span>
-          <span className="px-3 py-1 bg-white/10 rounded-full text-xs text-white">Mis à jour 2026</span>
-          <span className="px-3 py-1 bg-white/10 rounded-full text-xs text-white">OHADA compliant</span>
-        </div>
-      </div>
-
-      {/* Onglets */}
-      <div className="flex justify-center mb-8">
-        <div className="flex bg-white/10 backdrop-blur-sm rounded-2xl p-1 shadow-lg">
-          {[
-            { key: "guide", icon: "M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253", label: "Guide d'étude" },
-            { key: "quiz",  icon: "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2", label: "Quiz QCM" }
-          ].map(({ key, icon, label }) => (
-            <button key={key} onClick={() => setActiveTab(key)}
-              className={`tab-pro px-8 py-3 rounded-xl font-medium transition-all ${activeTab === key ? "active" : "text-gray-700 bg-white/80"}`}>
-              <svg className="inline w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={icon} />
-              </svg>
-              {label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Guide */}
-      {activeTab === "guide" && (
-        <div className="max-w-4xl mx-auto">
-          <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-white">Guide d'étude — 9 chapitres</h2>
-            <div className="tooltip" data-tooltip="Cliquez sur les sections pour les développer">
-              <svg className="w-5 h-5 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+          <div class="field"><label for="t-lbl">Libellé</label><input class="input" id="t-lbl" type="text" placeholder="Ex : vente au comptant" style="font-family:var(--sans)"></div>
+          <div class="field-row">
+            <div class="field"><label for="t-val">Montant (F CFA)</label><input class="input" id="t-val" type="number" min="0" step="1000" placeholder="0"></div>
+            <div class="field"><label>Sens</label>
+              <div class="seg" id="t-side"><button type="button" data-s="d">Débit</button><button type="button" data-s="c">Crédit</button></div>
             </div>
           </div>
-          {guideContent.map((section, i) => (
-            <GuideSection key={i} index={i} title={section.title} content={section.content} isImportant={section.isImportant} />
-          ))}
-        </div>
-      )}
-
-      {/* Quiz */}
-      {activeTab === "quiz" && (
-        <div>
-          <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold text-white mb-2">Évaluez vos connaissances</h2>
-            <p className="text-indigo-100">20 questions pour tester votre maîtrise de la comptabilité</p>
+          <button class="btn btn-primary" id="t-add" type="button" style="width:100%">${icon("plus", "ic-sm")} Passer l'opération</button>
+          <div class="field" style="margin-top:22px"><label>Exemples sur le compte Banques</label>
+            <div class="presets">${EXAMPLES.map((x, k) => `<button class="chip" data-ex="${k}" type="button">${x.l} (${x.s === "d" ? "D" : "C"} ${fmt(x.v)})</button>`).join("")}</div>
           </div>
-          <Quiz />
         </div>
-      )}
 
-      {/* Footer */}
-      <footer className="mt-16 text-center text-white/60 text-sm">
-        <p>Basé sur le cours « Initiation à la Comptabilité Générale I » — L1 Informatique — Les Cours Sonou (Calavi)</p>
-        <p className="mt-1">Conforme SYSCOHADA / OHADA · Taux TVA Bénin : 18%</p>
-        <p className="mt-2">ASSOGBA Marcos — Développeur web full-stack · Abomey-Calavi, Bénin · © 2026</p>
-      </footer>
-    </div>
-  );
-};
+        <div class="panel">
+          <div class="t-sim">
+            <div class="t-sim-title" id="t-title"></div>
+            <div class="t-sim-grid">
+              <div><div class="t-side d">Débit</div><div id="t-d"></div></div>
+              <div><div class="t-side c">Crédit</div><div id="t-c"></div></div>
+            </div>
+            <div class="t-totals"><div id="t-td"></div><div id="t-tc"></div></div>
+            <div id="t-solde"></div>
+            <div style="display:flex;justify-content:flex-end;margin-top:14px">
+              <button class="btn btn-ghost btn-sm" id="t-reset" type="button">${icon("refresh", "ic-sm")} Vider le compte</button>
+            </div>
+          </div>
+        </div>
+      </div>`;
 
-// ── Rendu ──────────────────────────────────────────────────
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(<App />);
+    const render = () => {
+      const a = ACCOUNTS[acc];
+      $("#t-title").textContent = `${acc} — ${a.l}`;
+      $("#t-rule").textContent = RULES[a.type];
+      $$("#t-side button").forEach((b) => { b.className = b.dataset.s === side ? (side === "d" ? "on-d" : "on-c") : ""; });
+      const list = (s) => {
+        const items = entries.map((e, k) => ({ ...e, k })).filter((e) => e.s === s);
+        return items.length ? items.map((e) => `
+          <div class="t-entry"><span class="l" title="${esc(e.l)}">${esc(e.l)}</span><span style="display:flex;gap:6px;align-items:center"><span class="v">${fmt(e.v)}</span>
+          <button type="button" data-rm="${e.k}" aria-label="Supprimer">${icon("x", "ic-sm")}</button></span></div>`).join("")
+          : `<div class="t-empty">Aucune opération</div>`;
+      };
+      $("#t-d").innerHTML = list("d");
+      $("#t-c").innerHTML = list("c");
+      const td = entries.filter((e) => e.s === "d").reduce((x, e) => x + e.v, 0);
+      const tc = entries.filter((e) => e.s === "c").reduce((x, e) => x + e.v, 0);
+      $("#t-td").textContent = "TD " + fmt(td);
+      $("#t-tc").textContent = "TC " + fmt(tc);
+
+      let html = "";
+      if (entries.length) {
+        const diff = td - tc;
+        if (diff === 0) {
+          html = `<div class="t-solde"><span>Compte soldé (TD = TC)</span><b>0</b></div>`;
+        } else {
+          const deb = diff > 0;
+          const normalDeb = a.type === "actif" || a.type === "charge";
+          let note = deb ? "TD > TC : pour arrêter le compte, on inscrit le solde au crédit." : "TC > TD : pour arrêter le compte, on inscrit le solde au débit.";
+          if (deb !== normalDeb) {
+            note += acc === "52"
+              ? " Un compte Banques créditeur correspond à un découvert (trésorerie-passif)."
+              : " Attention : ce sens de solde est inhabituel pour ce type de compte.";
+          }
+          html = `<div class="t-solde ${deb ? "" : "cr"}"><div><div style="font-weight:600">Solde ${deb ? "débiteur" : "créditeur"}</div><div style="font-size:13px;color:var(--muted)">${note}</div></div><b>${fmt(Math.abs(diff))}</b></div>`;
+        }
+      }
+      $("#t-solde").innerHTML = html;
+    };
+
+    const add = (l, v, s) => {
+      if (!(v > 0)) { toast("Indiquez un montant supérieur à zéro."); return false; }
+      entries.push({ l: l || (s === "d" ? "Opération au débit" : "Opération au crédit"), v, s });
+      render();
+      return true;
+    };
+
+    $("#t-acc").addEventListener("change", (e) => { acc = e.target.value; entries = []; render(); });
+    $("#t-side").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) { side = b.dataset.s; render(); } });
+    $("#t-add").addEventListener("click", () => {
+      if (add($("#t-lbl").value.trim(), num($("#t-val").value), side)) { $("#t-lbl").value = ""; $("#t-val").value = ""; $("#t-lbl").focus(); }
+    });
+    $("#t-val").addEventListener("keydown", (e) => { if (e.key === "Enter") $("#t-add").click(); });
+    $("#t-reset").addEventListener("click", () => { entries = []; render(); });
+    el.addEventListener("click", (e) => {
+      const x = e.target.closest("[data-ex]");
+      if (x) {
+        if (acc !== "52") { acc = "52"; entries = []; $("#t-acc").value = "52"; }
+        const ex = EXAMPLES[+x.dataset.ex];
+        add(ex.l, ex.v, ex.s);
+      }
+      const rm = e.target.closest("[data-rm]");
+      if (rm) { entries.splice(+rm.dataset.rm, 1); render(); }
+    });
+    render();
+  }
+
+  /* ── Fiches du plan comptable ────────────────────────────── */
+  function toolFiches(el) {
+    let cls = "all", mode = "n2l", deck = [], pos = 0, known = 0, again = 0, unique = 0, flipped = false;
+
+    el.innerHTML = `
+      <div class="tool">
+        <div class="flash-wrap">
+          <div class="flash-controls">
+            <select class="input" id="fc-cls" style="width:auto" aria-label="Classe">
+              <option value="all">Toutes les classes</option>
+              ${Object.entries(C.classNames).map(([k, v]) => `<option value="${k}">Classe ${k} — ${v}</option>`).join("")}
+            </select>
+            <div class="seg" id="fc-mode" style="min-width:300px">
+              <button type="button" data-m="n2l">Numéro → intitulé</button>
+              <button type="button" data-m="l2n">Intitulé → numéro</button>
+            </div>
+          </div>
+          <div id="fc-body" style="width:100%;display:flex;flex-direction:column;align-items:center;gap:20px"></div>
+        </div>
+      </div>`;
+
+    const build = () => {
+      deck = shuffle(C.accounts.filter((a) => cls === "all" || String(a.c) === cls));
+      pos = 0; known = 0; again = 0; unique = deck.length; flipped = false;
+      render();
+    };
+
+    const render = () => {
+      $$("#fc-mode button").forEach((b) => b.classList.toggle("on-d", b.dataset.m === mode));
+      const body = $("#fc-body");
+      if (pos >= deck.length) {
+        const pct = unique ? Math.round((known / unique) * 100) : 0;
+        body.innerHTML = `
+          <div class="panel" style="text-align:center;max-width:520px;width:100%">
+            <div class="ring" style="margin:0 auto 14px">${ring(pct, 26, pct + "%")}</div>
+            <h2>Série terminée</h2>
+            <p class="sub" style="margin-top:6px">${known} compte${known > 1 ? "s" : ""} sur ${unique} reconnu${known > 1 ? "s" : ""} du premier coup${again ? `, ${again} carte${again > 1 ? "s" : ""} revue${again > 1 ? "s" : ""}` : ""}.</p>
+            <button class="btn btn-primary" id="fc-restart" type="button">${icon("refresh", "ic-sm")} Nouvelle série</button>
+          </div>`;
+        $("#fc-restart").addEventListener("click", build);
+        if (pct >= 80) confetti();
+        return;
+      }
+      const a = deck[pos];
+      const front = mode === "n2l"
+        ? `<div class="flash-num">${a.n}</div><small>Classe ${a.c} — ${C.classNames[a.c]}</small>`
+        : `<div class="flash-label" style="font-family:var(--serif);font-size:26px;line-height:1.25">${esc(a.l)}</div><small>Classe ${a.c} — ${C.classNames[a.c]}</small>`;
+      const back = mode === "n2l"
+        ? `<div class="flash-label">${esc(a.l)}</div><small>Compte ${a.n}</small>`
+        : `<div class="flash-num" style="color:inherit">${a.n}</div><small>${esc(a.l)}</small>`;
+      body.innerHTML = `
+        <div class="flash-score"><span>Carte <b>${pos + 1}</b> / ${deck.length}</span><span>Reconnues <b>${known}</b></span><span>À revoir <b>${again}</b></span></div>
+        <div class="flashcard ${flipped ? "flipped" : ""}" id="fc-card" role="button" tabindex="0" aria-label="Retourner la carte">
+          <div class="flash-inner">
+            <div class="flash-face front">${front}<span class="flash-hint">Cliquez ou appuyez sur Espace pour retourner</span></div>
+            <div class="flash-face back">${back}</div>
+          </div>
+        </div>
+        <div class="flash-controls">
+          <button class="btn btn-again" id="fc-again" type="button">${icon("refresh", "ic-sm")} À revoir <kbd>1</kbd></button>
+          <button class="btn btn-know" id="fc-know" type="button">${icon("check", "ic-sm")} Je savais <kbd>2</kbd></button>
+        </div>`;
+      $("#fc-card").addEventListener("click", flip);
+      $("#fc-again").addEventListener("click", () => answer(false));
+      $("#fc-know").addEventListener("click", () => answer(true));
+    };
+
+    const flip = () => { flipped = !flipped; const c = $("#fc-card"); if (c) c.classList.toggle("flipped", flipped); };
+    const answer = (ok) => {
+      if (pos >= deck.length) return;
+      const card = deck[pos];
+      if (ok) { if (!card._seen) known++; }
+      else { again++; card._seen = true; deck.push(card); }
+      pos++; flipped = false; render();
+    };
+
+    $("#fc-cls").addEventListener("change", (e) => { cls = e.target.value; build(); });
+    $("#fc-mode").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) { mode = b.dataset.m; flipped = false; render(); } });
+
+    const onKey = (e) => {
+      if (e.target.matches("input, select, textarea") || !$("#searchModal").hidden) return;
+      if (e.code === "Space") { e.preventDefault(); flip(); }
+      else if (e.key === "1") answer(false);
+      else if (e.key === "2") answer(true);
+    };
+    document.addEventListener("keydown", onKey);
+    build();
+    return () => document.removeEventListener("keydown", onKey);
+  }
+
+  /* ── Classer au bilan ────────────────────────────────────── */
+  function toolBilan(el) {
+    let items, placed, errors, picked;
+
+    el.innerHTML = `
+      <div class="tool">
+        <div class="sort-wrap">
+          <p class="sub" style="color:var(--muted);margin-bottom:14px">Glissez chaque poste dans la bonne colonne, ou touchez un poste puis une colonne. L'actif regroupe les emplois, le passif les ressources.</p>
+          <div class="sort-pool" id="sb-pool"></div>
+          <div class="sort-zones">
+            <div class="zone actif" data-zone="actif"><h3><span>Actif — Emplois</span><span id="sb-na"></span></h3><div class="items"></div></div>
+            <div class="zone passif" data-zone="passif"><h3><span>Passif — Ressources</span><span id="sb-np"></span></h3><div class="items"></div></div>
+          </div>
+          <div class="sort-foot">
+            <p id="sb-status"></p>
+            <button class="btn btn-outline btn-sm" id="sb-reset" type="button">${icon("refresh", "ic-sm")} Recommencer</button>
+          </div>
+        </div>
+      </div>`;
+
+    const reset = () => {
+      items = shuffle(C.bilanItems).map((x, k) => ({ ...x, k }));
+      placed = new Set(); errors = 0; picked = null;
+      render();
+    };
+
+    const chip = (it, cls = "") => `<div class="sort-item ${cls}" data-k="${it.k}" ${cls ? "" : 'draggable="true" tabindex="0" role="button"'}>${esc(it.l)}</div>`;
+
+    const render = () => {
+      const pool = items.filter((it) => !placed.has(it.k));
+      $("#sb-pool").innerHTML = pool.length ? pool.map((it) => chip(it, picked === it.k ? "picked" : "").replace('class="sort-item picked"', 'class="sort-item picked" draggable="true" tabindex="0" role="button"')).join("")
+        : `<span style="color:var(--muted);font-size:14px">Tous les postes sont classés.</span>`;
+      ["actif", "passif"].forEach((z) => {
+        $(`[data-zone="${z}"] .items`).innerHTML = items.filter((it) => placed.has(it.k) && it.s === z).map((it) => chip(it, "right")).join("");
+      });
+      const na = items.filter((it) => it.s === "actif"), np = items.filter((it) => it.s === "passif");
+      $("#sb-na").textContent = `${na.filter((it) => placed.has(it.k)).length}/${na.length}`;
+      $("#sb-np").textContent = `${np.filter((it) => placed.has(it.k)).length}/${np.length}`;
+      const done = placed.size === items.length;
+      $("#sb-status").innerHTML = done
+        ? `<b style="color:var(--ok)">Exercice terminé</b> avec ${errors} erreur${errors > 1 ? "s" : ""}.`
+        : `${placed.size} sur ${items.length} postes classés · ${errors} erreur${errors > 1 ? "s" : ""}`;
+    };
+
+    const tryPlace = (k, zone) => {
+      const it = items.find((x) => x.k === k);
+      if (!it || placed.has(k)) return;
+      picked = null;
+      if (it.s === zone) {
+        placed.add(k);
+        render();
+        if (placed.size === items.length) { toast(errors ? `Terminé avec ${errors} erreur${errors > 1 ? "s" : ""}.` : "Sans faute, bravo."); if (!errors) confetti(); }
+      } else {
+        errors++;
+        render();
+        const node = $(`#sb-pool [data-k="${k}"]`);
+        if (node) { node.classList.add("wrong"); setTimeout(() => node.classList.remove("wrong"), 600); }
+        toast(`« ${it.l} » : emploi ou ressource ? Réessayez.`);
+      }
+    };
+
+    const pool = $("#sb-pool");
+    pool.addEventListener("click", (e) => {
+      const n = e.target.closest(".sort-item");
+      if (!n) return;
+      const k = +n.dataset.k;
+      picked = picked === k ? null : k;
+      render();
+    });
+    pool.addEventListener("keydown", (e) => {
+      const n = e.target.closest(".sort-item");
+      if (!n) return;
+      if (e.key === "ArrowLeft") tryPlace(+n.dataset.k, "actif");
+      if (e.key === "ArrowRight") tryPlace(+n.dataset.k, "passif");
+      if (e.key === "Enter") n.click();
+    });
+    pool.addEventListener("dragstart", (e) => {
+      const n = e.target.closest(".sort-item");
+      if (!n) return;
+      e.dataTransfer.setData("text/plain", n.dataset.k);
+      n.classList.add("dragging");
+    });
+    pool.addEventListener("dragend", (e) => { const n = e.target.closest(".sort-item"); if (n) n.classList.remove("dragging"); });
+
+    $$(".zone", el).forEach((z) => {
+      z.addEventListener("dragover", (e) => { e.preventDefault(); z.classList.add("over"); });
+      z.addEventListener("dragleave", () => z.classList.remove("over"));
+      z.addEventListener("drop", (e) => { e.preventDefault(); z.classList.remove("over"); tryPlace(+e.dataTransfer.getData("text/plain"), z.dataset.zone); });
+      z.addEventListener("click", () => { if (picked !== null) tryPlace(picked, z.dataset.zone); });
+    });
+    $("#sb-reset").addEventListener("click", reset);
+    reset();
+  }
+
+  /* ============================================================
+     QUIZ
+     ============================================================ */
+  function viewQuiz() {
+    app.innerHTML = `
+      <div class="wrap">
+        <div class="page-head fade-in" style="text-align:center">
+          <span class="eyebrow">Quiz</span>
+          <h1>Évaluez vos connaissances</h1>
+          <p style="margin:0 auto">Questions et réponses mélangées à chaque partie. Répondez au clavier avec A, B, C, D puis Entrée.</p>
+        </div>
+        <div class="quiz" id="quiz"></div>
+      </div>`;
+    const root = $("#quiz");
+    let Q = null;
+
+    const MODES = [
+      { id: "full", icon: "list", title: "Quiz complet", desc: `Les ${C.questions.length} questions du programme, dont des calculs.` },
+      { id: "quick", icon: "bolt", title: "Série rapide", desc: "10 questions tirées au hasard pour réviser en quelques minutes." },
+      { id: "calc", icon: "calc", title: "Calculs", desc: "Réductions, escompte, TVA : uniquement des questions chiffrées." }
+    ];
+
+    const intro = () => {
+      Q = null;
+      root.innerHTML = `
+        <div class="quiz-intro fade-in">
+          ${MODES.map((m) => `
+            <button class="mode-card" data-mode="${m.id}" type="button">
+              <div class="feature-ic">${icon(m.icon)}</div>
+              <h3>${m.title}</h3>
+              <p>${m.desc}</p>
+            </button>`).join("")}
+        </div>
+        <p class="best">${state.best ? `Meilleur score : <b>${state.best.pct} %</b> (${state.best.score}/${state.best.total}) · ${state.attempts} quiz terminé${state.attempts > 1 ? "s" : ""}` : "Aucun quiz terminé pour l'instant."}</p>`;
+      $$("[data-mode]", root).forEach((b) => b.addEventListener("click", () => start(b.dataset.mode)));
+    };
+
+    let lastMode = "full";
+    const start = (mode) => {
+      lastMode = mode;
+      let pool = C.questions;
+      if (mode === "calc") pool = pool.filter((q) => q.calc);
+      pool = shuffle(pool);
+      if (mode === "quick") pool = pool.slice(0, 10);
+      const items = pool.map((q) => {
+        const order = shuffle(q.o.map((_, k) => k));
+        return { ...q, opts: order.map((k) => q.o[k]), ans: order.indexOf(q.a) };
+      });
+      Q = { items, i: 0, sel: null, sub: false, res: [], wrongs: [], t0: Date.now() };
+      renderQ();
+    };
+
+    const renderQ = () => {
+      const it = Q.items[Q.i];
+      const dots = Q.items.map((_, k) => `<i class="${k < Q.i ? (Q.res[k] ? "ok" : "ko") : k === Q.i ? "cur" : ""}"></i>`).join("");
+      const score = Q.res.filter(Boolean).length;
+      root.innerHTML = `
+        <div class="quiz-card fade-in">
+          <div class="quiz-top"><span>Question <b>${Q.i + 1}</b> / ${Q.items.length}</span><span>Score <b>${score}</b></span></div>
+          <div class="quiz-dots">${dots}</div>
+          <h2 class="quiz-q">${esc(it.q)}</h2>
+          <div class="options" role="radiogroup">
+            ${it.opts.map((o, k) => `
+              <button class="option" data-k="${k}" type="button" role="radio" aria-checked="false">
+                <span class="key">${String.fromCharCode(65 + k)}</span><span>${esc(o)}</span><span class="mark"></span>
+              </button>`).join("")}
+          </div>
+          <div id="q-feedback"></div>
+          <div class="quiz-actions">
+            <span class="hint"><kbd>A</kbd><kbd>B</kbd><kbd>C</kbd><kbd>D</kbd> pour choisir, <kbd>Entrée</kbd> pour valider</span>
+            <button class="btn btn-primary" id="q-main" type="button" disabled>Valider</button>
+          </div>
+        </div>`;
+      $$(".option", root).forEach((b) => b.addEventListener("click", () => select(+b.dataset.k)));
+      $("#q-main").addEventListener("click", main);
+    };
+
+    const select = (k) => {
+      if (!Q || Q.sub || k >= Q.items[Q.i].opts.length) return;
+      Q.sel = k;
+      $$(".option", root).forEach((b, j) => { b.classList.toggle("selected", j === k); b.setAttribute("aria-checked", j === k); });
+      $("#q-main").disabled = false;
+    };
+
+    const main = () => {
+      if (!Q) return;
+      if (!Q.sub) validate();
+      else if (Q.i < Q.items.length - 1) { Q.i++; Q.sel = null; Q.sub = false; renderQ(); }
+      else results();
+    };
+
+    const validate = () => {
+      if (Q.sel === null) return;
+      const it = Q.items[Q.i], ok = Q.sel === it.ans;
+      Q.sub = true;
+      Q.res[Q.i] = ok;
+      if (!ok) Q.wrongs.push({ q: it.q, sel: it.opts[Q.sel], good: it.opts[it.ans], e: it.e, ch: it.ch });
+      $$(".option", root).forEach((b, j) => {
+        b.disabled = true;
+        b.classList.remove("selected");
+        if (j === it.ans) { b.classList.add("correct"); b.querySelector(".mark").innerHTML = icon("check"); }
+        else if (j === Q.sel) { b.classList.add("incorrect"); b.querySelector(".mark").innerHTML = icon("x"); }
+      });
+      const chI = chapterIndex(it.ch);
+      $("#q-feedback").innerHTML = `
+        <div class="feedback ${ok ? "ok" : "ko"}">
+          <b>${icon(ok ? "check" : "x", "ic-sm")} ${ok ? "Bonne réponse" : "Mauvaise réponse"}</b>
+          <p>${esc(it.e)}</p>
+          ${!ok && chI >= 0 ? `<a href="#/cours/${it.ch}">Revoir le chapitre ${chI + 1} : ${esc(C.chapters[chI].title)}</a>` : ""}
+        </div>`;
+      const dot = $$(".quiz-dots i", root)[Q.i];
+      dot.className = ok ? "ok" : "ko";
+      $(".quiz-top b:last-child", root).textContent = Q.res.filter(Boolean).length;
+      const btn = $("#q-main");
+      btn.innerHTML = Q.i < Q.items.length - 1 ? `Question suivante ${icon("arrowR", "ic-sm")}` : `Voir les résultats ${icon("arrowR", "ic-sm")}`;
+      btn.focus();
+    };
+
+    const results = () => {
+      const total = Q.items.length, score = Q.res.filter(Boolean).length;
+      const pct = Math.round((score / total) * 100);
+      const secs = Math.round((Date.now() - Q.t0) / 1000);
+      const time = `${Math.floor(secs / 60)} min ${String(secs % 60).padStart(2, "0")} s`;
+      const [title, msg] =
+        pct >= 80 ? ["Excellent travail", "Vous maîtrisez l'essentiel du programme."]
+        : pct >= 60 ? ["Très bien", "Encore quelques notions à consolider."]
+        : pct >= 40 ? ["Bon début", "Revoyez les chapitres signalés ci-dessous, puis retentez votre chance."]
+        : ["Continuez vos efforts", "Reprenez le cours chapitre par chapitre, puis refaites le quiz."];
+
+      state.attempts++;
+      store.set("attempts", state.attempts);
+      const isBest = !state.best || pct > state.best.pct;
+      if (isBest) { state.best = { pct, score, total }; store.set("best", state.best); }
+
+      const toReview = [...new Set(Q.wrongs.map((w) => w.ch))].map(chapterIndex).filter((k) => k >= 0).sort((a, b) => a - b);
+
+      root.innerHTML = `
+        <div class="quiz-card result fade-in">
+          <div class="ring">${ring(pct, 65, pct + "%")}</div>
+          <h2>${title}</h2>
+          <p>${msg}${isBest && state.attempts > 1 ? " Nouveau record personnel." : ""}</p>
+          <div class="result-stats">
+            <div><b style="color:var(--ok)">${score}</b><span>bonnes réponses</span></div>
+            <div><b style="color:var(--bad)">${total - score}</b><span>erreurs</span></div>
+            <div><b>${time}</b><span>temps total</span></div>
+          </div>
+          ${toReview.length ? `<p style="margin-bottom:20px;font-size:14px;color:var(--muted)">Chapitres à revoir : ${toReview.map((k) => `<a href="#/cours/${C.chapters[k].id}" style="color:var(--brand);font-weight:600">${k + 1}. ${esc(C.chapters[k].title)}</a>`).join(" · ")}</p>` : ""}
+          ${Q.wrongs.length ? `
+            <div class="review">
+              <h3>Questions à revoir (${Q.wrongs.length})</h3>
+              ${Q.wrongs.map((w) => `
+                <div class="review-item">
+                  <p class="q">${esc(w.q)}</p>
+                  <div class="ans"><span class="ko">${icon("x", "ic-sm")} ${esc(w.sel)}</span><span class="ok">${icon("check", "ic-sm")} ${esc(w.good)}</span></div>
+                  <p class="exp">${esc(w.e)}</p>
+                </div>`).join("")}
+            </div>` : ""}
+          <div class="result-actions">
+            <button class="btn btn-primary" id="q-again" type="button">${icon("refresh", "ic-sm")} Rejouer</button>
+            <button class="btn btn-outline" id="q-modes" type="button">Changer de mode</button>
+          </div>
+        </div>`;
+      Q = null;
+      $("#q-again").addEventListener("click", () => start(lastMode));
+      $("#q-modes").addEventListener("click", intro);
+      if (pct >= 80) confetti();
+    };
+
+    const onKey = (e) => {
+      if (!Q || e.target.matches("input, select, textarea") || !$("#searchModal").hidden) return;
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      const k = e.key.toLowerCase();
+      const map = { a: 0, b: 1, c: 2, d: 3, "1": 0, "2": 1, "3": 2, "4": 3 };
+      if (k in map) { e.preventDefault(); select(map[k]); }
+      else if (e.key === "Enter" && !(e.target.closest && e.target.closest("button"))) { e.preventDefault(); main(); }
+    };
+    document.addEventListener("keydown", onKey);
+    intro();
+
+    return () => document.removeEventListener("keydown", onKey);
+  }
+
+  /* ============================================================
+     RECHERCHE
+     ============================================================ */
+  const search = (() => {
+    const modal = $("#searchModal"), input = $("#searchInput"), out = $("#searchResults");
+    let index = null, active = 0;
+
+    const build = () => {
+      const tmp = document.createElement("div");
+      index = C.chapters.map((c, i) => {
+        tmp.innerHTML = c.content;
+        const text = tmp.textContent.replace(/\s+/g, " ").trim();
+        return { c, i, text, ntext: norm(text), ntitle: norm(c.title + " " + c.summary) };
+      });
+    };
+
+    const highlight = (str, q) => {
+      const n = norm(str), at = n.indexOf(q);
+      if (!q || at < 0 || n.length !== str.length) return esc(str);
+      return esc(str.slice(0, at)) + "<mark>" + esc(str.slice(at, at + q.length)) + "</mark>" + esc(str.slice(at + q.length));
+    };
+
+    const snippet = (text, ntext, q) => {
+      const at = ntext.indexOf(q);
+      if (at < 0) return "";
+      const s = Math.max(0, at - 40), e = Math.min(text.length, at + q.length + 70);
+      return (s > 0 ? "…" : "") + highlight(text.slice(s, e), q) + (e < text.length ? "…" : "");
+    };
+
+    const renderResults = (raw) => {
+      if (!index) build();
+      const q = norm(raw.trim());
+      let html = "";
+      if (!q) {
+        html = `<div class="search-group">Chapitres</div>` + index.map(({ c, i }) => `
+          <a class="search-item" href="#/cours/${c.id}"><span class="acc">${String(i + 1).padStart(2, "0")}</span><span><span class="t">${esc(c.title)}</span><span class="s">${esc(c.summary)}</span></span></a>`).join("");
+      } else {
+        const accs = C.accounts.filter((a) => a.n.startsWith(q) || norm(a.l).includes(q)).slice(0, 6);
+        const chs = index.filter((x) => x.ntitle.includes(q) || x.ntext.includes(q)).slice(0, 6);
+        if (accs.length) {
+          html += `<div class="search-group">Plan comptable</div>` + accs.map((a) => `
+            <a class="search-item" href="#/cours/${accountChapter(a.n)}"><span class="acc">${highlight(a.n, q)}</span><span><span class="t">${highlight(a.l, q)}</span><span class="s">Classe ${a.c} — ${C.classNames[a.c]}</span></span></a>`).join("");
+        }
+        if (chs.length) {
+          html += `<div class="search-group">Dans le cours</div>` + chs.map(({ c, i, text, ntext }) => `
+            <a class="search-item" href="#/cours/${c.id}"><span class="acc">${String(i + 1).padStart(2, "0")}</span><span><span class="t">${highlight(c.title, q)}</span><span class="s">${snippet(text, ntext, q) || esc(c.summary)}</span></span></a>`).join("");
+        }
+        if (!html) html = `<div class="search-empty">Aucun résultat pour « ${esc(raw)} ».</div>`;
+      }
+      out.innerHTML = html;
+      active = 0;
+      setActive();
+    };
+
+    const setActive = () => {
+      const items = $$(".search-item", out);
+      items.forEach((el, k) => el.classList.toggle("active", k === active));
+      if (items[active]) items[active].scrollIntoView({ block: "nearest" });
+    };
+
+    const open = () => { modal.hidden = false; input.value = ""; renderResults(""); setTimeout(() => input.focus(), 10); };
+    const close = () => { modal.hidden = true; };
+
+    input.addEventListener("input", () => renderResults(input.value));
+    input.addEventListener("keydown", (e) => {
+      const items = $$(".search-item", out);
+      if (e.key === "ArrowDown") { e.preventDefault(); active = Math.min(items.length - 1, active + 1); setActive(); }
+      else if (e.key === "ArrowUp") { e.preventDefault(); active = Math.max(0, active - 1); setActive(); }
+      else if (e.key === "Enter" && items[active]) { e.preventDefault(); items[active].click(); }
+    });
+    out.addEventListener("click", (e) => { if (e.target.closest(".search-item")) close(); });
+    modal.addEventListener("click", (e) => { if (e.target.hasAttribute("data-close")) close(); });
+    $("#searchOpen").addEventListener("click", open);
+
+    document.addEventListener("keydown", (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") { e.preventDefault(); modal.hidden ? open() : close(); }
+      else if (e.key === "Escape" && !modal.hidden) close();
+      else if (e.key === "/" && modal.hidden && !e.target.matches("input, select, textarea")) { e.preventDefault(); open(); }
+    });
+    return { open, close };
+  })();
+
+  /* ============================================================
+     ROUTAGE & INTERFACE GLOBALE
+     ============================================================ */
+  let cleanup = null, prevRoute = null;
+
+  function render() {
+    if (cleanup) { cleanup(); cleanup = null; }
+    const parts = location.hash.replace(/^#\/?/, "").split("/");
+    const route = ["cours", "outils", "quiz"].includes(parts[0]) ? parts[0] : "home";
+
+    $$(".nav a").forEach((a) => {
+      const on = a.dataset.route === route;
+      a.classList.toggle("active", on);
+      if (on) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
+    });
+    $("#nav").classList.remove("open");
+    $("#menuToggle").setAttribute("aria-expanded", "false");
+    search.close();
+
+    const titles = { home: "Accueil", cours: "Cours", outils: "Outils", quiz: "Quiz" };
+    if (route === "cours") cleanup = viewCourse(parts[1]);
+    else if (route === "outils") cleanup = viewTools(parts[1]);
+    else if (route === "quiz") cleanup = viewQuiz();
+    else cleanup = viewHome();
+    cleanup = typeof cleanup === "function" ? cleanup : null;
+
+    document.title = `${titles[route]} — Comptabilité Générale I`;
+    if (!(route === "outils" && prevRoute === "outils")) window.scrollTo({ top: 0, behavior: "instant" });
+    prevRoute = route;
+  }
+
+  // Thème clair / sombre
+  $("#themeToggle").addEventListener("click", () => {
+    const next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    try { localStorage.setItem("cg1-theme", next); } catch (e) {}
+  });
+
+  // Menu mobile
+  $("#menuToggle").addEventListener("click", () => {
+    const open = $("#nav").classList.toggle("open");
+    $("#menuToggle").setAttribute("aria-expanded", open);
+  });
+
+  addEventListener("hashchange", render);
+  initParticles();
+  render();
+})();
