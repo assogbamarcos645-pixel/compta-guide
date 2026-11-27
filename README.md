@@ -67,13 +67,19 @@ Une application web progressive (PWA) moderne, interactive et complète pour l'a
 
 ---
 
-### 5. Générateur d'Examen Blanc Complet (PDF)
-- Génère en un clic un sujet complet conforme aux examens universitaires :
-  1. **Partie I : Questionnaire à Choix Multiple (QCM)** (tiré aléatoirement de la banque de données).
-  2. **Partie II : Questions Vrai ou Faux** sous forme de grille d'évaluation tabulaire.
-  3. **Partie III : Questions de réflexion et définitions** avec lignes de rédaction.
-  4. **Partie IV : Cas pratique de synthèse** (Facturation en cascade et journalisation).
-  5. **Corrigé officiel détachable** avec barème de notation pour autocorrection ou évaluation par l'enseignant.
+### 5. Générateur d'Examen Blanc & Corrigé Séparé (PDF)
+- Génère en un clic des documents distincts conformes aux examens universitaires officiels :
+  1. **Épreuve d'Examen Blanc (Sujet seul)** :
+     - **Partie I : Questionnaire à Choix Multiple (QCM)** (tiré aléatoirement de la banque).
+     - **Partie II : Questions Vrai ou Faux** sous forme de tableau d'émargement.
+     - **Partie III : Questions de réflexion et définitions** avec lignes d'écriture réservées à la rédaction de l'étudiant.
+     - **Partie IV : Cas pratique de synthèse** (Facturation en cascade et journalisation).
+  2. **Corrigé Officiel et Grille de Notation (Document à part)** :
+     - Détail de chaque réponse exacte avec justifications et règles SYSCOHADA.
+     - Explications méthodologiques pour chaque Vrai/Faux.
+     - Réponses modèles pour les questions de cours.
+     - Calculs complets de la facture et imputations comptables au journal de la synthèse.
+  3. **Bouton « Nouveau tirage »** pour régénérer un nouveau couple sujet/corrigé à tout moment.
 - Compatible avec tous les téléphones (Android/iOS) et ordinateurs, sans blocage de fenêtres pop-up.
 
 ---
