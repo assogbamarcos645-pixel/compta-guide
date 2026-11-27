@@ -1525,9 +1525,11 @@
 
     const MODES = [
       { id: "full", icon: "list", title: "Quiz complet", desc: `Les ${C.questions.length} questions du programme, dont des calculs.` },
+      { id: "truefalse", icon: "check", title: "Vrai ou Faux", desc: `Série de ${(C.trueFalse || []).length} affirmations clés du SYSCOHADA à juger.` },
       { id: "quick", icon: "bolt", title: "Série rapide", desc: "10 questions tirées au hasard pour réviser en quelques minutes." },
       { id: "calc", icon: "calc", title: "Calculs", desc: "Réductions, escompte, TVA : uniquement des questions chiffrées." },
       { id: "exam", icon: "target", title: "Examen blanc", desc: "20 questions variées chronométrées avec notation sur 20." },
+      { id: "direct", icon: "cards", title: "Questions de cours", desc: `Flashcards de ${(C.directQuestions || []).length} questions fondamentales avec réponses modèles.` },
       { id: "wrongs", icon: "refresh", title: "Mes erreurs", desc: `Revoir les ${state.wrongs.length} questions que vous avez précédemment ratées.` }
     ];
 
@@ -1564,29 +1566,117 @@
     let lastMode = "full";
     const start = (mode, filterCh = null) => {
       lastMode = mode;
-      let pool = C.questions;
-      if (filterCh) {
-        pool = pool.filter((q) => q.ch === filterCh);
-      } else if (mode === "calc") {
-        pool = pool.filter((q) => q.calc);
-      } else if (mode === "wrongs") {
-        if (!state.wrongs.length) {
-          toast("Aucune question enregistrée dans vos erreurs pour l'instant !");
-          return;
+      if (mode === "direct") {
+        renderDirectQuestions();
+        return;
+      }
+      let pool = [];
+      if (mode === "truefalse") {
+        pool = (C.trueFalse || []).map(tf => ({
+          q: tf.q,
+          o: ["Vrai", "Faux"],
+          a: tf.a,
+          e: tf.e,
+          ch: tf.ch,
+          calc: false
+        }));
+      } else {
+        pool = C.questions;
+        if (filterCh) {
+          pool = pool.filter((q) => q.ch === filterCh);
+        } else if (mode === "calc") {
+          pool = pool.filter((q) => q.calc);
+        } else if (mode === "wrongs") {
+          if (!state.wrongs.length) {
+            toast("Aucune question enregistrée dans vos erreurs pour l'instant !");
+            return;
+          }
+          pool = C.questions.filter((q) => state.wrongs.some((w) => w.q === q.q));
+        } else if (mode === "exam") {
+          pool = pool.slice(0);
         }
-        pool = C.questions.filter((q) => state.wrongs.some((w) => w.q === q.q));
-      } else if (mode === "exam") {
-        pool = pool.slice(0);
       }
       pool = shuffle(pool);
       if (mode === "quick") pool = pool.slice(0, 10);
       else if (mode === "exam") pool = pool.slice(0, 20);
       const items = pool.map((q) => {
+        // Pour Vrai/Faux, garder l'ordre Vrai (A) et Faux (B) pour une clarté maximale
+        if (mode === "truefalse") {
+          return { ...q, opts: ["Vrai", "Faux"], ans: q.a };
+        }
         const order = shuffle(q.o.map((_, k) => k));
         return { ...q, opts: order.map((k) => q.o[k]), ans: order.indexOf(q.a) };
       });
-      Q = { items, i: 0, sel: null, sub: false, res: [], wrongs: [], t0: Date.now() };
+      Q = { items, i: 0, sel: null, sub: false, res: [], wrongs: [], t0: Date.now(), isTF: mode === "truefalse" };
       renderQ();
+    };
+
+    // Mode Questions-Réponses directes de cours avec auto-évaluation
+    const renderDirectQuestions = () => {
+      const items = [...(C.directQuestions || [])];
+      let currentIdx = 0;
+      let revealed = false;
+
+      const draw = () => {
+        const item = items[currentIdx];
+        const chIdx = chapterIndex(item.ch);
+        root.innerHTML = `
+          <div class="quiz-card fade-in">
+            <div class="quiz-top">
+              <span>Question de cours <b>${currentIdx + 1}</b> / ${items.length}</span>
+              <span class="pill" style="font-size:12px;background:var(--bg-subtle)">${chIdx >= 0 ? 'Ch. ' + (chIdx + 1) : 'SYSCOHADA'}</span>
+            </div>
+            <h2 class="quiz-q" style="margin-top:16px">${esc(item.q)}</h2>
+            
+            <div id="direct-answer-box" style="margin:24px 0">
+              ${revealed ? `
+                <div class="feedback ok fade-in" style="border-left:4px solid var(--ok);padding:18px">
+                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+                    <span class="pill ok" style="font-size:11px;font-weight:700">Réponse type du professeur</span>
+                  </div>
+                  <p style="white-space:pre-line;line-height:1.6;font-size:15px;margin:0">${esc(item.r)}</p>
+                </div>` : `
+                <div style="background:var(--surface-2);border:1px dashed var(--line);border-radius:12px;padding:32px 20px;text-align:center">
+                  <p style="color:var(--muted);margin:0 0 16px 0;font-size:14px">Réfléchissez à votre réponse ou notez-la sur une feuille avant de vérifier la solution officielle.</p>
+                  <button class="btn btn-primary" id="btn-reveal-answer" type="button">
+                    Afficher la réponse officielle
+                  </button>
+                </div>`}
+            </div>
+
+            <div class="quiz-actions" style="display:flex;justify-content:space-between;align-items:center">
+              <button class="btn btn-outline" id="btn-direct-prev" type="button" ${currentIdx === 0 ? 'disabled' : ''}>
+                ${icon('arrowL', 'ic-sm')} Précédente
+              </button>
+              <button class="btn btn-outline" id="btn-direct-exit" type="button">
+                Menu du Quiz
+              </button>
+              <button class="btn btn-primary" id="btn-direct-next" type="button">
+                ${currentIdx < items.length - 1 ? `Suivante ${icon('arrowR', 'ic-sm')}` : `Terminer`}
+              </button>
+            </div>
+          </div>`;
+
+        if (!revealed) {
+          $("#btn-reveal-answer").addEventListener("click", () => {
+            revealed = true;
+            draw();
+          });
+        }
+        $("#btn-direct-prev").addEventListener("click", () => {
+          if (currentIdx > 0) { currentIdx--; revealed = false; draw(); }
+        });
+        $("#btn-direct-next").addEventListener("click", () => {
+          if (currentIdx < items.length - 1) { currentIdx++; revealed = false; draw(); }
+          else {
+            toast("Session de questions de cours terminée avec succès !");
+            confetti();
+            intro();
+          }
+        });
+        $("#btn-direct-exit").addEventListener("click", intro);
+      };
+      draw();
     };
 
     const renderQ = () => {
@@ -1904,9 +1994,11 @@
     }
   }
 
-  // Générateur d'examen blanc avec corrigé détachable (Compatible 100% PC, Android et iOS sans blocage de pop-up)
+  // Générateur d'examen blanc avec corrigé détachable (Compatible 100% PC, Android et iOS)
   function generateExamPaper() {
-    const questionsPool = [...C.questions].sort(() => 0.5 - Math.random()).slice(0, 10);
+    const questionsPool = [...C.questions].sort(() => 0.5 - Math.random()).slice(0, 6);
+    const tfPool = [...(C.trueFalse || [])].sort(() => 0.5 - Math.random()).slice(0, 4);
+    const directPool = [...(C.directQuestions || [])].sort(() => 0.5 - Math.random()).slice(0, 2);
     const dateStr = new Date().toLocaleDateString("fr-FR");
 
     const paperHtml = `<!DOCTYPE html>
@@ -1948,7 +2040,7 @@
     <p><strong>UNIVERSITÉ / INSTITUT LES COURS SONOU — L1 INFORMATIQUE</strong></p>
     <p>Enseignant : Dr Rock Stanislas HINVI · SYSCOHADA Révisé</p>
     <h1>Épreuve d'Initiation à la Comptabilité Générale I</h1>
-    <p>Session d'entraînement · Durée conseillée : 1h30 · Calculatrice autorisée</p>
+    <p>Session d'entraînement officiel · Durée conseillée : 2h00 · Calculatrice autorisée</p>
   </div>
 
   <div class="meta-box">
@@ -1956,8 +2048,9 @@
     <div>Date : ${dateStr}</div>
   </div>
 
+  <!-- PARTIE I : QCM -->
   <div class="section-title">Partie I : Questionnaire à Choix Multiple (${questionsPool.length} points)</div>
-  <p><em>Pour chaque question, cochez la seule réponse exacte parmi les propositions formulées.</em></p>
+  <p><em>Pour chaque question, cochez la seule case correspondant à la réponse exacte.</em></p>
 
   ${questionsPool.map((q, idx) => {
     const opts = q.o || q.options || [];
@@ -1970,7 +2063,40 @@
     </div>`;
   }).join("")}
 
-  <div class="section-title">Partie II : Cas Pratique de Synthèse (Facturation & Journalisation - 10 points)</div>
+  <!-- PARTIE II : VRAI OU FAUX -->
+  <div class="section-title">Partie II : Questions Vrai ou Faux (${tfPool.length} points)</div>
+  <p><em>Indiquez pour chaque proposition si elle est Vraie [ V ] ou Fausse [ F ].</em></p>
+
+  <table style="width:100%;border-collapse:collapse;margin-bottom:20px;font-size:12pt">
+    <thead>
+      <tr style="background:#f3f4f6">
+        <th style="border:1px solid #333;padding:8px;text-align:left">Proposition</th>
+        <th style="border:1px solid #333;padding:8px;width:70px;text-align:center">Vrai</th>
+        <th style="border:1px solid #333;padding:8px;width:70px;text-align:center">Faux</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${tfPool.map((tf, idx) => `
+        <tr>
+          <td style="border:1px solid #333;padding:8px">${idx + 1}. ${esc(tf.q)}</td>
+          <td style="border:1px solid #333;text-align:center">[ &nbsp; ]</td>
+          <td style="border:1px solid #333;text-align:center">[ &nbsp; ]</td>
+        </tr>`).join("")}
+    </tbody>
+  </table>
+
+  <!-- PARTIE III : QUESTIONS DE COURS -->
+  <div class="section-title">Partie III : Questions de Réflexion et Définitions (${directPool.length * 2} points)</div>
+  <p><em>Répondez de manière concise et précise aux questions suivantes en vous référant aux normes du SYSCOHADA.</em></p>
+
+  ${directPool.map((dq, idx) => `
+    <div class="q-item">
+      <div class="q-title">Question ${idx + 1} : ${esc(dq.q)}</div>
+      <div style="border-bottom:1px dotted #999;min-height:70px;margin-top:6px"></div>
+    </div>`).join("")}
+
+  <!-- PARTIE IV : CAS PRATIQUE -->
+  <div class="section-title">Partie IV : Cas Pratique de Synthèse (Facturation & Journalisation - 8 points)</div>
   <p>L'entreprise « SONOU-TECH SA » réalise au cours du mois de novembre les opérations suivantes sous le taux de TVA en vigueur au Bénin (18 %) :</p>
   <p><strong>Opération 1 :</strong> Achat de marchandises pour un montant brut de 1 500 000 F CFA. Remise de 5 %, Escompte de règlement de 2 % accordé pour paiement sous huitaine, Port facturé : 45 000 F CFA HT. Règlement prévu dans 30 jours.</p>
   <p><strong>Opération 2 :</strong> Vente de marchandises d'une valeur brute de 2 000 000 F CFA, rabais 2%, TVA 18%, encaissée par chèque bancaire.</p>
@@ -1983,7 +2109,7 @@
   <!-- SAUT DE PAGE : CORRIGÉ OFFICIEL DÉTACHABLE -->
   <div class="page-break">
     <div class="corrigé-title">CORRIGÉ OFFICIEL & GRILLE DE NOTATION (DÉTACHABLE)</div>
-    <p style="text-align:center;font-style:italic;margin-bottom:25px">À détacher avant l'épreuve par le surveillant ou pour autocorrection.</p>
+    <p style="text-align:center;font-style:italic;margin-bottom:25px">Document réservé au correcteur ou pour autocorrection.</p>
 
     <div class="section-title">Corrigé de la Partie I : Q.C.M.</div>
     ${questionsPool.map((q, idx) => {
@@ -1992,12 +2118,26 @@
       const goodText = opts[goodIdx] || "";
       return `
       <div class="answer-item">
-        <strong>Q${idx + 1} : Réponse correcte -> Option ${String.fromCharCode(65 + goodIdx)} : ${esc(goodText)}</strong>
+        <strong>Q${idx + 1} : Réponse exacte -> Option ${String.fromCharCode(65 + goodIdx)} : ${esc(goodText)}</strong>
         <div style="font-size:12pt;color:#333;margin-top:3px"><em>Justification SYSCOHADA :</em> ${esc(q.e || "")}</div>
       </div>`;
     }).join("")}
 
-    <div class="section-title">Corrigé de la Partie II : Cas Pratique</div>
+    <div class="section-title">Corrigé de la Partie II : Vrai ou Faux</div>
+    ${tfPool.map((tf, idx) => `
+      <div class="answer-item">
+        <strong>Proposition ${idx + 1} : ${tf.a === 0 ? '<span style="color:#059669">VRAI</span>' : '<span style="color:#dc2626">FAUX</span>'}</strong>
+        <div style="font-size:12pt;color:#333;margin-top:2px"><em>Explication :</em> ${esc(tf.e)}</div>
+      </div>`).join("")}
+
+    <div class="section-title">Corrigé de la Partie III : Questions de Cours</div>
+    ${directPool.map((dq, idx) => `
+      <div class="answer-item">
+        <strong>Question ${idx + 1} : Réponse modèle attendue</strong>
+        <p style="margin:4px 0 0 0;font-size:12pt;color:#111;white-space:pre-line">${esc(dq.r)}</p>
+      </div>`).join("")}
+
+    <div class="section-title">Corrigé de la Partie IV : Cas Pratique</div>
     <p><strong>1. Décompte de la facture de l'Opération 1 :</strong></p>
     <ul>
       <li>Brut HT = 1 500 000 F CFA</li>

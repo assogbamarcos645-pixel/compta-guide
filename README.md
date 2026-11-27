@@ -55,13 +55,26 @@ Une application web progressive (PWA) moderne, interactive et complète pour l'a
 
 ---
 
-### 4. Quiz et Évaluations Avancées
-- **Quiz complet** : 52 questions couvrant l'ensemble du programme.
+### 4. Quiz et Évaluations Multimodales
+- **Quiz complet** : 52 questions à choix multiple couvrant l'ensemble du programme.
+- **Mode Vrai ou Faux** : 15 affirmations clés du SYSCOHADA pour tester vos réflexes conceptuels.
+- **Questions de cours (Flashcards & Réponses modèles)** : 8 questions de réflexion et définitions avec autocorrection guidée.
 - **Série rapide** : 10 questions tirées aléatoirement pour une révision express.
 - **Calculs** : Questions dédiées aux calculs arithmétiques comptables (réductions, TVA, résultat).
-- **Examen blanc** : 20 questions chronométrées avec note sur 20.
+- **Examen blanc chronométré** : 20 questions variées avec note sur 20.
 - **Mode « Mes erreurs »** : Enregistrement automatique des questions ratées pour vous entraîner dessus jusqu'à maîtrise complète.
 - **Quiz ciblé par chapitre** : Évaluation personnalisée sur le chapitre de votre choix.
+
+---
+
+### 5. Générateur d'Examen Blanc Complet (PDF)
+- Génère en un clic un sujet complet conforme aux examens universitaires :
+  1. **Partie I : Questionnaire à Choix Multiple (QCM)** (tiré aléatoirement de la banque de données).
+  2. **Partie II : Questions Vrai ou Faux** sous forme de grille d'évaluation tabulaire.
+  3. **Partie III : Questions de réflexion et définitions** avec lignes de rédaction.
+  4. **Partie IV : Cas pratique de synthèse** (Facturation en cascade et journalisation).
+  5. **Corrigé officiel détachable** avec barème de notation pour autocorrection ou évaluation par l'enseignant.
+- Compatible avec tous les téléphones (Android/iOS) et ordinateurs, sans blocage de fenêtres pop-up.
 
 ---
 

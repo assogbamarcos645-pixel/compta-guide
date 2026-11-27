@@ -2000,3 +2000,142 @@ COURSE.badges = [
     "desc": "Manipuler et valider le simulateur de facture"
   }
 ];
+
+
+/* ── Banque de questions Vrai ou Faux ──────────────────────── */
+COURSE.trueFalse = [
+  {
+    "q": "Le Tableau des flux de trésorerie (TFT) a remplacé le TAFIRE dans le SYSCOHADA révisé.",
+    "a": 0,
+    "e": "Vrai. Le SYSCOHADA révisé a supprimé le TAFIRE au profit du TFT pour analyser les flux de liquidités.",
+    "ch": "generalites"
+  },
+  {
+    "q": "Les réductions commerciales (3R) mentionnées sur une facture de Doit doivent être comptabilisées aux comptes 6019 ou 7019.",
+    "a": 1,
+    "e": "Faux. Les 3R sur facture de Doit ne se comptabilisent JAMAIS. Les achats et ventes sont enregistrés directement pour leur Net commercial.",
+    "ch": "factures"
+  },
+  {
+    "q": "L'escompte de règlement accordé se calcule sur le Net commercial, avant l'ajout du transport et de la TVA.",
+    "a": 0,
+    "e": "Vrai. L'escompte rémunère uniquement le règlement rapide des marchandises et ne porte jamais sur les frais accessoires comme le transport.",
+    "ch": "factures"
+  },
+  {
+    "q": "Le taux normal de la Taxe sur la Valeur Ajoutée (TVA) en vigueur en République du Bénin est de 20 %.",
+    "a": 1,
+    "e": "Faux. Au Bénin, le taux de TVA est fixé à 18 % pour l'ensemble des opérations imposables.",
+    "ch": "tva"
+  },
+  {
+    "q": "Le bilan d'ouverture d'un exercice doit obligatoirement correspondre au bilan de clôture de l'exercice précédent.",
+    "a": 0,
+    "e": "Vrai. C'est le principe intangible d'intangibilité du bilan d'ouverture posé par le SYSCOHADA.",
+    "ch": "generalites"
+  },
+  {
+    "q": "La consignation d'emballages récupérables supporte la TVA de 18 % au moment de la facturation.",
+    "a": 1,
+    "e": "Faux. La consignation constitue un simple prêt d'emballage assorti d'une caution financière : elle ne supporte jamais la TVA.",
+    "ch": "emballages"
+  },
+  {
+    "q": "L'acquisition d'un camion de livraison à crédit s'enregistre au crédit du compte 401 Fournisseurs.",
+    "a": 1,
+    "e": "Faux. Le compte 401 est réservé aux achats d'exploitation (marchandises/matières). Pour une immobilisation (classe 2), on crédite le 481 Fournisseurs d'investissements.",
+    "ch": "cadre-comptable"
+  },
+  {
+    "q": "Le résultat de l'exercice est égal à la somme des produits (classes 7 et 8) moins la somme des charges (classes 6 et 8).",
+    "a": 0,
+    "e": "Vrai. Résultat net = Total des Produits - Total des Charges.",
+    "ch": "charges-produits"
+  },
+  {
+    "q": "Dans un compte en T, la colonne Débit est conventionnellement située à droite et le Crédit à gauche.",
+    "a": 1,
+    "e": "Faux. La convention comptable universelle place toujours le Débit à GAUCHE et le Crédit à DROITE.",
+    "ch": "compte"
+  },
+  {
+    "q": "Un compte de banque (compte 521) peut présenter un solde créditeur en cas de découvert bancaire autorisé.",
+    "a": 0,
+    "e": "Vrai. En cas de découvert, le solde créditeur de la banque exprime une dette envers l'établissement financier et figure au passif du bilan.",
+    "ch": "compte"
+  },
+  {
+    "q": "Les frais de port forfaitaire facturés par le vendeur à son client sont enregistrés au crédit du compte 7071 Port, emballages perdus et autres frais facturés.",
+    "a": 0,
+    "e": "Vrai. Pour le fournisseur, la facturation forfaitaire du port constitue un produit accessoire rattaché à l'activité ordinaire (compte 7071).",
+    "ch": "transport"
+  },
+  {
+    "q": "Un solde de TVA est dit 'Crédit de TVA' lorsque la TVA facturée aux clients est supérieure à la TVA déductible.",
+    "a": 1,
+    "e": "Faux. Lorsque la TVA facturée est supérieure, il s'agit d'une 'TVA due / à payer' (compte 4441). Le Crédit de TVA (compte 4449) survient quand la TVA déductible est supérieure.",
+    "ch": "tva"
+  },
+  {
+    "q": "La lettre de change est émise par le créancier (tireur) qui ordonne au débiteur (tiré) de payer une somme à une échéance fixée.",
+    "a": 0,
+    "e": "Vrai. Contrairement au billet à ordre qui est souscrit par le débiteur, la lettre de change est tirée par le créancier.",
+    "ch": "effets"
+  },
+  {
+    "q": "Selon le principe de prudence, les plus-values potentielles doivent être comptabilisées immédiatement dès qu'elles sont probables.",
+    "a": 1,
+    "e": "Faux. La prudence impose de ne comptabiliser que les gains certains et définitivement réalisés, tout en provisionnant les risques et pertes probables.",
+    "ch": "generalites"
+  },
+  {
+    "q": "L'amortissement linéaire consiste à répartir la valeur amortissable d'un bien de manière égale sur toute sa durée d'utilité.",
+    "a": 0,
+    "e": "Vrai. L'annuité d'amortissement linéaire est constante d'un exercice à l'autre : Annuité = Valeur d'origine / Durée.",
+    "ch": "cadre-comptable"
+  }
+];
+
+/* ── Banque de Questions-Réponses directes de cours ─────────── */
+COURSE.directQuestions = [
+  {
+    "q": "Définir le principe comptable de la partie double et énoncer son équation fondamentale.",
+    "r": "La partie double est la règle fondamentale selon laquelle toute opération comptable affecte au moins deux comptes, avec une égalité permanente entre le montant inscrit au Débit (Emplois) et le montant inscrit au Crédit (Ressources). Équation fondamentale : Total Débit = Total Crédit.",
+    "ch": "entite-partie-double"
+  },
+  {
+    "q": "Quelle est la distinction fondamentale entre une charge d'Activité Ordinaire (AO) et une charge Hors Activité Ordinaire (HAO) selon le SYSCOHADA ?",
+    "r": "Les charges d'Activités Ordinaires (classe 6) correspondent aux opérations récurrentes et cycliques liées à l'objet social de l'entité (achats, salaires, loyers, transports). Les charges HAO (compte 83) désignent les événements inhabituels, non récurrents et fortuits ne relevant pas de la gestion courante (catastrophes, pénalités exceptionnelles, destructions accidentelles).",
+    "ch": "charges-produits"
+  },
+  {
+    "q": "Détailler la cascade des réductions sur une facture de Doit et préciser l'assiette de calcul de l'escompte.",
+    "r": "1. Montant brut HT.\n2. Déduction des réductions commerciales en cascade (Rabais, puis Remise, puis Ristourne) -> Obtention du Net Commercial.\n3. Déduction de la réduction financière (Escompte de règlement) -> Obtention du Net Financier.\nL'assiette de l'escompte est STRICTEMENT le dernier Net commercial, avant tout ajout de port ou de TVA.",
+    "ch": "factures"
+  },
+  {
+    "q": "Expliquer le mécanisme de liquidation mensuelle de la TVA et donner les comptes du Plan Comptable SYSCOHADA utilisés.",
+    "r": "Chaque fin de mois, l'entreprise confronte la TVA collectée/facturée sur ses ventes (compte 4431 débité pour solde) et la TVA déductible sur ses achats (comptes 4451 et 4452 crédités pour solde), plus un éventuel crédit antérieur (4449).\n- Si TVA facturée > TVA déductible : Solde créditeur = TVA due à l'État (compte 4441).\n- Si TVA déductible > TVA facturée : Solde débiteur = Crédit de TVA à reporter (compte 4449).",
+    "ch": "tva"
+  },
+  {
+    "q": "Qu'est-ce qu'un port payé (ou débours) lors d'une expédition de marchandises et comment s'enregistre-t-il chez le fournisseur ?",
+    "r": "Le port payé ou port débours est un transport sous-traité à un transporteur tiers, que le fournisseur paie d'avance pour le compte de son client. Lors de la facturation au client, il s'agit d'une récupération à l'identique de frais engagés : le fournisseur crédite le compte 7072 'Ports et frais accessoires refacturés' (ou le compte 612 débité préalablement) sans marge.",
+    "ch": "transport"
+  },
+  {
+    "q": "Citer les 4 états financiers annuels obligatoires et indissociables formant le Système Normal du SYSCOHADA.",
+    "r": "1. Le Bilan (synthèse patrimoniale Actif / Passif).\n2. Le Compte de Résultat (Charges et Produits de l'exercice).\n3. Le Tableau des flux de trésorerie - TFT (mouvements de liquidités d'exploitation, d'investissement et de financement).\n4. Les Notes annexes (commentaires et détails chiffrés des méthodes).",
+    "ch": "generalites"
+  },
+  {
+    "q": "Différencier emballages perdus et emballages récupérables, et préciser le traitement comptable de la déconsignation avec boni.",
+    "r": "Les emballages perdus sont vendus définitivement avec la marchandise (comptabilisés en charges 601 ou produits 701). Les emballages récupérables sont prêtés au client contre cautionnement (compte 4194).\nEn cas de restitution à un prix inférieur au montant consigné (déconsignation avec boni pour le fournisseur), la différence représente un gain pour le fournisseur (compte 7074 Bonis sur reprise d'emballages) assujetti à la TVA, et une charge pour le client (compte 6224 Malis sur emballages).",
+    "ch": "emballages"
+  },
+  {
+    "q": "Définir l'annuité d'amortissement constant et donner la formule de calcul de la Valeur Nette Comptable (VNC).",
+    "r": "L'annuité d'amortissement linéaire est la dépréciation annuelle irréversible subie par une immobilisation du fait de l'usage ou du temps : Annuité = Valeur d'origine (VO) × Taux d'amortissement (ou VO / Durée en années).\nLa Valeur Nette Comptable représente la valeur résiduelle du bien à la clôture de l'exercice : VNC = Valeur d'origine HT - Amortissements cumulés.",
+    "ch": "cadre-comptable"
+  }
+];
