@@ -1,3 +1,4 @@
+// Service Worker — Comptabilité Générale I (PWA hors-ligne)
 const CACHE_NAME = 'compta-l1-v2';
 const ASSETS = [
   './',
@@ -61,7 +62,7 @@ self.addEventListener('fetch', (event) => {
         caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseToCache));
         return networkResponse;
       }).catch(() => {
-        // Fallback hors-ligne pour la navigation HTML
+        // Repli hors-ligne pour la navigation HTML (page blanche évitée)
         if (event.request.mode === 'navigate') {
           return caches.match('./index.html');
         }
