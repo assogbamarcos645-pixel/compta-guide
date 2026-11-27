@@ -1840,13 +1840,19 @@
           <div class="traps-grid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));gap:16px">
             ${(C.traps || []).map((t, idx) => `
               <div class="panel trap-card" style="border-left:4px solid var(--bad);padding:20px;background:var(--card-bg)">
-                <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-                  <span style="background:rgba(239, 68, 68, 0.15);color:var(--bad);width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px">${idx + 1}</span>
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+                  <span style="background:var(--brand-soft);color:var(--brand);width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px">${idx + 1}</span>
                   <h3 style="margin:0;font-size:16px;color:var(--fg)">${esc(t.title)}</h3>
                 </div>
-                <p style="color:var(--bad);font-weight:600;font-size:14px;margin-bottom:6px">❌ L'erreur : ${esc(t.wrong)}</p>
-                <p style="color:var(--ok);font-weight:600;font-size:14px;margin-bottom:8px">✔️ La règle juste : ${esc(t.right)}</p>
-                <p style="color:var(--muted);font-size:13px;line-height:1.5;margin:0">💡 ${esc(t.tip)}</p>
+                <div style="margin-bottom:8px">
+                  <span class="pill" style="background:var(--bad-soft);color:var(--bad);font-weight:700;font-size:11px;margin-right:6px">Erreur classique</span>
+                  <span style="color:var(--bad);font-size:14px;font-weight:500">${esc(t.wrong)}</span>
+                </div>
+                <div style="margin-bottom:8px">
+                  <span class="pill" style="background:var(--ok-soft);color:var(--ok);font-weight:700;font-size:11px;margin-right:6px">Règle exacte</span>
+                  <span style="color:var(--ok);font-size:14px;font-weight:600">${esc(t.right)}</span>
+                </div>
+                <p style="color:var(--muted);font-size:13px;line-height:1.5;margin:6px 0 0 0;border-top:1px dashed var(--line);padding-top:8px">${esc(t.tip)}</p>
               </div>`).join("")}
           </div>
         </div>
@@ -2029,23 +2035,35 @@
         <!-- 4 KPI cartes -->
         <div class="stats-grid fade-in" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:16px;margin-bottom:28px">
           <div class="panel stat-card" style="text-align:center;padding:20px">
-            <div style="font-size:32px;margin-bottom:4px">🔥 ${streakDays}</div>
-            <strong style="display:block;font-size:15px;color:var(--fg)">Jours consécutifs</strong>
-            <small style="color:var(--muted)">Streak d'apprentissage</small>
+            <div style="display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:14px;background:var(--brand-soft);color:var(--brand);margin-bottom:8px">
+              ${icon("clock", "ic-md")}
+            </div>
+            <div style="font-size:26px;font-weight:700;margin-bottom:2px;color:var(--fg)">${streakDays} j</div>
+            <strong style="display:block;font-size:14px;color:var(--fg)">Jours consécutifs</strong>
+            <small style="color:var(--muted)">Régularité d'étude</small>
           </div>
           <div class="panel stat-card" style="text-align:center;padding:20px">
-            <div style="font-size:32px;margin-bottom:4px">🏆 ${unlockedCount} / ${totalBadges}</div>
-            <strong style="display:block;font-size:15px;color:var(--fg)">Trophées débloqués</strong>
+            <div style="display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:14px;background:var(--gold-soft);color:var(--gold);margin-bottom:8px">
+              ${icon("target", "ic-md")}
+            </div>
+            <div style="font-size:26px;font-weight:700;margin-bottom:2px;color:var(--fg)">${unlockedCount} / ${totalBadges}</div>
+            <strong style="display:block;font-size:14px;color:var(--fg)">Trophées débloqués</strong>
             <small style="color:var(--muted)">Succès d'apprentissage</small>
           </div>
           <div class="panel stat-card" style="text-align:center;padding:20px">
-            <div style="font-size:32px;margin-bottom:4px">📖 ${readCount} / ${totalChapters}</div>
-            <strong style="display:block;font-size:15px;color:var(--fg)">Chapitres étudiés</strong>
+            <div style="display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:14px;background:var(--ok-soft);color:var(--ok);margin-bottom:8px">
+              ${icon("book", "ic-md")}
+            </div>
+            <div style="font-size:26px;font-weight:700;margin-bottom:2px;color:var(--fg)">${readCount} / ${totalChapters}</div>
+            <strong style="display:block;font-size:14px;color:var(--fg)">Chapitres étudiés</strong>
             <small style="color:var(--muted)">${Math.round((readCount/totalChapters)*100)}% du programme</small>
           </div>
           <div class="panel stat-card" style="text-align:center;padding:20px">
-            <div style="font-size:32px;margin-bottom:4px">🎯 ${bestPct}%</div>
-            <strong style="display:block;font-size:15px;color:var(--fg)">Meilleur score Quiz</strong>
+            <div style="display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:14px;background:var(--brand-soft);color:var(--brand);margin-bottom:8px">
+              ${icon("calc", "ic-md")}
+            </div>
+            <div style="font-size:26px;font-weight:700;margin-bottom:2px;color:var(--fg)">${bestPct}%</div>
+            <strong style="display:block;font-size:14px;color:var(--fg)">Meilleur score Quiz</strong>
             <small style="color:var(--muted)">${state.attempts} tentative${state.attempts > 1 ? "s" : ""}</small>
           </div>
         </div>
@@ -2054,7 +2072,7 @@
         <div class="panel fade-in" style="margin-bottom:28px">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
             <div>
-              <h2 style="margin:0;font-size:20px">Trophées & Badges</h2>
+              <h2 style="margin:0;font-size:20px">Trophées & Distinctions</h2>
               <p class="sub" style="margin:4px 0 0 0">Accomplissez les défis pour débloquer toutes les distinctions.</p>
             </div>
             <span style="font-weight:700;color:var(--brand)">${unlockedCount} validé${unlockedCount > 1 ? "s" : ""}</span>
@@ -2063,12 +2081,14 @@
             ${(C.badges || []).map(b => {
               const isUnlocked = state.badges ? state.badges.has(b.id) : false;
               return `
-                <div class="panel badge-card" style="padding:16px;background:${isUnlocked ? 'var(--bg-subtle)' : 'var(--card-bg)'};border:1px solid ${isUnlocked ? 'var(--brand)' : 'var(--border)'};opacity:${isUnlocked ? '1' : '0.6'};display:flex;align-items:center;gap:14px;border-radius:12px">
-                  <div style="font-size:32px;filter:${isUnlocked ? 'none' : 'grayscale(1)'}">${b.icon}</div>
+                <div class="panel badge-card" style="padding:16px;background:${isUnlocked ? 'var(--bg-subtle)' : 'var(--card-bg)'};border:1px solid ${isUnlocked ? 'var(--brand)' : 'var(--border)'};opacity:${isUnlocked ? '1' : '0.65'};display:flex;align-items:center;gap:14px;border-radius:12px">
+                  <div style="width:40px;height:40px;border-radius:10px;background:${isUnlocked ? 'var(--brand-soft)' : 'var(--surface-2)'};color:${isUnlocked ? 'var(--brand)' : 'var(--muted)'};display:grid;place-items:center;flex-shrink:0">
+                    ${icon(b.icon || "target", "ic-sm")}
+                  </div>
                   <div style="flex:1">
                     <div style="display:flex;justify-content:space-between;align-items:center">
                       <strong style="color:var(--fg);font-size:15px">${esc(b.title)}</strong>
-                      ${isUnlocked ? '<span style="color:var(--ok);font-size:12px;font-weight:700">Obtenu ✓</span>' : '<span style="color:var(--muted);font-size:11px">Verrouillé</span>'}
+                      ${isUnlocked ? '<span class="pill ok" style="font-size:11px;font-weight:700">Obtenu</span>' : '<span class="pill" style="font-size:11px;color:var(--muted)">Verrouillé</span>'}
                     </div>
                     <p style="margin:4px 0 0 0;font-size:13px;color:var(--muted);line-height:1.4">${esc(b.desc)}</p>
                   </div>
