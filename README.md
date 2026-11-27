@@ -57,8 +57,8 @@ Une application web progressive (PWA) moderne, interactive et complète pour l'a
 
 ### 4. Quiz et Évaluations Multimodales
 - **Quiz complet** : 52 questions à choix multiple couvrant l'ensemble du programme.
-- **Mode Vrai ou Faux** : 15 affirmations clés du SYSCOHADA pour tester vos réflexes conceptuels.
-- **Questions de cours (Flashcards & Réponses modèles)** : 8 questions de réflexion et définitions avec autocorrection guidée.
+- **Mode Vrai ou Faux** : 15 affirmations clés du SYSCOHADA pour tester vos réflexes conceptuels avec justifications méthodologiques.
+- **Questions de cours (Saisie obligatoire de l'étudiant)** : L'étudiant doit d'abord formuler et soumettre par écrit sa propre réponse avant de débloquer le corrigé officiel du professeur et la vérification des mots-clés attendus.
 - **Série rapide** : 10 questions tirées aléatoirement pour une révision express.
 - **Calculs** : Questions dédiées aux calculs arithmétiques comptables (réductions, TVA, résultat).
 - **Examen blanc chronométré** : 20 questions variées avec note sur 20.

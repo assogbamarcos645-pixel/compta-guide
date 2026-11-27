@@ -2101,41 +2101,119 @@ COURSE.directQuestions = [
   {
     "q": "Définir le principe comptable de la partie double et énoncer son équation fondamentale.",
     "r": "La partie double est la règle fondamentale selon laquelle toute opération comptable affecte au moins deux comptes, avec une égalité permanente entre le montant inscrit au Débit (Emplois) et le montant inscrit au Crédit (Ressources). Équation fondamentale : Total Débit = Total Crédit.",
+    "keywords": [
+      "debit",
+      "credit",
+      "egalite",
+      "compte",
+      "ressource",
+      "emploi"
+    ],
     "ch": "entite-partie-double"
   },
   {
     "q": "Quelle est la distinction fondamentale entre une charge d'Activité Ordinaire (AO) et une charge Hors Activité Ordinaire (HAO) selon le SYSCOHADA ?",
     "r": "Les charges d'Activités Ordinaires (classe 6) correspondent aux opérations récurrentes et cycliques liées à l'objet social de l'entité (achats, salaires, loyers, transports). Les charges HAO (compte 83) désignent les événements inhabituels, non récurrents et fortuits ne relevant pas de la gestion courante (catastrophes, pénalités exceptionnelles, destructions accidentelles).",
+    "keywords": [
+      "ordinaire",
+      "recurrente",
+      "cyclique",
+      "hao",
+      "inhabituel",
+      "exceptionnel",
+      "courant"
+    ],
     "ch": "charges-produits"
   },
   {
     "q": "Détailler la cascade des réductions sur une facture de Doit et préciser l'assiette de calcul de l'escompte.",
     "r": "1. Montant brut HT.\n2. Déduction des réductions commerciales en cascade (Rabais, puis Remise, puis Ristourne) -> Obtention du Net Commercial.\n3. Déduction de la réduction financière (Escompte de règlement) -> Obtention du Net Financier.\nL'assiette de l'escompte est STRICTEMENT le dernier Net commercial, avant tout ajout de port ou de TVA.",
+    "keywords": [
+      "commercial",
+      "financier",
+      "cascade",
+      "escompte",
+      "rabais",
+      "remise",
+      "port",
+      "tva"
+    ],
     "ch": "factures"
   },
   {
     "q": "Expliquer le mécanisme de liquidation mensuelle de la TVA et donner les comptes du Plan Comptable SYSCOHADA utilisés.",
     "r": "Chaque fin de mois, l'entreprise confronte la TVA collectée/facturée sur ses ventes (compte 4431 débité pour solde) et la TVA déductible sur ses achats (comptes 4451 et 4452 crédités pour solde), plus un éventuel crédit antérieur (4449).\n- Si TVA facturée > TVA déductible : Solde créditeur = TVA due à l'État (compte 4441).\n- Si TVA déductible > TVA facturée : Solde débiteur = Crédit de TVA à reporter (compte 4449).",
+    "keywords": [
+      "facturee",
+      "collectee",
+      "deductible",
+      "4431",
+      "4451",
+      "4452",
+      "4441",
+      "4449",
+      "due",
+      "credit"
+    ],
     "ch": "tva"
   },
   {
     "q": "Qu'est-ce qu'un port payé (ou débours) lors d'une expédition de marchandises et comment s'enregistre-t-il chez le fournisseur ?",
     "r": "Le port payé ou port débours est un transport sous-traité à un transporteur tiers, que le fournisseur paie d'avance pour le compte de son client. Lors de la facturation au client, il s'agit d'une récupération à l'identique de frais engagés : le fournisseur crédite le compte 7072 'Ports et frais accessoires refacturés' (ou le compte 612 débité préalablement) sans marge.",
+    "keywords": [
+      "debours",
+      "tiers",
+      "transporteur",
+      "7072",
+      "612",
+      "refacture",
+      "recuperation",
+      "avance"
+    ],
     "ch": "transport"
   },
   {
     "q": "Citer les 4 états financiers annuels obligatoires et indissociables formant le Système Normal du SYSCOHADA.",
     "r": "1. Le Bilan (synthèse patrimoniale Actif / Passif).\n2. Le Compte de Résultat (Charges et Produits de l'exercice).\n3. Le Tableau des flux de trésorerie - TFT (mouvements de liquidités d'exploitation, d'investissement et de financement).\n4. Les Notes annexes (commentaires et détails chiffrés des méthodes).",
+    "keywords": [
+      "bilan",
+      "resultat",
+      "flux",
+      "tresorerie",
+      "tft",
+      "annexes",
+      "notes"
+    ],
     "ch": "generalites"
   },
   {
     "q": "Différencier emballages perdus et emballages récupérables, et préciser le traitement comptable de la déconsignation avec boni.",
     "r": "Les emballages perdus sont vendus définitivement avec la marchandise (comptabilisés en charges 601 ou produits 701). Les emballages récupérables sont prêtés au client contre cautionnement (compte 4194).\nEn cas de restitution à un prix inférieur au montant consigné (déconsignation avec boni pour le fournisseur), la différence représente un gain pour le fournisseur (compte 7074 Bonis sur reprise d'emballages) assujetti à la TVA, et une charge pour le client (compte 6224 Malis sur emballages).",
+    "keywords": [
+      "perdu",
+      "recuperable",
+      "consignation",
+      "boni",
+      "mali",
+      "7074",
+      "6224",
+      "4194",
+      "caution"
+    ],
     "ch": "emballages"
   },
   {
     "q": "Définir l'annuité d'amortissement constant et donner la formule de calcul de la Valeur Nette Comptable (VNC).",
     "r": "L'annuité d'amortissement linéaire est la dépréciation annuelle irréversible subie par une immobilisation du fait de l'usage ou du temps : Annuité = Valeur d'origine (VO) × Taux d'amortissement (ou VO / Durée en années).\nLa Valeur Nette Comptable représente la valeur résiduelle du bien à la clôture de l'exercice : VNC = Valeur d'origine HT - Amortissements cumulés.",
+    "keywords": [
+      "annuite",
+      "amortissement",
+      "origine",
+      "duree",
+      "vnc",
+      "cumul",
+      "valeur"
+    ],
     "ch": "cadre-comptable"
   }
 ];

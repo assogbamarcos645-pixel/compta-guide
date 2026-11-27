@@ -1611,15 +1611,18 @@
       renderQ();
     };
 
-    // Mode Questions-Réponses directes de cours avec auto-évaluation
+    // Mode Questions-Réponses directes de cours avec réponse préalable obligatoire de l'étudiant
     const renderDirectQuestions = () => {
       const items = [...(C.directQuestions || [])];
       let currentIdx = 0;
-      let revealed = false;
+      let evaluated = false;
+      let studentAnswers = {};
 
       const draw = () => {
         const item = items[currentIdx];
         const chIdx = chapterIndex(item.ch);
+        const prevAnswer = studentAnswers[currentIdx] || "";
+
         root.innerHTML = `
           <div class="quiz-card fade-in">
             <div class="quiz-top">
@@ -1628,47 +1631,82 @@
             </div>
             <h2 class="quiz-q" style="margin-top:16px">${esc(item.q)}</h2>
             
-            <div id="direct-answer-box" style="margin:24px 0">
-              ${revealed ? `
-                <div class="feedback ok fade-in" style="border-left:4px solid var(--ok);padding:18px">
-                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-                    <span class="pill ok" style="font-size:11px;font-weight:700">Réponse type du professeur</span>
-                  </div>
-                  <p style="white-space:pre-line;line-height:1.6;font-size:15px;margin:0">${esc(item.r)}</p>
-                </div>` : `
-                <div style="background:var(--surface-2);border:1px dashed var(--line);border-radius:12px;padding:32px 20px;text-align:center">
-                  <p style="color:var(--muted);margin:0 0 16px 0;font-size:14px">Réfléchissez à votre réponse ou notez-la sur une feuille avant de vérifier la solution officielle.</p>
-                  <button class="btn btn-primary" id="btn-reveal-answer" type="button">
-                    Afficher la réponse officielle
+            <div id="direct-answer-box" style="margin:20px 0">
+              ${!evaluated ? `
+                <div class="field" style="margin-bottom:12px">
+                  <label for="student-direct-text" style="font-weight:600;font-size:14px;color:var(--fg);margin-bottom:6px;display:block">
+                    Votre réponse (rédigez votre explication avant de valider) :
+                  </label>
+                  <textarea class="input" id="student-direct-text" rows="4" placeholder="Saisissez ici les notions, règles, comptes et formules appropriés..." style="width:100%;resize:vertical;font-family:inherit;padding:12px;line-height:1.5">${esc(prevAnswer)}</textarea>
+                </div>
+                <div style="display:flex;justify-content:flex-end">
+                  <button class="btn btn-primary" id="btn-submit-answer" type="button">
+                    Valider et afficher la correction
                   </button>
+                </div>` : `
+                <!-- Comparatif entre la réponse de l'étudiant et la solution officielle -->
+                <div class="fade-in" style="display:flex;flex-direction:column;gap:16px">
+                  <div style="background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:16px">
+                    <span class="pill" style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px">Votre réponse rédigée</span>
+                    <p style="margin:6px 0 0 0;font-size:14.5px;color:var(--fg);line-height:1.5;white-space:pre-line">${esc(prevAnswer || "(Aucune réponse saisie)")}</p>
+                  </div>
+
+                  <div class="feedback ok" style="border-left:4px solid var(--ok);padding:18px;margin:0">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px">
+                      <span class="pill ok" style="font-size:11px;font-weight:700">Réponse type et barème officiel du professeur</span>
+                    </div>
+                    <p style="white-space:pre-line;line-height:1.6;font-size:15px;color:var(--ink-2);margin:0 0 10px 0">${esc(item.r)}</p>
+                    
+                    ${item.keywords && item.keywords.length ? `
+                      <div style="border-top:1px dashed var(--line);padding-top:10px;margin-top:10px">
+                        <small style="color:var(--muted);display:block;margin-bottom:6px;font-weight:600">Points-clés attendus dans votre rédaction :</small>
+                        <div style="display:flex;gap:6px;flex-wrap:wrap">
+                          ${item.keywords.map(kw => {
+                            const found = norm(prevAnswer).includes(norm(kw));
+                            return `<span class="pill ${found ? 'ok' : ''}" style="font-size:11px;${found ? 'background:var(--ok-soft);color:var(--ok)' : 'background:var(--surface);color:var(--muted);border:1px solid var(--line)'}">${found ? 'Mentionné : ' : 'À inclure : '} ${esc(kw)}</span>`;
+                          }).join("")}
+                        </div>
+                      </div>` : ''}
+                  </div>
                 </div>`}
             </div>
 
-            <div class="quiz-actions" style="display:flex;justify-content:space-between;align-items:center">
+            <div class="quiz-actions" style="display:flex;justify-content:space-between;align-items:center;margin-top:24px">
               <button class="btn btn-outline" id="btn-direct-prev" type="button" ${currentIdx === 0 ? 'disabled' : ''}>
                 ${icon('arrowL', 'ic-sm')} Précédente
               </button>
               <button class="btn btn-outline" id="btn-direct-exit" type="button">
                 Menu du Quiz
               </button>
-              <button class="btn btn-primary" id="btn-direct-next" type="button">
-                ${currentIdx < items.length - 1 ? `Suivante ${icon('arrowR', 'ic-sm')}` : `Terminer`}
+              <button class="btn btn-primary" id="btn-direct-next" type="button" ${!evaluated ? 'disabled title="Veuillez d\'abord valider votre réponse"' : ''}>
+                ${currentIdx < items.length - 1 ? `Question suivante ${icon('arrowR', 'ic-sm')}` : `Terminer`}
               </button>
             </div>
           </div>`;
 
-        if (!revealed) {
-          $("#btn-reveal-answer").addEventListener("click", () => {
-            revealed = true;
+        if (!evaluated) {
+          const txtInput = $("#student-direct-text");
+          $("#btn-submit-answer").addEventListener("click", () => {
+            const val = txtInput.value.trim();
+            if (!val) {
+              alert("Veuillez saisir votre réponse avant de pouvoir afficher la correction.");
+              txtInput.focus();
+              return;
+            }
+            studentAnswers[currentIdx] = val;
+            evaluated = true;
             draw();
           });
         }
         $("#btn-direct-prev").addEventListener("click", () => {
-          if (currentIdx > 0) { currentIdx--; revealed = false; draw(); }
+          if (currentIdx > 0) { currentIdx--; evaluated = !!studentAnswers[currentIdx]; draw(); }
         });
         $("#btn-direct-next").addEventListener("click", () => {
-          if (currentIdx < items.length - 1) { currentIdx++; revealed = false; draw(); }
-          else {
+          if (currentIdx < items.length - 1) {
+            currentIdx++;
+            evaluated = !!studentAnswers[currentIdx];
+            draw();
+          } else {
             toast("Session de questions de cours terminée avec succès !");
             confetti();
             intro();
