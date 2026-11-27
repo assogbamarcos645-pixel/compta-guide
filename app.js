@@ -1637,7 +1637,7 @@
                   <label for="student-direct-text" style="font-weight:600;font-size:14px;color:var(--fg);margin-bottom:6px;display:block">
                     Votre réponse (rédigez votre explication avant de valider) :
                   </label>
-                  <textarea class="input" id="student-direct-text" rows="4" placeholder="Saisissez ici les notions, règles, comptes et formules appropriés..." style="width:100%;resize:vertical;font-family:inherit;padding:12px;line-height:1.5">${esc(prevAnswer)}</textarea>
+                  <textarea class="input" id="student-direct-text" data-clarity-mask="true" rows="4" placeholder="Saisissez ici les notions, règles, comptes et formules appropriés..." style="width:100%;resize:vertical;font-family:inherit;padding:12px;line-height:1.5">${esc(prevAnswer)}</textarea>
                 </div>
                 <div style="display:flex;justify-content:flex-end">
                   <button class="btn btn-primary" id="btn-submit-answer" type="button">
@@ -2470,39 +2470,74 @@
       toast("Progression exportée avec succès !");
     });
 
-    // Gestion Import JSON
+    // Gestion Import JSON avec sanitisation et validation de schéma stricte
     $("#file-import-json").addEventListener("change", (e) => {
       const file = e.target.files && e.target.files[0];
       if (!file) return;
+
+      // Protection taille maximale de fichier (max 1 Mo)
+      if (file.size > 1024 * 1024) {
+        alert("Fichier trop volumineux. La taille maximale autorisée est de 1 Mo.");
+        return;
+      }
+
       const reader = new FileReader();
       reader.onload = (evt) => {
         try {
           const imported = JSON.parse(evt.target.result);
-          if (imported && typeof imported === "object") {
-            if (imported.read) state.read = new Set(imported.read);
-            if (imported.exDone) state.exDone = new Set(imported.exDone);
-            if (imported.badges) state.badges = new Set(imported.badges);
-            if (imported.best !== undefined) state.best = imported.best;
-            if (imported.attempts !== undefined) state.attempts = imported.attempts;
-            if (imported.wrongs) state.wrongs = imported.wrongs;
-            if (imported.streak) state.streak = imported.streak;
-            if (imported.cardReviews) state.cardReviews = imported.cardReviews;
-
-            // Sauvegarder dans localStorage
-            store.set("read", Array.from(state.read));
-            store.set("exDone", Array.from(state.exDone));
-            store.set("badges", Array.from(state.badges));
-            store.set("best", state.best);
-            store.set("attempts", state.attempts);
-            store.set("wrongs", state.wrongs);
-            store.set("streak", state.streak);
-            store.set("cardReviews", state.cardReviews);
-
-            toast("Progression restaurée avec succès !");
-            viewDashboard();
+          if (!imported || typeof imported !== "object" || Array.isArray(imported)) {
+            throw new Error("Format de fichier JSON invalide.");
           }
+
+          // Validation stricte de chaque champ
+          if (Array.isArray(imported.read)) {
+            const validChIds = new Set(C.chapters.map(c => c.id));
+            state.read = new Set(imported.read.filter(id => typeof id === "string" && validChIds.has(id)));
+          }
+          if (Array.isArray(imported.exDone)) {
+            state.exDone = new Set(imported.exDone.filter(id => typeof id === "string" && id.length <= 64));
+          }
+          if (Array.isArray(imported.badges)) {
+            const validBadgeIds = new Set((C.badges || []).map(b => b.id));
+            state.badges = new Set(imported.badges.filter(id => typeof id === "string" && validBadgeIds.has(id)));
+          }
+          if (imported.best && typeof imported.best === "object") {
+            const pct = Number(imported.best.pct);
+            const score = Number(imported.best.score);
+            const total = Number(imported.best.total);
+            if (isFinite(pct) && isFinite(score) && isFinite(total)) {
+              state.best = { pct: Math.min(100, Math.max(0, pct)), score, total };
+            }
+          }
+          if (typeof imported.attempts === "number" && isFinite(imported.attempts)) {
+            state.attempts = Math.max(0, Math.floor(imported.attempts));
+          }
+          if (Array.isArray(imported.wrongs)) {
+            state.wrongs = imported.wrongs.filter(w => w && typeof w.q === "string").slice(0, 100);
+          }
+          if (imported.streak && typeof imported.streak === "object") {
+            const count = Math.max(1, Math.floor(Number(imported.streak.count) || 1));
+            const last = typeof imported.streak.last === "string" ? imported.streak.last.slice(0, 10) : new Date().toISOString().slice(0, 10);
+            state.streak = { count, last };
+          }
+          if (imported.cardReviews && typeof imported.cardReviews === "object") {
+            state.cardReviews = imported.cardReviews;
+          }
+
+          // Sauvegarder dans localStorage
+          store.set("read", Array.from(state.read));
+          store.set("exDone", Array.from(state.exDone));
+          store.set("badges", Array.from(state.badges));
+          store.set("best", state.best);
+          store.set("attempts", state.attempts);
+          store.set("wrongs", state.wrongs);
+          store.set("streak", state.streak);
+          store.set("cardReviews", state.cardReviews);
+
+          toast("Progression validée et restaurée avec succès !");
+          viewDashboard();
         } catch (err) {
-          alert("Erreur lors de la lecture du fichier JSON : " + err.message);
+          alert("Erreur lors de la validation du fichier de sauvegarde : " + err.message);
         }
       };
       reader.readAsText(file);
