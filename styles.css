@@ -957,3 +957,30 @@ select.input { font-family: var(--sans); }
   .recap-card { border: 1px solid #ccc !important; box-shadow: none !important; page-break-inside: avoid; margin-bottom: 20px; }
   .recap-card h3 { color: #000 !important; }
 }
+
+/* Styles V2 : Badges, Glossaire, Pièges et Dashboard */
+.badge-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.badge-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+.term-card {
+  transition: border-color 0.2s ease;
+}
+.term-card:hover {
+  border-color: var(--brand);
+}
+.trap-card {
+  transition: transform 0.2s ease;
+}
+.trap-card:hover {
+  transform: translateY(-2px);
+}
+.stat-card {
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+

@@ -1856,3 +1856,147 @@ COURSE.exercises = [
     ]
   }
 ];
+
+/* ── Glossaire des termes clés ─────────────────────────────── */
+COURSE.glossary = [
+  {
+    "term": "Rabais",
+    "def": "Réduction accordée exceptionnellement sur le prix de vente pour compenser un défaut de qualité, une non-conformité ou un retard de livraison."
+  },
+  {
+    "term": "Remise",
+    "def": "Réduction commerciale habituelle accordée en fonction du volume important d'achats ou de la fidélité/qualité du client."
+  },
+  {
+    "term": "Ristourne",
+    "def": "Réduction commerciale globale calculée sur l'ensemble des opérations réalisées avec un client pendant une période donnée (trimestre, année)."
+  },
+  {
+    "term": "Escompte",
+    "def": "Réduction financière accordée au client qui s'acquitte de sa dette avant l'échéance ou au comptant."
+  },
+  {
+    "term": "Partie double",
+    "def": "Principe fondamental selon lequel toute opération se traduit par au moins un débit et un crédit d'égal montant (Débit = Crédit)."
+  },
+  {
+    "term": "Situation nette",
+    "def": "Richesse réelle des propriétaires de l'entité : Actif réel diminué de l'ensemble des dettes exigibles (égale aux capitaux propres)."
+  },
+  {
+    "term": "Amortissement",
+    "def": "Constatation comptable de la perte irréversible de valeur d'une immobilisation résultant de l'usage, du temps ou du progrès technique."
+  },
+  {
+    "term": "Provisions",
+    "def": "Passif dont l'échéance ou le montant n'est pas fixé de façon précise (risque prévisible ou dépréciation probable)."
+  },
+  {
+    "term": "Franco de port",
+    "def": "Clause de vente signifiant que les frais de transport des marchandises sont intégralement pris en charge par le fournisseur."
+  },
+  {
+    "term": "Débours",
+    "def": "Avance de fonds effectuée par le vendeur pour le compte d'un tiers (ex: paiement direct d'un transporteur), réclamée à l'identique sur la facture."
+  },
+  {
+    "term": "Consignation",
+    "def": "Prêt d'un emballage récupérable contre le dépôt d'une somme de garantie (dette du fournisseur 4194 / créance du client 4094)."
+  },
+  {
+    "term": "Effet de commerce",
+    "def": "Titre négociable payable à court terme représentant une créance d'argent (Lettre de change ou Billet à ordre)."
+  },
+  {
+    "term": "Agios",
+    "def": "Ensemble des intérêts d'escompte et des commissions bancaires prélevés par la banque lors de la négociation d'un effet de commerce."
+  },
+  {
+    "term": "TVA facturée",
+    "def": "Taxe sur la valeur ajoutée collectée par l'entreprise auprès de ses clients lors de la vente de biens ou services (dette fiscale compte 443)."
+  },
+  {
+    "term": "TVA récupérable",
+    "def": "Taxe sur la valeur ajoutée payée par l'entreprise sur ses achats professionnels, déductible de la TVA collectée (compte 445)."
+  }
+];
+
+/* ── Pièges fréquents d'examen & Astuces du Professeur ─────── */
+COURSE.traps = [
+  {
+    "title": "L'escompte sur le port",
+    "trap": "Calculer l'escompte financier après avoir ajouté les frais de port.",
+    "rule": "L'escompte rémunère uniquement le paiement anticipé des marchandises : il se calcule TOUJOURS sur le Net commercial, AVANT l'addition du transport et de la TVA."
+  },
+  {
+    "title": "Comptabilisation des 3R sur facture de doit",
+    "trap": "Enregistrer les rabais, remises ou ristournes figurant sur la facture de doit dans les comptes 6019 ou 7019.",
+    "rule": "Les 3R sur facture de doit ne sont JAMAIS comptabilisés. Les achats (601) et ventes (701) sont enregistrés directement pour leur Net commercial."
+  },
+  {
+    "title": "Fournisseur d'immobilisation vs Fournisseur d'exploitation",
+    "trap": "Utiliser le compte 401 lors de l'acquisition d'un matériel ou d'un véhicule à crédit.",
+    "rule": "Le compte 401 concerne exclusivement les achats de marchandises et matières. Pour un bien durable (classe 2), il faut utiliser le compte 481 Fournisseurs d'investissements."
+  },
+  {
+    "title": "Sens des comptes 4091 et 4191",
+    "trap": "Confondre le compte d'avance versée et le compte d'avance reçue.",
+    "rule": "4091 est un compte d'actif (créance sur le fournisseur jusqu'à livraison) alors que 4191 est un compte de passif (dette envers le client pour l'argent encaissé)."
+  },
+  {
+    "title": "TVA sur emballages consignés",
+    "trap": "Appliquer la TVA de 18 % sur le montant de la consignation d'emballages.",
+    "rule": "La consignation est un simple prêt avec cautionnement financier. Elle n'est pas une vente et ne supporte JAMAIS la TVA."
+  },
+  {
+    "title": "Sens normal du compte Banque créditeur",
+    "trap": "Penser qu'un compte 521 ne peut jamais avoir de solde créditeur.",
+    "rule": "En cas de découvert bancaire, le compte 521 présente un solde créditeur qui figure au passif du bilan (Trésorerie-Passif)."
+  }
+];
+
+/* ── Badges & Récompenses de gamification ─────────────────── */
+COURSE.badges = [
+  {
+    "id": "first_read",
+    "icon": "book",
+    "title": "Premier Pas",
+    "desc": "Lire son premier chapitre de cours"
+  },
+  {
+    "id": "all_read",
+    "icon": "check",
+    "title": "Érudit SYSCOHADA",
+    "desc": "Lire l'intégralité des 11 chapitres"
+  },
+  {
+    "id": "quiz_first",
+    "icon": "bolt",
+    "title": "Première Évaluation",
+    "desc": "Terminer un premier quiz"
+  },
+  {
+    "id": "quiz_ace",
+    "icon": "target",
+    "title": "Major de Promo",
+    "desc": "Obtenir un score parfait de 100 % à un quiz"
+  },
+  {
+    "id": "streak_3",
+    "icon": "clock",
+    "title": "Assiduité",
+    "desc": "Réviser 3 jours consécutifs"
+  },
+  {
+    "id": "ex_master",
+    "icon": "calc",
+    "title": "Praticien Comptable",
+    "desc": "Résoudre et valider tous les exercices interactifs"
+  },
+  {
+    "id": "calc_guru",
+    "icon": "sort",
+    "title": "Maître de la Facture",
+    "desc": "Manipuler et valider le simulateur de facture"
+  }
+];

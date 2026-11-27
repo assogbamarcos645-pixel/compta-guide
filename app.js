@@ -21,10 +21,46 @@
     best: store.get("best", null),
     attempts: store.get("attempts", 0),
     wrongs: store.get("wrongs", []),
-    exDone: new Set(store.get("exDone", []))
+    exDone: new Set(store.get("exDone", [])),
+    badges: new Set(store.get("badges", [])),
+    streak: store.get("streak", { count: 1, last: new Date().toISOString().slice(0, 10) }),
+    cardReviews: store.get("cardReviews", {}) // compte n -> { level: 0..4, nextReview: timestamp }
   };
   const saveWrongs = () => store.set("wrongs", state.wrongs);
   const saveExDone = () => store.set("exDone", Array.from(state.exDone));
+  const saveBadges = () => store.set("badges", Array.from(state.badges));
+  const saveStreak = () => store.set("streak", state.streak);
+  const saveCardReviews = () => store.set("cardReviews", state.cardReviews);
+
+  // Vérifier et incrémenter le streak
+  const checkStreak = () => {
+    const today = new Date().toISOString().slice(0, 10);
+    const last = state.streak.last;
+    if (last === today) return;
+    const diffDays = Math.round((new Date(today) - new Date(last)) / (1000 * 60 * 60 * 24));
+    if (diffDays === 1) {
+      state.streak.count++;
+      if (state.streak.count >= 3) unlockBadge('streak_3');
+    } else if (diffDays > 1) {
+      state.streak.count = 1;
+    }
+    state.streak.last = today;
+    saveStreak();
+  };
+  checkStreak();
+
+  // Débloquer un badge
+  const unlockBadge = (id) => {
+    if (!state.badges.has(id)) {
+      state.badges.add(id);
+      saveBadges();
+      const bObj = (C.badges || []).find(b => b.id === id);
+      if (bObj) {
+        toast("Trophée débloqué : " + bObj.title + " !");
+        confetti();
+      }
+    }
+  };
   const saveRead = () => store.set("read", Array.from(state.read));
 
   /* ── Utilitaires ─────────────────────────────────────────── */
@@ -168,8 +204,11 @@
   const TOOLS = [
     { id: "facture", label: "Calculateur de facture", icon: "calc", desc: "Du montant brut au net à payer, étape par étape, avec l'écriture au journal." },
     { id: "compte-t", label: "Compte en T", icon: "t", desc: "Passez des opérations au débit ou au crédit et observez le solde évoluer." },
-    { id: "fiches", label: "Fiches du plan comptable", icon: "cards", desc: "Mémorisez les numéros de comptes essentiels avec des cartes à retourner." },
-    { id: "bilan", label: "Classer au bilan", icon: "sort", desc: "Rangez chaque poste à l'actif ou au passif et vérifiez vos réflexes." }
+    { id: "fiches", label: "Fiches du plan comptable", icon: "cards", desc: "Mémorisez les comptes avec système de répétition espacée." },
+    { id: "bilan", label: "Classer au bilan", icon: "sort", desc: "Rangez chaque poste à l'actif ou au passif et vérifiez vos réflexes." },
+    { id: "amortissement", label: "Tableau d'amortissement", icon: "list", desc: "Calcul linéaire ou dégressif, annuités et écritures de dotation." },
+    { id: "tva-declaration", label: "Déclaration de TVA", icon: "target", desc: "Simulateur de bordereau mensuel : TVA due ou crédit de TVA." },
+    { id: "generator", label: "Générateur infini", icon: "bolt", desc: "Génération illimitée d'exercices à montants aléatoires pour s'entraîner." }
   ];
 
   function viewHome() {
@@ -406,7 +445,295 @@
         <div id="toolBody" class="fade-in"></div>
       </div>`;
     const el = $("#toolBody");
-    return ({ facture: toolFacture, "compte-t": toolCompteT, fiches: toolFiches, bilan: toolBilan })[t.id](el);
+    const map = {
+      facture: toolFacture,
+      "compte-t": toolCompteT,
+      fiches: toolFiches,
+      bilan: toolBilan,
+      amortissement: toolAmortissement,
+      "tva-declaration": toolTvaDeclaration,
+      generator: toolGenerator
+    };
+    return (map[t.id] || toolFacture)(el);
+  }
+
+
+  /* ── Simulateur d'amortissement (Linéaire) ────────────────── */
+  function toolAmortissement(el) {
+    let vo = 5000000, duree = 5, annee0 = 2026;
+
+    el.innerHTML = `
+      <div class="tool">
+        <div class="panel">
+          <h2>Paramètres de l'immobilisation</h2>
+          <p class="sub">Calculez le plan d'amortissement linéaire selon les normes du SYSCOHADA.</p>
+          <div class="field">
+            <label for="am-vo">Valeur d'origine HT (F CFA)</label>
+            <input class="input" id="am-vo" type="number" min="100000" step="100000" value="${vo}">
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="am-dur">Durée d'utilisation (ans)</label>
+              <input class="input" id="am-dur" type="number" min="1" max="50" value="${duree}">
+            </div>
+            <div class="field">
+              <label for="am-an">Année de mise en service</label>
+              <input class="input" id="am-an" type="number" min="2000" max="2050" value="${annee0}">
+            </div>
+          </div>
+          <div class="field" style="margin-top:20px">
+            <label>Types de biens usuels</label>
+            <div class="presets">
+              <button class="chip" data-vo="12000000" data-dur="5" type="button">Matériel de transport (5 ans)</button>
+              <button class="chip" data-vo="2500000" data-dur="4" type="button">Matériel informatique (4 ans)</button>
+              <button class="chip" data-vo="30000000" data-dur="20" type="button">Bâtiment commercial (20 ans)</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Plan d'amortissement</h2>
+          <div id="am-table" style="overflow-x:auto;margin-top:14px"></div>
+          <div class="journal-box">
+            <h3>Écriture de dotation annuelle (31/12)</h3>
+            <div id="am-journal"></div>
+          </div>
+        </div>
+      </div>`;
+
+    const compute = () => {
+      const rate = 100 / duree;
+      const annuite = vo / duree;
+      let cumul = 0;
+
+      let html = `
+        <table class="journal-table" style="min-width:440px">
+          <thead>
+            <tr>
+              <th>Année</th>
+              <th style="text-align:right">Base</th>
+              <th style="text-align:right">Taux</th>
+              <th style="text-align:right">Annuité</th>
+              <th style="text-align:right">Amort. cumulés</th>
+              <th style="text-align:right">VNC</th>
+            </tr>
+          </thead>
+          <tbody>`;
+
+      for (let y = 0; y < duree; y++) {
+        cumul += annuite;
+        const vnc = vo - cumul;
+        html += `
+          <tr>
+            <td><b>${annee0 + y}</b></td>
+            <td class="num">${fmt(vo)}</td>
+            <td class="num">${rate.toFixed(1)} %</td>
+            <td class="num" style="color:var(--brand)">${fmt(annuite)}</td>
+            <td class="num">${fmt(cumul)}</td>
+            <td class="num"><b>${fmt(Math.max(0, vnc))}</b></td>
+          </tr>`;
+      }
+
+      html += `</tbody></table>`;
+      $("#am-table").innerHTML = html;
+
+      $("#am-journal").innerHTML = `
+        <table class="journal-table">
+          <thead><tr><th>Compte</th><th>Intitulé</th><th style="text-align:right">Débit</th><th style="text-align:right">Crédit</th></tr></thead>
+          <tbody>
+            <tr><td class="acc">681</td><td>Dotations aux amortissements d'exploitation</td><td class="num">${fmt(annuite)}</td><td class="num"></td></tr>
+            <tr class="cr"><td class="acc">28x</td><td>Amortissements de l'immobilisation</td><td class="num"></td><td class="num">${fmt(annuite)}</td></tr>
+            <tr><td></td><td><b>Totaux</b></td><td class="num"><b>${fmt(annuite)}</b></td><td class="num"><b>${fmt(annuite)}</b></td></tr>
+          </tbody>
+        </table>`;
+    };
+
+    $("#am-vo").addEventListener("input", (e) => { vo = num(e.target.value); compute(); });
+    $("#am-dur").addEventListener("input", (e) => { duree = Math.max(1, num(e.target.value)); compute(); });
+    $("#am-an").addEventListener("input", (e) => { annee0 = num(e.target.value); compute(); });
+
+    el.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-vo]");
+      if (b) {
+        vo = +b.dataset.vo;
+        duree = +b.dataset.dur;
+        $("#am-vo").value = vo;
+        $("#am-dur").value = duree;
+        compute();
+      }
+    });
+
+    compute();
+  }
+
+  /* ── Simulateur de Déclaration de TVA ──────────────────────── */
+  function toolTvaDeclaration(el) {
+    let ventes = 15000000, achats = 9000000, report = 250000;
+
+    el.innerHTML = `
+      <div class="tool">
+        <div class="panel">
+          <h2>Déclaration mensuelle de TVA</h2>
+          <p class="sub">Remplissez les montants HT réalisés au cours du mois (Taux légal Bénin : 18 %).</p>
+          <div class="field">
+            <label for="tva-v">Ventes imposables HT (F CFA)</label>
+            <input class="input" id="tva-v" type="number" min="0" step="50000" value="${ventes}">
+          </div>
+          <div class="field">
+            <label for="tva-a">Achats de biens & services déductibles HT (F CFA)</label>
+            <input class="input" id="tva-a" type="number" min="0" step="50000" value="${achats}">
+          </div>
+          <div class="field">
+            <label for="tva-rep">Crédit de TVA du mois précédent à reporter (F CFA)</label>
+            <input class="input" id="tva-rep" type="number" min="0" step="10000" value="${report}">
+          </div>
+        </div>
+
+        <div class="panel">
+          <h2>Résultat de la liquidation</h2>
+          <div id="tva-res" style="margin-top:16px"></div>
+          <div class="journal-box">
+            <h3>Écriture au journal de fin de mois</h3>
+            <div id="tva-journal"></div>
+          </div>
+        </div>
+      </div>`;
+
+    const compute = () => {
+      const fact = ventes * 0.18;
+      const recup = achats * 0.18;
+      const totalDeduc = recup + report;
+      const diff = fact - totalDeduc;
+
+      const isDue = diff >= 0;
+      $("#tva-res").innerHTML = `
+        <div class="invoice">
+          <div class="invoice-row"><span class="lbl">TVA facturée collectée (18 % de ${fmt(ventes)})</span><span class="val plus">+ ${fmt(fact)}</span></div>
+          <div class="invoice-row"><span class="lbl">TVA récupérable sur achats (18 % de ${fmt(achats)})</span><span class="val minus">− ${fmt(recup)}</span></div>
+          ${report > 0 ? `<div class="invoice-row"><span class="lbl">Crédit de TVA antérieur reporté</span><span class="val minus">− ${fmt(report)}</span></div>` : ''}
+          <div class="invoice-row total"><span class="lbl">Total TVA déductible</span><span class="val">${fmt(totalDeduc)}</span></div>
+          <div class="invoice-row nap">
+            <span class="lbl">${isDue ? 'TVA DUE À REVERSER AU TRÉSOR' : 'CRÉDIT DE TVA À REPORTER'}</span>
+            <span class="val" style="color:${isDue ? 'var(--bad)' : 'var(--ok)'}">${fmt(Math.abs(diff))} F CFA</span>
+          </div>
+        </div>`;
+
+      if (isDue) {
+        $("#tva-journal").innerHTML = `
+          <table class="journal-table">
+            <thead><tr><th>Compte</th><th>Intitulé</th><th style="text-align:right">Débit</th><th style="text-align:right">Crédit</th></tr></thead>
+            <tbody>
+              <tr><td class="acc">443</td><td>État, TVA facturée</td><td class="num">${fmt(fact)}</td><td class="num"></td></tr>
+              <tr class="cr"><td class="acc">445</td><td>État, TVA récupérable</td><td class="num"></td><td class="num">${fmt(recup)}</td></tr>
+              ${report > 0 ? `<tr class="cr"><td class="acc">4449</td><td>État, crédit de TVA (reporté)</td><td class="num"></td><td class="num">${fmt(report)}</td></tr>` : ''}
+              <tr class="cr"><td class="acc">4441</td><td>État, TVA due (à payer)</td><td class="num"></td><td class="num"><b>${fmt(diff)}</b></td></tr>
+            </tbody>
+          </table>`;
+      } else {
+        $("#tva-journal").innerHTML = `
+          <table class="journal-table">
+            <thead><tr><th>Compte</th><th>Intitulé</th><th style="text-align:right">Débit</th><th style="text-align:right">Crédit</th></tr></thead>
+            <tbody>
+              <tr><td class="acc">443</td><td>État, TVA facturée</td><td class="num">${fmt(fact)}</td><td class="num"></td></tr>
+              <tr><td class="acc">4449</td><td>État, crédit de TVA à reporter</td><td class="num"><b>${fmt(Math.abs(diff))}</b></td><td class="num"></td></tr>
+              <tr class="cr"><td class="acc">445</td><td>État, TVA récupérable</td><td class="num"></td><td class="num">${fmt(recup)}</td></tr>
+              ${report > 0 ? `<tr class="cr"><td class="acc">4449</td><td>État, crédit de TVA (antérieur)</td><td class="num"></td><td class="num">${fmt(report)}</td></tr>` : ''}
+            </tbody>
+          </table>`;
+      }
+    };
+
+    $("#tva-v").addEventListener("input", (e) => { ventes = num(e.target.value); compute(); });
+    $("#tva-a").addEventListener("input", (e) => { achats = num(e.target.value); compute(); });
+    $("#tva-rep").addEventListener("input", (e) => { report = num(e.target.value); compute(); });
+
+    compute();
+  }
+
+  /* ── Générateur infini d'exercices à montants aléatoires ──── */
+  function toolGenerator(el) {
+    let currentTask = null;
+
+    const generateTask = () => {
+      const mb = Math.round((Math.random() * 80 + 10)) * 50000; // 500 000 à 4 500 000
+      const rem = Math.random() > 0.3 ? (Math.random() > 0.5 ? 10 : 5) : 0;
+      const esc = Math.random() > 0.4 ? (Math.random() > 0.5 ? 2 : 1) : 0;
+      const port = Math.random() > 0.5 ? Math.round((Math.random() * 8 + 2)) * 10000 : 0;
+
+      const nc = rem ? mb * (1 - rem / 100) : mb;
+      const escompte = esc ? nc * (esc / 100) : 0;
+      const nf = nc - escompte;
+      const ht = nf + port;
+      const tva = ht * 0.18;
+      const nap = ht + tva;
+
+      currentTask = { mb, rem, esc, port, nc, escompte, nf, ht, tva, nap };
+      render();
+    };
+
+    const render = () => {
+      const t = currentTask;
+      el.innerHTML = `
+        <div class="tool">
+          <div class="panel">
+            <h2>Énoncé généré aléatoirement</h2>
+            <p class="sub">Résolvez la facture et indiquez le Net à payer (TVA 18 %).</p>
+            <div style="background:var(--bg);padding:18px;border-radius:12px;font-size:15px;line-height:1.7;margin-bottom:20px">
+              L'entreprise réalise une vente de marchandises :<br>
+              • <strong>Montant brut :</strong> ${fmt(t.mb)} F CFA<br>
+              ${t.rem ? `• <strong>Remise commerciale :</strong> ${t.rem} %<br>` : ''}
+              ${t.esc ? `• <strong>Escompte financier :</strong> ${t.esc} %<br>` : ''}
+              ${t.port ? `• <strong>Frais de transport forfaitaires :</strong> ${fmt(t.port)} F CFA HT<br>` : ''}
+              • <strong>Taux de TVA :</strong> 18 %
+            </div>
+            <div class="field">
+              <label for="gen-ans">Quel est le Net à payer (TTC) ?</label>
+              <input class="input" id="gen-ans" type="number" placeholder="Entrez votre calcul en F CFA">
+            </div>
+            <div style="display:flex;gap:12px;margin-top:16px">
+              <button class="btn btn-primary" id="btn-check-gen" type="button">Vérifier ma réponse</button>
+              <button class="btn btn-outline" id="btn-next-gen" type="button">${icon('refresh', 'ic-sm')} Autre énoncé</button>
+            </div>
+            <div id="gen-feedback" style="margin-top:18px"></div>
+          </div>
+
+          <div class="panel">
+            <h2>Solution détaillée de la facture</h2>
+            <div id="gen-sol" style="opacity:0.25;transition:opacity 0.3s">
+              <div class="invoice">
+                <div class="invoice-row"><span class="lbl">Montant brut</span><span class="val">${fmt(t.mb)}</span></div>
+                ${t.rem ? `<div class="invoice-row minus"><span class="lbl">Remise ${t.rem} %</span><span class="val">− ${fmt(t.mb * t.rem / 100)}</span></div>` : ''}
+                <div class="invoice-row total"><span class="lbl">Net commercial</span><span class="val">${fmt(t.nc)}</span></div>
+                ${t.esc ? `<div class="invoice-row minus"><span class="lbl">Escompte ${t.esc} %</span><span class="val">− ${fmt(t.escompte)}</span></div>` : ''}
+                ${t.esc ? `<div class="invoice-row total"><span class="lbl">Net financier</span><span class="val">${fmt(t.nf)}</span></div>` : ''}
+                ${t.port ? `<div class="invoice-row plus"><span class="lbl">Port HT</span><span class="val">+ ${fmt(t.port)}</span></div>` : ''}
+                <div class="invoice-row plus"><span class="lbl">TVA 18 %</span><span class="val">+ ${fmt(t.tva)}</span></div>
+                <div class="invoice-row nap"><span class="lbl">Net à payer</span><span class="val">${fmt(t.nap)}</span></div>
+              </div>
+            </div>
+            <p id="sol-hint" style="color:var(--muted);font-size:13px;margin-top:14px;text-align:center">La solution sera révélée après votre réponse.</p>
+          </div>
+        </div>`;
+
+      $('#btn-check-gen').addEventListener('click', () => {
+        const val = num($('#gen-ans').value);
+        const diff = Math.abs(val - t.nap);
+        $('#gen-sol').style.opacity = '1';
+        $('#sol-hint').style.display = 'none';
+
+        if (diff < 5) {
+          confetti();
+          unlockBadge('calc_guru');
+          $('#gen-feedback').innerHTML = `<div class="feedback ok"><b>${icon('check', 'ic-sm')} Excellent !</b><p>Votre calcul est parfaitement exact (${fmt(t.nap)} F CFA).</p></div>`;
+        } else {
+          $('#gen-feedback').innerHTML = `<div class="feedback ko"><b>${icon('x', 'ic-sm')} Pas tout à fait...</b><p>Le Net à payer attendu est de <strong>${fmt(t.nap)} F CFA</strong>. Consultez la cascade à droite pour analyser vos écarts.</p></div>`;
+        }
+      });
+
+      $('#btn-next-gen').addEventListener('click', generateTask);
+    };
+
+    generateTask();
   }
 
   /* ── Calculateur de facture ──────────────────────────────── */
@@ -1340,6 +1667,8 @@
       store.set("attempts", state.attempts);
       const isBest = !state.best || pct > state.best.pct;
       if (isBest) { state.best = { pct, score, total }; store.set("best", state.best); }
+      if (pct === 100) unlockBadge("quiz_ace");
+      if (state.attempts >= 1) unlockBadge("first_quiz");
 
       const toReview = [...new Set(Q.wrongs.map((w) => w.ch))].map(chapterIndex).filter((k) => k >= 0).sort((a, b) => a - b);
 
@@ -1471,7 +1800,377 @@
     return { open, close };
   })();
 
+  
   /* ============================================================
+     GLOSSAIRE & PIÈGES FRÉQUENTS
+     ============================================================ */
+  function viewGlossary() {
+    app.innerHTML = `
+      <div class="wrap">
+        <div class="page-head fade-in">
+          <span class="eyebrow">Lexique & Conseils</span>
+          <h1>Glossaire & Pièges d'examen</h1>
+          <p>Les 15 définitions incontournables du SYSCOHADA et les 6 erreurs classiques à éviter absolument le jour du contrôle.</p>
+        </div>
+
+        <div class="filter-bar fade-in" style="margin-bottom:24px;display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+          <div style="position:relative;flex:1;min-width:260px">
+            <input class="input" id="glossarySearch" type="text" placeholder="Rechercher un terme, un principe, un mot-clé..." aria-label="Rechercher dans le glossaire">
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-primary" id="tab-btn-glossary" type="button">Termes clés (${(C.glossary || []).length})</button>
+            <button class="btn btn-outline" id="tab-btn-traps" type="button">Pièges d'examen (${(C.traps || []).length})</button>
+          </div>
+        </div>
+
+        <div id="glossarySection" class="fade-in">
+          <div class="recap-grid" id="glossaryGrid">
+            ${(C.glossary || []).map(g => `
+              <div class="recap-card term-card" data-term="${esc(g.term.toLowerCase())} ${esc(g.def.toLowerCase())}">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px">
+                  <h3 style="margin:0;color:var(--brand)">${esc(g.term)}</h3>
+                  <span class="badge-pill" style="font-size:11px;background:var(--bg-subtle);color:var(--muted);padding:2px 8px;border-radius:12px">${esc(g.badge || "SYSCOHADA")}</span>
+                </div>
+                <p style="margin:0;font-size:14px;line-height:1.6;color:var(--fg-dim)">${esc(g.def)}</p>
+              </div>`).join("")}
+          </div>
+        </div>
+
+        <div id="trapsSection" class="fade-in" style="display:none">
+          <div class="traps-grid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));gap:16px">
+            ${(C.traps || []).map((t, idx) => `
+              <div class="panel trap-card" style="border-left:4px solid var(--bad);padding:20px;background:var(--card-bg)">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+                  <span style="background:rgba(239, 68, 68, 0.15);color:var(--bad);width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px">${idx + 1}</span>
+                  <h3 style="margin:0;font-size:16px;color:var(--fg)">${esc(t.title)}</h3>
+                </div>
+                <p style="color:var(--bad);font-weight:600;font-size:14px;margin-bottom:6px">❌ L'erreur : ${esc(t.wrong)}</p>
+                <p style="color:var(--ok);font-weight:600;font-size:14px;margin-bottom:8px">✔️ La règle juste : ${esc(t.right)}</p>
+                <p style="color:var(--muted);font-size:13px;line-height:1.5;margin:0">💡 ${esc(t.tip)}</p>
+              </div>`).join("")}
+          </div>
+        </div>
+      </div>`;
+
+    const gSearch = $("#glossarySearch");
+    const gGrid = $("#glossaryGrid");
+    const gSec = $("#glossarySection");
+    const tSec = $("#trapsSection");
+    const btnG = $("#tab-btn-glossary");
+    const btnT = $("#tab-btn-traps");
+
+    btnG.addEventListener("click", () => {
+      btnG.className = "btn btn-primary";
+      btnT.className = "btn btn-outline";
+      gSec.style.display = "block";
+      tSec.style.display = "none";
+    });
+
+    btnT.addEventListener("click", () => {
+      btnT.className = "btn btn-primary";
+      btnG.className = "btn btn-outline";
+      gSec.style.display = "none";
+      tSec.style.display = "block";
+    });
+
+    if (gSearch) {
+      gSearch.addEventListener("input", () => {
+        const q = gSearch.value.trim().toLowerCase();
+        $$(".term-card", gGrid).forEach(card => {
+          const match = card.getAttribute("data-term").includes(q);
+          card.style.display = match ? "block" : "none";
+        });
+      });
+    }
+  }
+
+  // Générateur d'examen blanc avec corrigé détachable
+  function generateExamPaper() {
+    const questionsPool = [...C.questions].sort(() => 0.5 - Math.random()).slice(0, 10);
+    const dateStr = new Date().toLocaleDateString("fr-FR");
+
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      alert("Veuillez autoriser les fenêtres pop-up pour générer le sujet d'examen imprimable.");
+      return;
+    }
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html lang="fr">
+      <head>
+        <meta charset="UTF-8">
+        <title>Examen Blanc — Initiation à la Comptabilité Générale I</title>
+        <style>
+          body { font-family: "Times New Roman", serif; margin: 40px; color: #111; line-height: 1.5; font-size: 13pt; }
+          .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 25px; }
+          .header h1 { margin: 5px 0; font-size: 17pt; text-transform: uppercase; }
+          .header p { margin: 3px 0; font-size: 11pt; }
+          .meta-box { display: flex; justify-content: space-between; margin-bottom: 25px; font-size: 12pt; }
+          .section-title { font-size: 14pt; font-weight: bold; margin-top: 25px; margin-bottom: 12px; border-bottom: 1px solid #444; padding-bottom: 4px; text-transform: uppercase; }
+          .q-item { margin-bottom: 16px; page-break-inside: avoid; }
+          .q-title { font-weight: bold; margin-bottom: 5px; }
+          .q-choices { margin-left: 20px; list-style-type: upper-alpha; }
+          .q-choices li { margin-bottom: 3px; }
+          .page-break { page-break-before: always; margin-top: 40px; border-top: 2px dashed #999; padding-top: 30px; }
+          .corrigé-title { text-align: center; font-size: 17pt; font-weight: bold; margin-bottom: 20px; color: #111; }
+          .answer-item { margin-bottom: 14px; page-break-inside: avoid; }
+          @media print {
+            .no-print { display: none; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="no-print" style="background:#e0e7ff;padding:12px;text-align:center;margin-bottom:20px;border-radius:6px;font-family:sans-serif;font-size:12pt">
+          <strong>Aperçu du sujet d'examen blanc.</strong> Utilisez le bouton ci-contre pour imprimer ou enregistrer en PDF : 
+          <button onclick="window.print()" style="padding:6px 14px;font-weight:bold;cursor:pointer;margin-left:10px">Imprimer / Exporter PDF</button>
+        </div>
+
+        <div class="header">
+          <p><strong>UNIVERSITÉ / INSTITUT LES COURS SONOU — L1 INFORMATIQUE</strong></p>
+          <p>Enseignant : Dr Rock Stanislas HINVI · SYSCOHADA Révisé</p>
+          <h1>Épreuve d'Initiation à la Comptabilité Générale I</h1>
+          <p>Session d'entraînement · Durée conseillée : 1h30 · Calculatrice autorisée</p>
+        </div>
+
+        <div class="meta-box">
+          <div>Nom & Prénom(s) : ..........................................................................</div>
+          <div>Date : ${dateStr}</div>
+        </div>
+
+        <div class="section-title">Partie I : Questionnaire à Choix Multiple (${questionsPool.length} points)</div>
+        <p><em>Pour chaque question, cochez la seule réponse exacte parmi les propositions formulées.</em></p>
+
+        ${questionsPool.map((q, idx) => `
+          <div class="q-item">
+            <div class="q-title">Question ${idx + 1} : ${esc(q.q)}</div>
+            <ol class="q-choices">
+              ${q.a.map(opt => `<li>[ &nbsp; ] &nbsp; ${esc(opt)}</li>`).join("")}
+            </ol>
+          </div>`).join("")}
+
+        <div class="section-title">Partie II : Cas Pratique de Synthèse (Facturation & Journalisation - 10 points)</div>
+        <p>L'entreprise « SONOU-TECH SA » réalise au cours du mois de novembre les opérations suivantes sous le taux de TVA en vigueur au Bénin (18 %) :</p>
+        <p><strong>Opération 1 :</strong> Achat de marchandises pour un montant brut de 1 500 000 F CFA. Remise de 5 %, Escompte de règlement de 2 % accordé pour paiement sous huitaine, Port facturé : 45 000 F CFA HT. Règlement prévu dans 30 jours.</p>
+        <p><strong>Opération 2 :</strong> Vente de marchandises d'une valeur brute de 2 000 000 F CFA, rabais 2%, TVA 18%, encaissée par chèque bancaire.</p>
+        <p><strong>Travail à faire :</strong></p>
+        <ol>
+          <li>Présenter la facture n° V-101 complète de l'opération 1 en détaillant toutes les étapes de calcul.</li>
+          <li>Enregistrer les deux opérations au journal de l'entreprise dans le strict respect des comptes SYSCOHADA.</li>
+        </ol>
+
+        <!-- PAGE BREAK : CORRIGÉ OFFICIEL DÉTACHABLE -->
+        <div class="page-break">
+          <div class="corrigé-title">CORRIGÉ OFFICIEL & GRILLE DE NOTATION (DÉTACHABLE)</div>
+          <p style="text-align:center;font-style:italic;margin-bottom:25px">À détacher avant l'épreuve par le surveillant ou pour autocorrection.</p>
+
+          <div class="section-title">Corrigé de la Partie I : Q.C.M.</div>
+          ${questionsPool.map((q, idx) => `
+            <div class="answer-item">
+              <strong>Q${idx + 1} : Réponse correcte -> Option ${String.fromCharCode(65 + q.good)} : ${esc(q.a[q.good])}</strong>
+              <div style="font-size:12pt;color:#333;margin-top:3px"><em>Justification SYSCOHADA :</em> ${esc(q.e)}</div>
+            </div>`).join("")}
+
+          <div class="section-title">Corrigé de la Partie II : Cas Pratique</div>
+          <p><strong>1. Décompte de la facture de l'Opération 1 :</strong></p>
+          <ul>
+            <li>Brut HT = 1 500 000 F CFA</li>
+            <li>Remise 5% = 75 000 F CFA -> Net Commercial = 1 425 000 F CFA</li>
+            <li>Escompte 2% = 28 500 F CFA -> Net Financier = 1 396 500 F CFA</li>
+            <li>Port forfaitaire = 45 000 F CFA</li>
+            <li>Base HT soumise à TVA = Net Financier (1 396 500) + Port (45 000) = 1 441 500 F CFA</li>
+            <li>TVA 18% = 1 441 500 × 18% = 259 470 F CFA</li>
+            <li>Net à payer TTC = 1 441 500 + 259 470 = 1 700 970 F CFA</li>
+          </ul>
+          <p><strong>2. Schéma d'imputation au journal :</strong></p>
+          <ul>
+            <li>Débit 601 Achats de marchandises (Net Commercial : 1 425 000)</li>
+            <li>Débit 611 Transports sur achats (Port : 45 000)</li>
+            <li>Débit 4452 État, TVA récupérable sur achats (259 470)</li>
+            <li>Crédit 773 Escomptes obtenus (28 500)</li>
+            <li>Crédit 401 Fournisseurs (Net à payer TTC : 1 700 970)</li>
+          </ul>
+        </div>
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
+  }
+
+  /* ============================================================
+     TABLEAU DE BORD, GAMIFICATION & PROGRESSION
+     ============================================================ */
+  function viewDashboard() {
+    const unlockedCount = (state.badges || []).length;
+    const totalBadges = (C.badges || []).length;
+    const streakDays = (state.streak && state.streak.count) || 0;
+    const readCount = (state.readChapters || []).length;
+    const totalChapters = C.chapters.length;
+    const bestPct = (state.best && state.best.pct) || 0;
+
+    app.innerHTML = `
+      <div class="wrap">
+        <div class="page-head fade-in">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px">
+            <div>
+              <span class="eyebrow">Mon Espace de Révision</span>
+              <h1>Tableau de bord & Progression</h1>
+              <p>Suivez vos compétences, trophées débloqués, régularité et exportez vos examens blancs d'entraînement.</p>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <button class="btn btn-primary" id="btn-exam-download" type="button">
+                <svg class="ic" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                Générer un sujet d'examen blanc (PDF)
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4 KPI cartes -->
+        <div class="stats-grid fade-in" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:16px;margin-bottom:28px">
+          <div class="panel stat-card" style="text-align:center;padding:20px">
+            <div style="font-size:32px;margin-bottom:4px">🔥 ${streakDays}</div>
+            <strong style="display:block;font-size:15px;color:var(--fg)">Jours consécutifs</strong>
+            <small style="color:var(--muted)">Streak d'apprentissage</small>
+          </div>
+          <div class="panel stat-card" style="text-align:center;padding:20px">
+            <div style="font-size:32px;margin-bottom:4px">🏆 ${unlockedCount} / ${totalBadges}</div>
+            <strong style="display:block;font-size:15px;color:var(--fg)">Trophées débloqués</strong>
+            <small style="color:var(--muted)">Succès d'apprentissage</small>
+          </div>
+          <div class="panel stat-card" style="text-align:center;padding:20px">
+            <div style="font-size:32px;margin-bottom:4px">📖 ${readCount} / ${totalChapters}</div>
+            <strong style="display:block;font-size:15px;color:var(--fg)">Chapitres étudiés</strong>
+            <small style="color:var(--muted)">${Math.round((readCount/totalChapters)*100)}% du programme</small>
+          </div>
+          <div class="panel stat-card" style="text-align:center;padding:20px">
+            <div style="font-size:32px;margin-bottom:4px">🎯 ${bestPct}%</div>
+            <strong style="display:block;font-size:15px;color:var(--fg)">Meilleur score Quiz</strong>
+            <small style="color:var(--muted)">${state.attempts} tentative${state.attempts > 1 ? "s" : ""}</small>
+          </div>
+        </div>
+
+        <!-- Section Trophées / Badges -->
+        <div class="panel fade-in" style="margin-bottom:28px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+            <div>
+              <h2 style="margin:0;font-size:20px">Trophées & Badges</h2>
+              <p class="sub" style="margin:4px 0 0 0">Accomplissez les défis pour débloquer toutes les distinctions.</p>
+            </div>
+            <span style="font-weight:700;color:var(--brand)">${unlockedCount} validé${unlockedCount > 1 ? "s" : ""}</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:16px">
+            ${(C.badges || []).map(b => {
+              const isUnlocked = (state.badges || []).includes(b.id);
+              return `
+                <div class="panel badge-card" style="padding:16px;background:${isUnlocked ? 'var(--bg-subtle)' : 'var(--card-bg)'};border:1px solid ${isUnlocked ? 'var(--brand)' : 'var(--border)'};opacity:${isUnlocked ? '1' : '0.6'};display:flex;align-items:center;gap:14px;border-radius:12px">
+                  <div style="font-size:32px;filter:${isUnlocked ? 'none' : 'grayscale(1)'}">${b.icon}</div>
+                  <div style="flex:1">
+                    <div style="display:flex;justify-content:space-between;align-items:center">
+                      <strong style="color:var(--fg);font-size:15px">${esc(b.title)}</strong>
+                      ${isUnlocked ? '<span style="color:var(--ok);font-size:12px;font-weight:700">Obtenu ✓</span>' : '<span style="color:var(--muted);font-size:11px">Verrouillé</span>'}
+                    </div>
+                    <p style="margin:4px 0 0 0;font-size:13px;color:var(--muted);line-height:1.4">${esc(b.desc)}</p>
+                  </div>
+                </div>`;
+            }).join("")}
+          </div>
+        </div>
+
+        <!-- Compétences par chapitre -->
+        <div class="panel fade-in" style="margin-bottom:28px">
+          <h2 style="margin:0 0 8px 0;font-size:20px">Maîtrise du programme par chapitre</h2>
+          <p class="sub" style="margin-bottom:20px">Suivi de vos lectures et des validations de vos connaissances.</p>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            ${C.chapters.map((ch, idx) => {
+              const isRead = (state.readChapters || []).includes(ch.id);
+              const pct = isRead ? 100 : 0;
+              return `
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px">
+                    <span><strong>Ch. ${idx + 1} :</strong> ${esc(ch.title)}</span>
+                    <span style="font-weight:600;color:${isRead ? 'var(--ok)' : 'var(--muted)'}">${isRead ? 'Lu & validé (100%)' : 'À étudier (0%)'}</span>
+                  </div>
+                  <div style="height:8px;background:var(--bg-subtle);border-radius:4px;overflow:hidden">
+                    <div style="width:${pct}%;height:100%;background:${isRead ? 'var(--brand)' : 'transparent'};transition:width 0.4s ease"></div>
+                  </div>
+                </div>`;
+            }).join("")}
+          </div>
+        </div>
+
+        <!-- Données & Sauvegarde -->
+        <div class="panel fade-in" style="margin-bottom:28px">
+          <h2 style="margin:0 0 8px 0;font-size:20px">Sauvegarde & Synchronisation de vos révisions</h2>
+          <p class="sub" style="margin-bottom:16px">Exportez votre progression sous forme de fichier JSON ou importez-la sur votre téléphone ou PC.</p>
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <button class="btn btn-outline" id="btn-export-json" type="button">
+              <svg class="ic" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Exporter ma progression (.json)
+            </button>
+            <label class="btn btn-outline" style="cursor:pointer;display:inline-flex;align-items:center;gap:6px">
+              <svg class="ic" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Importer un fichier de sauvegarde
+              <input type="file" id="file-import-json" accept=".json" style="display:none">
+            </label>
+            <button class="btn btn-outline" id="btn-reset-data" style="color:var(--bad);border-color:rgba(239, 68, 68, 0.4)" type="button">
+              Réinitialiser ma progression
+            </button>
+          </div>
+        </div>
+      </div>`;
+
+    // Gestion Export JSON
+    $("#btn-export-json").addEventListener("click", () => {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
+      const downloadAnchor = document.createElement("a");
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `compta_revision_backup_${new Date().toISOString().slice(0, 10)}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      toast("Progression exportée avec succès !");
+    });
+
+    // Gestion Import JSON
+    $("#file-import-json").addEventListener("change", (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        try {
+          const imported = JSON.parse(evt.target.result);
+          if (imported && typeof imported === "object") {
+            Object.assign(state, imported);
+            // Sauvegarder dans localStorage
+            for (const [k, v] of Object.entries(imported)) {
+              store.set(k, v);
+            }
+            toast("Progression restaurée avec succès !");
+            viewDashboard();
+          }
+        } catch (err) {
+          alert("Erreur lors de la lecture du fichier JSON : " + err.message);
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    // Réinitialisation
+    $("#btn-reset-data").addEventListener("click", () => {
+      if (confirm("Êtes-vous sûr de vouloir réinitialiser toutes vos données de progression ?")) {
+        localStorage.clear();
+        location.reload();
+      }
+    });
+
+    // Générateur d'examen blanc PDF
+    $("#btn-exam-download").addEventListener("click", () => {
+      generateExamPaper();
+    });
+  }
+
+/* ============================================================
      ROUTAGE & INTERFACE GLOBALE
      ============================================================ */
   let cleanup = null, prevRoute = null;
@@ -1479,7 +2178,7 @@
   function render() {
     if (cleanup) { cleanup(); cleanup = null; }
     const parts = location.hash.replace(/^#\/?/, "").split("/");
-    const route = ["cours", "exercices", "outils", "quiz", "fiches"].includes(parts[0]) ? parts[0] : "home";
+    const route = ["cours", "exercices", "outils", "quiz", "fiches", "glossaire", "dashboard"].includes(parts[0]) ? parts[0] : "home";
 
     $$(".nav a").forEach((a) => {
       const on = a.dataset.route === route;
@@ -1490,12 +2189,14 @@
     $("#menuToggle").setAttribute("aria-expanded", "false");
     search.close();
 
-    const titles = { home: "Accueil", cours: "Cours", exercices: "Exercices", outils: "Outils", quiz: "Quiz", fiches: "Fiches de synthèse" };
+    const titles = { home: "Accueil", cours: "Cours", exercices: "Exercices", outils: "Outils", quiz: "Quiz", fiches: "Fiches de synthèse", glossaire: "Glossaire & Pièges", dashboard: "Tableau de bord" };
     if (route === "cours") cleanup = viewCourse(parts[1]);
     else if (route === "exercices") cleanup = viewExercises(parts[1]);
     else if (route === "outils") cleanup = viewTools(parts[1]);
     else if (route === "quiz") cleanup = viewQuiz();
     else if (route === "fiches") cleanup = viewFichesSummary();
+    else if (route === "glossaire") cleanup = viewGlossary();
+    else if (route === "dashboard") cleanup = viewDashboard();
     else cleanup = viewHome();
     cleanup = typeof cleanup === "function" ? cleanup : null;
 
