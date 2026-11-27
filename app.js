@@ -234,7 +234,7 @@
       <section class="hero">
         <div class="wrap hero-grid">
           <div class="fade-in">
-            <span class="eyebrow">L1 Informatique · SYSCOHADA révisé</span>
+            <span class="eyebrow">Enseignement Supérieur & Professionnel · SYSCOHADA révisé</span>
             <h1>Maîtrisez les bases de la <em>comptabilité générale</em>.</h1>
             <p class="hero-lead">Un cours clair en ${total} chapitres, des outils pour s'exercer sur de vrais calculs et un quiz pour vérifier ce que vous avez retenu.</p>
             <div class="hero-cta">
@@ -2397,7 +2397,7 @@
   </div>
 
   <div class="header">
-    <p><strong>UNIVERSITÉ / ENSEIGNEMENT SUPÉRIEUR — L1 INFORMATIQUE</strong></p>
+    <p><strong>ENSEIGNEMENT SUPÉRIEUR & FORMATION PROFESSIONNELLE</strong></p>
     <p>Initiation à la Comptabilité Générale I · Référentiel SYSCOHADA Révisé</p>
     <h1>Épreuve d'Initiation à la Comptabilité Générale I</h1>
     <p>Session d'entraînement officiel · Durée conseillée : 2h00 · Calculatrice autorisée</p>
@@ -2506,7 +2506,7 @@
   </div>
 
   <div class="header">
-    <p><strong>UNIVERSITÉ / ENSEIGNEMENT SUPÉRIEUR — L1 INFORMATIQUE</strong></p>
+    <p><strong>ENSEIGNEMENT SUPÉRIEUR & FORMATION PROFESSIONNELLE</strong></p>
     <p>Initiation à la Comptabilité Générale I · Référentiel SYSCOHADA Révisé</p>
     <h1>Corrigé Officiel & Grille de Notation</h1>
     <p>Session d'examen blanc du ${dateStr} · Barème total sur 20 points</p>
@@ -2881,6 +2881,20 @@
     const open = $("#nav").classList.toggle("open");
     $("#menuToggle").setAttribute("aria-expanded", open);
   });
+
+  // Modale Mentions Légales & Code du Numérique
+  const legalModal = $("#legalModal");
+  const openLegal = () => { if (legalModal) legalModal.hidden = false; };
+  const closeLegal = () => { if (legalModal) legalModal.hidden = true; };
+
+  const btnOpenLegal = $("#btnOpenLegal");
+  if (btnOpenLegal) btnOpenLegal.addEventListener("click", openLegal);
+  const legalClose = $("#legalClose");
+  if (legalClose) legalClose.addEventListener("click", closeLegal);
+  const legalBackdrop = $("#legalBackdrop");
+  if (legalBackdrop) legalBackdrop.addEventListener("click", closeLegal);
+  const legalOk = $("#legalOk");
+  if (legalOk) legalOk.addEventListener("click", closeLegal);
 
   addEventListener("hashchange", render);
   initParticles();

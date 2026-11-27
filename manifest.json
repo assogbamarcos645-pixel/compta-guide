@@ -2,7 +2,7 @@
   "id": "./",
   "name": "Comptabilité Générale I",
   "short_name": "Compta L1",
-  "description": "Cours complet, exercices d'examen et quiz interactifs SYSCOHADA L1 Informatique",
+  "description": "Cours complet, exercices d'examen et quiz interactifs SYSCOHADA",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

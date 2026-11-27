@@ -99,12 +99,17 @@
     <div class="footer-inner">
       <div>
         <strong class="footer-title">Comptabilité Générale I</strong>
-        <p>Basé sur le programme « Initiation à la Comptabilité Générale I » — L1 Informatique — SYSCOHADA révisé.</p>
+        <p>Plateforme d'apprentissage « Initiation à la Comptabilité Générale I » — Référentiel SYSCOHADA révisé (OHADA).</p>
         <p>Conforme SYSCOHADA / OHADA · Taux de TVA au Bénin : 18 %.</p>
       </div>
       <div class="footer-meta">
         <p>ASSOGBA Marcos — Développeur web full-stack</p>
-        <p>Abomey-Calavi, Bénin · © 2026</p>
+        <p>Abomey-Calavi, République du Bénin · © 2026</p>
+        <p style="margin-top:6px;font-size:12px;color:var(--muted)">
+          <button id="btnOpenLegal" type="button" style="background:none;border:none;color:inherit;text-decoration:underline;cursor:pointer;padding:0;font-family:inherit;font-size:inherit">
+            Mentions Légales & Code du Numérique (Bénin)
+          </button>
+        </p>
       </div>
     </div>
   </footer>
@@ -119,6 +124,44 @@
         <kbd>Échap</kbd>
       </div>
       <div class="search-results" id="searchResults"></div>
+    </div>
+  </div>
+
+  <!-- Modale Mentions Légales & Code du Numérique (Loi n° 2017-20 / APDP Bénin) -->
+  <div class="modal" id="legalModal" role="dialog" aria-modal="true" aria-label="Mentions Légales et Protection des Données" hidden>
+    <div class="modal-backdrop" id="legalBackdrop"></div>
+    <div class="modal-panel" style="max-width:680px;max-height:85vh;overflow-y:auto;padding:28px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;border-bottom:1px solid var(--line);padding-bottom:12px">
+        <h2 style="margin:0;font-size:18px">Mentions Légales & Code du Numérique du Bénin</h2>
+        <button class="icon-btn" id="legalClose" type="button" aria-label="Fermer">
+          <svg class="ic" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+
+      <div style="font-size:14px;line-height:1.6;color:var(--ink-2)">
+        <h3 style="font-size:15px;color:var(--fg);margin-top:0">1. Éditeur de la plateforme</h3>
+        <p>Plateforme éducative d'apprentissage et d'auto-évaluation en Comptabilité Générale (SYSCOHADA).<br>
+        <strong>Concepteur & Développeur :</strong> ASSOGBA Marcos, Développeur web full-stack, Abomey-Calavi, République du Bénin.<br>
+        <strong>Cadre juridique :</strong> Loi n° 2017-20 du 20 avril 2018 portant Code du Numérique en République du Bénin.</p>
+
+        <h3 style="font-size:15px;color:var(--fg);margin-top:16px">2. Protection des données à caractère personnel (Livre V du Code du Numérique)</h3>
+        <p>Conformément aux dispositions du Livre V de la Loi n° 2017-20 régissant la protection des données personnelles en République du Bénin sous le contrôle de l'<strong>APDP</strong> (Autorité de Protection des Données Personnelles) :</p>
+        <ul style="padding-left:20px;margin:8px 0">
+          <li><strong>Zéro collecte non consentie :</strong> La plateforme ne collecte ni ne stocke de données nominatives ou identifiantes sur des serveurs distants.</li>
+          <li><strong>Stockage strictement local :</strong> Votre progression (chapitres étudiés, trophées, scores de quiz, notes de cours) est conservée exclusivement sur votre terminal (PC ou smartphone) via la technologie <code>localStorage</code> du navigateur.</li>
+          <li><strong>Droit à l'effacement :</strong> Vous pouvez supprimer instantanément et définitivement l'ensemble de vos données locales d'apprentissage en un clic depuis le bouton <em>« Réinitialiser ma progression »</em> du tableau de bord.</li>
+        </ul>
+
+        <h3 style="font-size:15px;color:var(--fg);margin-top:16px">3. Propriété intellectuelle & Nature des contenus</h3>
+        <p>Les contenus pédagogiques sont conformes au référentiel officiel du <strong>SYSCOHADA révisé</strong> (Acte Uniforme OHADA relatif au droit comptable et à l'information financière). Les outils interactifs, simulateurs et codes sources sont la propriété exclusive de leur auteur.</p>
+
+        <h3 style="font-size:15px;color:var(--fg);margin-top:16px">4. Sécurité des systèmes d'information</h3>
+        <p>La plateforme met en œuvre les meilleures pratiques de sécurité numérique (en-têtes Content Security Policy, isolation du Service Worker hors-ligne, absence de traceur intrusif et intégrité des scripts client).</p>
+      </div>
+
+      <div style="margin-top:20px;text-align:right">
+        <button class="btn btn-primary" id="legalOk" type="button">J'ai compris</button>
+      </div>
     </div>
   </div>
 

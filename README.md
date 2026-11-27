@@ -1,6 +1,6 @@
 # Comptabilité Générale I — Plateforme PWA de Révision (SYSCOHADA)
 
-Une application web progressive (PWA) moderne, interactive et complète pour l'apprentissage et la révision de l'**Initiation à la Comptabilité Générale I**, conforme au référentiel **SYSCOHADA révisé (OHADA)** et adaptée au programme universitaire de Licence I Informatique.
+Une application web progressive (PWA) moderne, interactive et complète pour l'apprentissage et la révision de l'**Initiation à la Comptabilité Générale I**, conforme au référentiel **SYSCOHADA révisé (OHADA)** et adaptée aux filières de l'Enseignement Supérieur et de la formation professionnelle.
 
 ---
 
@@ -160,7 +160,7 @@ python -m http.server 8000
 ## Auteur & Crédits
 
 - **Conception & Développement Web** : **ASSOGBA Marcos** — Développeur Web Full-Stack (*Abomey-Calavi, Bénin*).
-- **Programme Académique & Enseignement** : Programme officiel « *Initiation à la Comptabilité Générale I* », Filière Informatique, Licence I (Année académique 2025-2026).
+- **Programme Académique & Enseignement** : Conforme aux normes officielles de l'Enseignement Supérieur et de l'espace OHADA pour l'« *Initiation à la Comptabilité Générale I* ».
 - **Référentiel Juridique et Comptable** : **SYSCOHADA révisé** — Acte Uniforme relatif au Droit Comptable et à l'Information Financière (AUDCIF / OHADA).
 
 ---
