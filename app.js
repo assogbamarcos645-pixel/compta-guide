@@ -2001,10 +2001,10 @@
      TABLEAU DE BORD, GAMIFICATION & PROGRESSION
      ============================================================ */
   function viewDashboard() {
-    const unlockedCount = (state.badges || []).length;
+    const unlockedCount = state.badges ? state.badges.size : 0;
     const totalBadges = (C.badges || []).length;
     const streakDays = (state.streak && state.streak.count) || 0;
-    const readCount = (state.readChapters || []).length;
+    const readCount = state.read ? state.read.size : 0;
     const totalChapters = C.chapters.length;
     const bestPct = (state.best && state.best.pct) || 0;
 
@@ -2061,7 +2061,7 @@
           </div>
           <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:16px">
             ${(C.badges || []).map(b => {
-              const isUnlocked = (state.badges || []).includes(b.id);
+              const isUnlocked = state.badges ? state.badges.has(b.id) : false;
               return `
                 <div class="panel badge-card" style="padding:16px;background:${isUnlocked ? 'var(--bg-subtle)' : 'var(--card-bg)'};border:1px solid ${isUnlocked ? 'var(--brand)' : 'var(--border)'};opacity:${isUnlocked ? '1' : '0.6'};display:flex;align-items:center;gap:14px;border-radius:12px">
                   <div style="font-size:32px;filter:${isUnlocked ? 'none' : 'grayscale(1)'}">${b.icon}</div>
@@ -2083,7 +2083,7 @@
           <p class="sub" style="margin-bottom:20px">Suivi de vos lectures et des validations de vos connaissances.</p>
           <div style="display:flex;flex-direction:column;gap:12px">
             ${C.chapters.map((ch, idx) => {
-              const isRead = (state.readChapters || []).includes(ch.id);
+              const isRead = state.read ? state.read.has(ch.id) : false;
               const pct = isRead ? 100 : 0;
               return `
                 <div>
@@ -2122,7 +2122,17 @@
 
     // Gestion Export JSON
     $("#btn-export-json").addEventListener("click", () => {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
+      const exportable = {
+        read: Array.from(state.read),
+        best: state.best,
+        attempts: state.attempts,
+        wrongs: state.wrongs,
+        exDone: Array.from(state.exDone),
+        badges: Array.from(state.badges),
+        streak: state.streak,
+        cardReviews: state.cardReviews
+      };
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportable, null, 2));
       const downloadAnchor = document.createElement("a");
       downloadAnchor.setAttribute("href", dataStr);
       downloadAnchor.setAttribute("download", `compta_revision_backup_${new Date().toISOString().slice(0, 10)}.json`);
@@ -2141,11 +2151,25 @@
         try {
           const imported = JSON.parse(evt.target.result);
           if (imported && typeof imported === "object") {
-            Object.assign(state, imported);
+            if (imported.read) state.read = new Set(imported.read);
+            if (imported.exDone) state.exDone = new Set(imported.exDone);
+            if (imported.badges) state.badges = new Set(imported.badges);
+            if (imported.best !== undefined) state.best = imported.best;
+            if (imported.attempts !== undefined) state.attempts = imported.attempts;
+            if (imported.wrongs) state.wrongs = imported.wrongs;
+            if (imported.streak) state.streak = imported.streak;
+            if (imported.cardReviews) state.cardReviews = imported.cardReviews;
+
             // Sauvegarder dans localStorage
-            for (const [k, v] of Object.entries(imported)) {
-              store.set(k, v);
-            }
+            store.set("read", Array.from(state.read));
+            store.set("exDone", Array.from(state.exDone));
+            store.set("badges", Array.from(state.badges));
+            store.set("best", state.best);
+            store.set("attempts", state.attempts);
+            store.set("wrongs", state.wrongs);
+            store.set("streak", state.streak);
+            store.set("cardReviews", state.cardReviews);
+
             toast("Progression restaurée avec succès !");
             viewDashboard();
           }
