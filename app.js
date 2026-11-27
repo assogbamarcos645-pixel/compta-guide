@@ -1444,7 +1444,7 @@
         </div>
         <div class="ex-panel">
           <div class="ex-header">
-            <span class="eyebrow">Exercice ${ex.type.toUpperCase()} · ${ex.source || 'Cours Sonou'}</span>
+            <span class="eyebrow">Exercice ${ex.type.toUpperCase()} · ${ex.source || 'SYSCOHADA'}</span>
             <h2>${esc(ex.title)}</h2>
           </div>
           <div class="ex-context">${ex.context || ''}</div>
@@ -2397,7 +2397,7 @@
   </div>
 
   <div class="header">
-    <p><strong>UNIVERSITÉ / INSTITUT LES COURS SONOU — L1 INFORMATIQUE</strong></p>
+    <p><strong>UNIVERSITÉ / ENSEIGNEMENT SUPÉRIEUR — L1 INFORMATIQUE</strong></p>
     <p>Initiation à la Comptabilité Générale I · Référentiel SYSCOHADA Révisé</p>
     <h1>Épreuve d'Initiation à la Comptabilité Générale I</h1>
     <p>Session d'entraînement officiel · Durée conseillée : 2h00 · Calculatrice autorisée</p>
@@ -2457,7 +2457,7 @@
 
   <!-- PARTIE IV : CAS PRATIQUE -->
   <div class="section-title">Partie IV : Cas Pratique de Synthèse (Facturation & Journalisation - 8 points)</div>
-  <p>L'entreprise « SONOU-TECH SA » réalise au cours du mois de novembre les opérations suivantes sous le taux de TVA en vigueur au Bénin (18 %) :</p>
+  <p>L'entreprise « BENIN-TECH SA » réalise au cours du mois de novembre les opérations suivantes sous le taux de TVA en vigueur au Bénin (18 %) :</p>
   <p><strong>Opération 1 :</strong> Achat de marchandises pour un montant brut de 1 500 000 F CFA. Remise de 5 %, Escompte de règlement de 2 % accordé pour paiement sous huitaine, Port facturé : 45 000 F CFA HT. Règlement prévu dans 30 jours.</p>
   <p><strong>Opération 2 :</strong> Vente de marchandises d'une valeur brute de 2 000 000 F CFA, rabais 2%, TVA 18%, encaissée par chèque bancaire.</p>
   <p><strong>Travail à faire :</strong></p>
@@ -2506,7 +2506,7 @@
   </div>
 
   <div class="header">
-    <p><strong>UNIVERSITÉ / INSTITUT LES COURS SONOU — L1 INFORMATIQUE</strong></p>
+    <p><strong>UNIVERSITÉ / ENSEIGNEMENT SUPÉRIEUR — L1 INFORMATIQUE</strong></p>
     <p>Initiation à la Comptabilité Générale I · Référentiel SYSCOHADA Révisé</p>
     <h1>Corrigé Officiel & Grille de Notation</h1>
     <p>Session d'examen blanc du ${dateStr} · Barème total sur 20 points</p>
