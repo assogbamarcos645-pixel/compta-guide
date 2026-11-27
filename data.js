@@ -2217,3 +2217,146 @@ COURSE.directQuestions = [
     "ch": "cadre-comptable"
   }
 ];
+
+/* ── Données pour le Speed-Coding (Entraînement réflexe 60s) ── */
+COURSE.speedCoding = [
+  { prompt: "Banque (Disponibilités en compte)", answer: "521", hint: "Classe 5 - Trésorerie" },
+  { prompt: "Fournisseurs d'exploitation", answer: "401", hint: "Classe 4 - Dettes circulantes" },
+  { prompt: "Clients ordinaires", answer: "411", hint: "Classe 4 - Créances d'exploitation" },
+  { prompt: "Caisse centrale", answer: "571", hint: "Classe 5 - Liquidités espèces" },
+  { prompt: "Capital social ou personnel", answer: "101", hint: "Classe 1 - Ressources durables" },
+  { prompt: "Achats de marchandises", answer: "601", hint: "Classe 6 - Charges d'exploitation" },
+  { prompt: "Ventes de marchandises", answer: "701", hint: "Classe 7 - Produits d'exploitation" },
+  { prompt: "État, TVA facturée sur ventes", answer: "4431", hint: "Classe 4 - TVA collectée" },
+  { prompt: "État, TVA récupérable sur achats", answer: "4452", hint: "Classe 4 - TVA déductible" },
+  { prompt: "Escomptes obtenus du fournisseur", answer: "773", hint: "Classe 7 - Produit financier" },
+  { prompt: "Escomptes accordés au client", answer: "673", hint: "Classe 6 - Charge financière" },
+  { prompt: "Transports sur achats (frais accessoires)", answer: "6015", hint: "Classe 6 - Port refacturé" },
+  { prompt: "Ports et frais accessoires facturés", answer: "7071", hint: "Classe 7 - Vente accessoire" },
+  { prompt: "Matériel de transport", answer: "245", hint: "Classe 2 - Actif immobilisé" },
+  { prompt: "Amortissement du matériel de transport", answer: "2845", hint: "Constante 8 en 2e position" },
+  { prompt: "Clients, effets à recevoir", answer: "412", hint: "Classe 4 - Lettre de change / Billet à ordre" },
+  { prompt: "Fournisseurs, effets à payer", answer: "402", hint: "Classe 4 - Dette cambiaire" },
+  { prompt: "Clients, dettes pour emballages consignés", answer: "4194", hint: "Constante 9 en 3e position" },
+  { prompt: "Fournisseurs, créances pour emballages à rendre", answer: "4094", hint: "Constante 9 en 3e position" },
+  { prompt: "Marchandises en stock au magasin", answer: "31", hint: "Classe 3 - Actif circulant" },
+  { prompt: "Frais de télécommunications et internet", answer: "628", hint: "Classe 6 - Services extérieurs" },
+  { prompt: "Rémunérations directes versées au personnel", answer: "661", hint: "Classe 6 - Charges de personnel" },
+  { prompt: "Emprunts auprès des établissements de crédit", answer: "162", hint: "Classe 1 - Dettes financières" },
+  { prompt: "Dotations aux amortissements d'exploitation", answer: "681", hint: "Classe 6 - Charges calculées" },
+  { prompt: "État, TVA due (après liquidation)", answer: "4441", hint: "Classe 4 - Dette fiscale" },
+  { prompt: "État, crédit de TVA à reporter", answer: "4449", hint: "Classe 4 - Créance fiscale" }
+];
+
+/* ── Données pour le Guide Décisionnel de Choix de Compte ── */
+COURSE.accountDecisionTree = [
+  {
+    id: "achat_marchandise",
+    category: "Achats & Charges",
+    scenario: "Achat de marchandises destinées à être revendues sans transformation",
+    account: "601",
+    label: "Achats de marchandises",
+    sens: "Débit",
+    rule: "Enregistrement au Net commercial HT. Si le port est assuré par le fournisseur, utiliser 6015 (Port refacturé)."
+  },
+  {
+    id: "achat_fournitures",
+    category: "Achats & Charges",
+    scenario: "Achat de petits matériels, fournitures de bureau ou carburant consommable",
+    account: "604 / 605",
+    label: "Achats stockés / Autres achats",
+    sens: "Débit",
+    rule: "Fournitures administratives non stockables : 6055. Carburant : 6053."
+  },
+  {
+    id: "achat_immobilisation",
+    category: "Investissement & Immobilisations",
+    scenario: "Acquisition d'un véhicule, ordinateur ou machine utilisé plus d'un an",
+    account: "24",
+    label: "Matériel, mobilier et actif biologique",
+    sens: "Débit",
+    rule: "Matériel informatique : 244. Matériel de transport : 245. Comptabilisé au coût d'acquisition HT."
+  },
+  {
+    id: "vente_marchandise",
+    category: "Ventes & Produits",
+    scenario: "Facturation d'une vente de marchandises à un client",
+    account: "701",
+    label: "Ventes de marchandises",
+    sens: "Crédit",
+    rule: "Toujours enregistré pour le Net commercial HT (déduction faite des remises, rabais et ristournes)."
+  },
+  {
+    id: "reduction_financiere_obtenue",
+    category: "Réductions",
+    scenario: "Escompte de règlement accordé par le fournisseur pour paiement rapide",
+    account: "773",
+    label: "Escomptes obtenus",
+    sens: "Crédit",
+    rule: "Produit financier enregistré au crédit chez le client pour le montant calculé sur le Net commercial."
+  },
+  {
+    id: "reduction_financiere_accordee",
+    category: "Réductions",
+    scenario: "Escompte de règlement consenti par l'entreprise à un client pour règlement anticipé",
+    account: "673",
+    label: "Escomptes accordés",
+    sens: "Débit",
+    rule: "Charge financière enregistrée au débit chez le fournisseur pour le montant de l'escompte."
+  },
+  {
+    id: "transport_debourses",
+    category: "Transports & Logistique",
+    scenario: "Port payé d'avance par le fournisseur pour le compte du client (Port débours)",
+    account: "612 / 7072",
+    label: "Transports sur achats (Acheteur) / Avances remboursables (Vendeur)",
+    sens: "Neutre",
+    rule: "Chez le vendeur, le débours est une simple avance (opération blanche sans TVA). Chez le client : charge 612."
+  },
+  {
+    id: "reglement_creance_effets",
+    category: "Règlements & Effets de commerce",
+    scenario: "Acceptation par le client d'une lettre de change ou émission d'un billet à ordre",
+    account: "412 (Vendeur) / 402 (Acheteur)",
+    label: "Clients, effets à recevoir / Fournisseurs, effets à payer",
+    sens: "Débit 412 / Crédit 402",
+    rule: "Substitue la créance ordinaire 411 en créance cambiaire 412, ou la dette 401 en 402."
+  },
+  {
+    id: "emballages_consignes",
+    category: "Emballages",
+    scenario: "Facturation d'une caution pour des bouteilles ou palettes récupérables",
+    account: "4194 (Vendeur) / 4094 (Acheteur)",
+    label: "Dette pour emballages consignés / Créance pour emballages à rendre",
+    sens: "Crédit 4194 / Débit 4094",
+    rule: "Opération hors champ de la TVA lors de la consignation. TVA exigible uniquement en cas de non-restitution ou mali."
+  }
+];
+
+/* ── Données pour le Détecteur d'Anomalies Comptables ── */
+COURSE.anomalies = [
+  {
+    id: "ano_tva_transport",
+    title: "Erreur d'assiette de TVA sur port forfaitaire",
+    context: "Facture n° 120 : Marchandises 1 000 000 F, Port forfaitaire facturé 50 000 F, TVA 18 % calculée uniquement sur les 1 000 000 F.",
+    badEntry: "Débit 601 : 1 000 000 | Débit 611 : 50 000 | Débit 4452 : 180 000 | Crédit 401 : 1 230 000",
+    correctEntry: "Débit 601 : 1 000 000 | Débit 6015 : 50 000 | Débit 4452 : 189 000 | Crédit 401 : 1 239 000",
+    explanation: "Le port forfaitaire facturé par le fournisseur fait partie intégrante de la base imposable à la TVA : Base TVA = 1 000 000 + 50 000 = 1 050 000 F CFA. La TVA exacte est 189 000 F CFA et non 180 000 F CFA."
+  },
+  {
+    id: "ano_escompte_commercial",
+    title: "Confusion entre remise commerciale et escompte financier",
+    context: "L'entreprise comptabilise une remise commerciale de 5 % au crédit du compte 773 Escomptes obtenus.",
+    badEntry: "Débit 601 : Montant Brut | Crédit 773 : Remise 5 % | Crédit 401 : Net à payer",
+    correctEntry: "Débit 601 : Net Commercial directement (Pas de compte 773 ni 609 sur facture de Doit)",
+    explanation: "Règle d'or SYSCOHADA : Les réductions commerciales (rabais, remises, ristournes) figurant sur une facture de Doit ne se comptabilisent JAMAIS. Les achats s'enregistrent directement au Net Commercial."
+  },
+  {
+    id: "ano_tva_debour",
+    title: "Taxation injustifiée d'un port débours",
+    context: "Le fournisseur facture des débours (récupération exacte d'un transport payé à un transporteur tiers) et y ajoute 18 % de TVA.",
+    badEntry: "Port débours 40 000 F + TVA 18% = 47 200 F facturé au client",
+    correctEntry: "Port débours 40 000 F net (exonéré de TVA chez le fournisseur car c'est un remboursement exact de frais avancés)",
+    explanation: "Le port payé pour le compte du client est une avance financière (opération de tiers). Le fournisseur ne peut pas facturer de TVA sur une prestation qu'il n'a pas lui-même réalisée."
+  }
+];

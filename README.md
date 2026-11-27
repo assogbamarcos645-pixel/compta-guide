@@ -30,13 +30,15 @@ Une application web progressive (PWA) moderne, interactive et complète pour l'a
 ---
 
 ### 3. Outils et Simulateurs Interactifs
-1. **Calculateur de Facture** : Calculez dynamiquement les remises en cascade, escomptes, frais de port et TVA, avec génération instantanée des écritures au journal chez l'acheteur et le vendeur.
+1. **Calculateur de Facture avec Vue Miroir** : Calculez dynamiquement les remises en cascade, escomptes, frais de port et TVA, avec génération et comparaison instantanée des écritures au journal côte à côte chez l'acheteur (client) et chez le vendeur (fournisseur).
 2. **Simulateur de Compte en T** : Imputez des opérations au débit ou au crédit et observez l'évolution dynamique du solde.
-3. **Fiches Mémos 3D & SRS** : Cartes mémoire interactives (Flashcards) avec effet 3D et algorithme de répétition espacée (Spaced Repetition System) pour optimiser la mémorisation à long terme.
-4. **Jeu de Tri du Bilan** : Rangez les postes d'actif et de passif par glisser-déposer (Drag & Drop) pour tester vos réflexes d'analyse patrimoniale.
-5. **Tableau d'Amortissement** : Simulation du plan d'amortissement linéaire selon le SYSCOHADA (taux, annuité constante, valeur nette comptable et écritures de dotation 681/28x).
-6. **Bordereau de Déclaration de TVA** : Calcul mensuel automatisé confrontant TVA facturée et TVA déductible (sur immobilisations et sur charges), avec arbitrage TVA due (4441) ou crédit de TVA (4449).
-7. **Générateur Infini d'Exercices** : Génération aléatoire d'opérations commerciales (achats/ventes avec remises, escomptes et ports) pour un entraînement autonome illimité.
+3. **Guide Décisionnel du Numéro de Compte** : Arbre interactif par catégorie d'opération pour identifier immédiatement le bon compte SYSCOHADA et son sens Débit / Crédit.
+4. **Détecteur d'Anomalies (« Trouver l'erreur »)** : Cas pratiques d'audit pour repérer les erreurs comptables d'examen et apprendre les schémas conformes.
+5. **Fiches Mémos 3D & SRS** : Cartes mémoire interactives (Flashcards) avec effet 3D et algorithme de répétition espacée (Spaced Repetition System) pour optimiser la mémorisation à long terme.
+6. **Jeu de Tri du Bilan** : Rangez les postes d'actif et de passif par glisser-déposer (Drag & Drop) pour tester vos réflexes d'analyse patrimoniale.
+7. **Tableau d'Amortissement** : Simulation du plan d'amortissement linéaire selon le SYSCOHADA (taux, annuité constante, valeur nette comptable et écritures de dotation 681/28x).
+8. **Bordereau de Déclaration de TVA** : Calcul mensuel automatisé confrontant TVA facturée et TVA déductible (sur immobilisations et sur charges), avec arbitrage TVA due (4441) ou crédit de TVA (4449).
+9. **Générateur Infini d'Exercices** : Génération aléatoire d'opérations commerciales (achats/ventes avec remises, escomptes et ports) pour un entraînement autonome illimité.
 
 ---
 
@@ -57,6 +59,7 @@ Une application web progressive (PWA) moderne, interactive et complète pour l'a
 
 ### 4. Quiz et Évaluations Multimodales
 - **Quiz complet** : 52 questions à choix multiple couvrant l'ensemble du programme.
+- **Speed-Coding (60s)** : Défi chronométré intense pour tester et automatiser la saisie des numéros de compte SYSCOHADA.
 - **Mode Vrai ou Faux** : 15 affirmations clés du SYSCOHADA pour tester vos réflexes conceptuels avec justifications méthodologiques.
 - **Questions de cours (Saisie obligatoire de l'étudiant)** : L'étudiant doit d'abord formuler et soumettre par écrit sa propre réponse avant de débloquer le corrigé officiel du professeur et la vérification des mots-clés attendus.
 - **Série rapide** : 10 questions tirées aléatoirement pour une révision express.

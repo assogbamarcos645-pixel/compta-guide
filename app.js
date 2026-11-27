@@ -212,8 +212,10 @@
      ACCUEIL
      ============================================================ */
   const TOOLS = [
-    { id: "facture", label: "Calculateur de facture", icon: "calc", desc: "Du montant brut au net à payer, étape par étape, avec l'écriture au journal." },
+    { id: "facture", label: "Calculateur de facture", icon: "calc", desc: "Du montant brut au net à payer, étape par étape, avec comparaison miroir acheteur vs fournisseur." },
     { id: "compte-t", label: "Compte en T", icon: "t", desc: "Passez des opérations au débit ou au crédit et observez le solde évoluer." },
+    { id: "guide-compte", label: "Guide du compte", icon: "target", desc: "Arbre décisionnel pour trouver le bon numéro de compte SYSCOHADA selon l'opération." },
+    { id: "anomalies", label: "Trouver l'anomalie", icon: "refresh", desc: "Détecteur d'erreurs comptables fréquentes pour développer vos réflexes d'auditeur." },
     { id: "fiches", label: "Fiches du plan comptable", icon: "cards", desc: "Mémorisez les comptes avec système de répétition espacée." },
     { id: "bilan", label: "Classer au bilan", icon: "sort", desc: "Rangez chaque poste à l'actif ou au passif et vérifiez vos réflexes." },
     { id: "amortissement", label: "Tableau d'amortissement", icon: "list", desc: "Calcul linéaire ou dégressif, annuités et écritures de dotation." },
@@ -459,6 +461,8 @@
     const map = {
       facture: toolFacture,
       "compte-t": toolCompteT,
+      "guide-compte": toolGuideCompte,
+      anomalies: toolAnomalies,
       fiches: toolFiches,
       bilan: toolBilan,
       amortissement: toolAmortissement,
@@ -469,7 +473,135 @@
   }
 
 
-  /* ── Simulateur d'amortissement (Linéaire) ────────────────── */
+  /* ── Guide Décisionnel du Numéro de Compte ────────────────── */
+  function toolGuideCompte(el) {
+    const list = COURSE.accountDecisionTree || [];
+    const categories = ["Tous", ...new Set(list.map(x => x.category))];
+    let selectedCat = "Tous";
+
+    const draw = () => {
+      const filtered = selectedCat === "Tous" ? list : list.filter(x => x.category === selectedCat);
+      el.innerHTML = `
+        <div class="tool">
+          <div class="panel" style="grid-column:1 / -1">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+              <div>
+                <h2>Guide Décisionnel du Compte SYSCOHADA</h2>
+                <p class="sub" style="margin:4px 0 0 0">Identifiez en un instant le compte approprié et son sens Débit / Crédit selon la nature de l'opération.</p>
+              </div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap" id="tree-cats">
+                ${categories.map(c => `
+                  <button class="chip ${c === selectedCat ? 'active' : ''}" type="button" data-cat="${esc(c)}">${esc(c)}</button>
+                `).join("")}
+              </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));gap:16px">
+              ${filtered.map(item => `
+                <div class="panel" style="background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;flex-direction:column;justify-content:space-between">
+                  <div>
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+                      <span class="pill" style="font-size:11px;background:var(--bg-subtle);color:var(--muted)">${esc(item.category)}</span>
+                      <span class="pill brand" style="font-weight:700;font-size:13px">${esc(item.sens)}</span>
+                    </div>
+                    <strong style="color:var(--fg);font-size:15px;display:block;margin-bottom:8px;line-height:1.4">${esc(item.scenario)}</strong>
+                  </div>
+
+                  <div style="margin-top:14px;padding-top:12px;border-top:1px dashed var(--line)">
+                    <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:6px">
+                      <span style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--brand)">${esc(item.account)}</span>
+                      <span style="font-weight:600;font-size:14px;color:var(--fg)">${esc(item.label)}</span>
+                    </div>
+                    <p style="font-size:13px;color:var(--muted);margin:0;line-height:1.4">${esc(item.rule)}</p>
+                  </div>
+                </div>
+              `).join("")}
+            </div>
+          </div>
+        </div>`;
+
+      $$("#tree-cats button", el).forEach(btn => {
+        btn.addEventListener("click", () => {
+          selectedCat = btn.dataset.cat;
+          draw();
+        });
+      });
+    };
+    draw();
+  }
+
+  /* ── Détecteur d'Anomalies Comptables (« Trouver l'erreur ») ─ */
+  function toolAnomalies(el) {
+    const list = COURSE.anomalies || [];
+    let currentIdx = 0;
+    let revealed = false;
+
+    const draw = () => {
+      const it = list[currentIdx];
+      el.innerHTML = `
+        <div class="tool">
+          <div class="panel" style="grid-column:1 / -1;max-width:850px;margin:0 auto;width:100%">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+              <span class="eyebrow">Atelier d'Audit & Contrôle</span>
+              <span class="pill" style="font-size:12px">Cas ${currentIdx + 1} / ${list.length}</span>
+            </div>
+
+            <h2 style="margin:0 0 10px 0">${esc(it.title)}</h2>
+            <div style="background:var(--bg-subtle);padding:14px;border-radius:10px;margin-bottom:18px">
+              <strong style="display:block;margin-bottom:4px;color:var(--fg)">Situation observée :</strong>
+              <p style="margin:0;color:var(--ink-2);font-size:14.5px;line-height:1.5">${esc(it.context)}</p>
+            </div>
+
+            <div style="background:var(--bad-soft);border:1px solid var(--bad);border-radius:10px;padding:14px;margin-bottom:20px">
+              <div style="display:flex;align-items:center;gap:6px;color:var(--bad);font-weight:700;font-size:12px;margin-bottom:6px">
+                ${icon("x", "ic-sm")} ÉCRITURE OU CALCUL ERRONÉ CONSTATÉ
+              </div>
+              <code style="font-family:var(--mono);font-size:14px;color:var(--fg);display:block;word-break:break-word">${esc(it.badEntry)}</code>
+            </div>
+
+            ${!revealed ? `
+              <div style="text-align:center;padding:15px 0">
+                <button class="btn btn-primary" id="btn-reveal-ano" type="button">
+                  Révéler l'anomalie et la rectification conforme
+                </button>
+              </div>` : `
+              <div class="fade-in" style="background:var(--ok-soft);border:1px solid var(--ok);border-radius:10px;padding:16px;margin-bottom:20px">
+                <div style="display:flex;align-items:center;gap:6px;color:var(--ok);font-weight:700;font-size:12px;margin-bottom:6px">
+                  ${icon("check", "ic-sm")} RECTIFICATION CONFORME AU SYSCOHADA
+                </div>
+                <code style="font-family:var(--mono);font-size:14px;color:var(--fg);display:block;margin-bottom:12px;word-break:break-word">${esc(it.correctEntry)}</code>
+                <div style="border-top:1px dashed var(--line);padding-top:10px;font-size:14px;line-height:1.5;color:var(--ink-2)">
+                  <strong>Explication de la règle :</strong> ${esc(it.explanation)}
+                </div>
+              </div>
+            `}
+
+            <div style="display:flex;justify-content:space-between;margin-top:20px">
+              <button class="btn btn-outline" id="btn-prev-ano" type="button" ${currentIdx === 0 ? 'disabled' : ''}>
+                ${icon('arrowL', 'ic-sm')} Précédent
+              </button>
+              <button class="btn btn-outline" id="btn-next-ano" type="button" ${currentIdx === list.length - 1 ? 'disabled' : ''}>
+                Suivant ${icon('arrowR', 'ic-sm')}
+              </button>
+            </div>
+          </div>
+        </div>`;
+
+      if (!revealed) {
+        $("#btn-reveal-ano").addEventListener("click", () => {
+          revealed = true;
+          draw();
+        });
+      }
+      $("#btn-prev-ano").addEventListener("click", () => {
+        if (currentIdx > 0) { currentIdx--; revealed = false; draw(); }
+      });
+      $("#btn-next-ano").addEventListener("click", () => {
+        if (currentIdx < list.length - 1) { currentIdx++; revealed = false; draw(); }
+      });
+    };
+    draw();
+  }
   function toolAmortissement(el) {
     let vo = 5000000, duree = 5, annee0 = 2026;
 
@@ -792,9 +924,10 @@
           <div class="journal-box">
             <div class="invoice-head" style="flex-wrap:wrap;gap:12px">
               <h3>Écriture au journal</h3>
-              <div class="seg" id="f-view" style="min-width:250px">
+              <div class="seg" id="f-view" style="min-width:320px">
                 <button type="button" data-v="client">Chez le client</button>
                 <button type="button" data-v="fournisseur">Chez le fournisseur</button>
+                <button type="button" data-v="miroir">Vue Miroir (2 colonnes)</button>
               </div>
             </div>
             <div id="f-journal"></div>
@@ -842,33 +975,53 @@
       $("#f-out").innerHTML = html;
       $("#f-tvapill").textContent = "TVA " + s.tva + " %";
 
-      const lines = view === "client"
-        ? [
-            ["d", "601", "Achats de marchandises", nc],
-            ["d", "6015", "Frais sur achats (port)", s.port],
-            ["d", "445", "État, TVA récupérable", tva],
-            ["c", "401", "Fournisseurs", nap],
-            ["c", "773", "Escomptes obtenus", escompte]
-          ]
-        : [
-            ["d", "411", "Clients", nap],
-            ["d", "673", "Escomptes accordés", escompte],
-            ["c", "701", "Ventes de marchandises", nc],
-            ["c", "707", "Produits accessoires (port)", s.port],
-            ["c", "443", "État, TVA facturée", tva]
-          ];
-      const shown = lines.filter((l) => Math.round(l[3]) !== 0);
-      const td = shown.filter((l) => l[0] === "d").reduce((a, l) => a + l[3], 0);
-      const tc = shown.filter((l) => l[0] === "c").reduce((a, l) => a + l[3], 0);
-      $("#f-journal").innerHTML = nap > 0 ? `
-        <table class="journal-table">
-          <thead><tr><th>Compte</th><th>Intitulé</th><th style="text-align:right">Débit</th><th style="text-align:right">Crédit</th></tr></thead>
-          <tbody>
-            ${shown.map((l) => `<tr class="${l[0] === "c" ? "cr" : ""}"><td class="acc">${l[1]}</td><td>${l[2]}</td>
-              <td class="num">${l[0] === "d" ? fmt(l[3]) : ""}</td><td class="num">${l[0] === "c" ? fmt(l[3]) : ""}</td></tr>`).join("")}
-            <tr><td></td><td><b>Totaux</b></td><td class="num"><b>${fmt(td)}</b></td><td class="num"><b>${fmt(tc)}</b></td></tr>
-          </tbody>
-        </table>` : `<p class="t-empty">Saisissez un montant brut pour générer l'écriture.</p>`;
+      const linesClient = [
+        ["d", "601", "Achats de marchandises", nc],
+        ["d", "6015", "Frais sur achats (port)", s.port],
+        ["d", "445", "État, TVA récupérable", tva],
+        ["c", "401", "Fournisseurs", nap],
+        ["c", "773", "Escomptes obtenus", escompte]
+      ];
+      const linesFournisseur = [
+        ["d", "411", "Clients", nap],
+        ["d", "673", "Escomptes accordés", escompte],
+        ["c", "701", "Ventes de marchandises", nc],
+        ["c", "707", "Produits accessoires (port)", s.port],
+        ["c", "443", "État, TVA facturée", tva]
+      ];
+
+      const renderTable = (lines) => {
+        const shown = lines.filter((l) => Math.round(l[3]) !== 0);
+        const td = shown.filter((l) => l[0] === "d").reduce((a, l) => a + l[3], 0);
+        const tc = shown.filter((l) => l[0] === "c").reduce((a, l) => a + l[3], 0);
+        return `
+          <table class="journal-table">
+            <thead><tr><th>Compte</th><th>Intitulé</th><th style="text-align:right">Débit</th><th style="text-align:right">Crédit</th></tr></thead>
+            <tbody>
+              ${shown.map((l) => `<tr class="${l[0] === "c" ? "cr" : ""}"><td class="acc">${l[1]}</td><td>${l[2]}</td>
+                <td class="num">${l[0] === "d" ? fmt(l[3]) : ""}</td><td class="num">${l[0] === "c" ? fmt(l[3]) : ""}</td></tr>`).join("")}
+              <tr><td></td><td><b>Totaux</b></td><td class="num"><b>${fmt(td)}</b></td><td class="num"><b>${fmt(tc)}</b></td></tr>
+            </tbody>
+          </table>`;
+      };
+
+      if (nap <= 0) {
+        $("#f-journal").innerHTML = `<p class="t-empty">Saisissez un montant brut pour générer l'écriture.</p>`;
+      } else if (view === "miroir") {
+        $("#f-journal").innerHTML = `
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:16px">
+            <div>
+              <span class="pill" style="font-size:11px;font-weight:700;margin-bottom:8px;background:var(--brand-soft);color:var(--brand)">Livre-journal de l'Acheteur (Client)</span>
+              ${renderTable(linesClient)}
+            </div>
+            <div>
+              <span class="pill" style="font-size:11px;font-weight:700;margin-bottom:8px;background:var(--ok-soft);color:var(--ok)">Livre-journal du Vendeur (Fournisseur)</span>
+              ${renderTable(linesFournisseur)}
+            </div>
+          </div>`;
+      } else {
+        $("#f-journal").innerHTML = renderTable(view === "client" ? linesClient : linesFournisseur);
+      }
       $$("#f-view button").forEach((b) => b.classList.toggle("on-d", b.dataset.v === view));
     };
 
@@ -1525,8 +1678,9 @@
 
     const MODES = [
       { id: "full", icon: "list", title: "Quiz complet", desc: `Les ${C.questions.length} questions du programme, dont des calculs.` },
+      { id: "speed", icon: "bolt", title: "Speed-Coding (60s)", desc: "Défi chrono de 60 secondes pour taper les numéros de comptes à la vitesse de l'éclair." },
       { id: "truefalse", icon: "check", title: "Vrai ou Faux", desc: `Série de ${(C.trueFalse || []).length} affirmations clés du SYSCOHADA à juger.` },
-      { id: "quick", icon: "bolt", title: "Série rapide", desc: "10 questions tirées au hasard pour réviser en quelques minutes." },
+      { id: "quick", icon: "clock", title: "Série rapide", desc: "10 questions tirées au hasard pour réviser en quelques minutes." },
       { id: "calc", icon: "calc", title: "Calculs", desc: "Réductions, escompte, TVA : uniquement des questions chiffrées." },
       { id: "exam", icon: "target", title: "Examen blanc", desc: "20 questions variées chronométrées avec notation sur 20." },
       { id: "direct", icon: "cards", title: "Questions de cours", desc: `Flashcards de ${(C.directQuestions || []).length} questions fondamentales avec réponses modèles.` },
@@ -1566,6 +1720,10 @@
     let lastMode = "full";
     const start = (mode, filterCh = null) => {
       lastMode = mode;
+      if (mode === "speed") {
+        renderSpeedCoding();
+        return;
+      }
       if (mode === "direct") {
         renderDirectQuestions();
         return;
@@ -1609,6 +1767,92 @@
       });
       Q = { items, i: 0, sel: null, sub: false, res: [], wrongs: [], t0: Date.now(), isTF: mode === "truefalse" };
       renderQ();
+    };
+
+    // Mode Speed-Coding (Défi chrono 60 secondes)
+    const renderSpeedCoding = () => {
+      const pool = shuffle([...(C.speedCoding || [])]);
+      let current = 0;
+      let score = 0;
+      let timeLeft = 60;
+      let timerId = null;
+
+      const finish = () => {
+        if (timerId) clearInterval(timerId);
+        if (score >= 10) confetti();
+        root.innerHTML = `
+          <div class="quiz-card result fade-in">
+            <div class="ring">${ring(Math.min(100, score * 10), 65, score)}</div>
+            <h2>Défi Speed-Coding terminé !</h2>
+            <p class="sub">Vous avez validé <strong>${score} comptes</strong> en 60 secondes chrono.</p>
+            <div style="display:flex;gap:12px;justify-content:center;margin-top:20px">
+              <button class="btn btn-primary" id="btn-speed-retry" type="button">${icon('refresh', 'ic-sm')} Recommencer</button>
+              <button class="btn btn-outline" id="btn-speed-exit" type="button">Menu Quiz</button>
+            </div>
+          </div>`;
+        $("#btn-speed-retry").addEventListener("click", renderSpeedCoding);
+        $("#btn-speed-exit").addEventListener("click", intro);
+      };
+
+      const drawQuestion = () => {
+        if (current >= pool.length) {
+          finish();
+          return;
+        }
+        const it = pool[current];
+        root.innerHTML = `
+          <div class="quiz-card fade-in">
+            <div class="quiz-top">
+              <span>Chrono : <b id="speed-time" style="color:var(--brand);font-size:18px">${timeLeft}s</b></span>
+              <span>Score : <b id="speed-score" style="color:var(--ok);font-size:18px">${score}</b></span>
+            </div>
+            <div style="margin:24px 0;text-align:center">
+              <span class="pill" style="font-size:12px;background:var(--bg-subtle);color:var(--muted);margin-bottom:8px">${esc(it.hint)}</span>
+              <h2 style="font-size:22px;margin:8px 0 20px 0;line-height:1.4">${esc(it.prompt)}</h2>
+              <div style="max-width:320px;margin:0 auto">
+                <input class="input" id="speed-input" type="text" autocomplete="off" placeholder="Tapez le n° (ex: 401)" style="font-size:20px;text-align:center;font-family:var(--mono);padding:12px">
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:24px">
+              <button class="btn btn-outline" id="btn-speed-stop" type="button">Arrêter le défi</button>
+              <button class="btn btn-primary" id="btn-speed-submit" type="button">Valider (Entrée)</button>
+            </div>
+          </div>`;
+
+        const input = $("#speed-input");
+        if (input) {
+          input.focus();
+          const check = () => {
+            const val = input.value.trim().replace(/\s/g, "");
+            if (!val) return;
+            if (val === it.answer) {
+              score++;
+              current++;
+              drawQuestion();
+            } else {
+              input.style.borderColor = "var(--bad)";
+              setTimeout(() => {
+                input.style.borderColor = "";
+                input.value = "";
+              }, 400);
+            }
+          };
+          input.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") check();
+          });
+          $("#btn-speed-submit").addEventListener("click", check);
+          $("#btn-speed-stop").addEventListener("click", finish);
+        }
+      };
+
+      timerId = setInterval(() => {
+        timeLeft--;
+        const timeEl = $("#speed-time");
+        if (timeEl) timeEl.textContent = timeLeft + "s";
+        if (timeLeft <= 0) finish();
+      }, 1000);
+
+      drawQuestion();
     };
 
     // Mode Questions-Réponses directes de cours avec réponse préalable obligatoire de l'étudiant
