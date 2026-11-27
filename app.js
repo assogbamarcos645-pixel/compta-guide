@@ -796,6 +796,8 @@
   /* ── Générateur infini d'exercices à montants aléatoires ──── */
   function toolGenerator(el) {
     let currentTask = null;
+    let isChecked = false;
+    let userAns = "";
 
     const generateTask = () => {
       const mb = Math.round((Math.random() * 80 + 10)) * 50000; // 500 000 à 4 500 000
@@ -811,6 +813,8 @@
       const nap = ht + tva;
 
       currentTask = { mb, rem, esc, port, nc, escompte, nf, ht, tva, nap };
+      isChecked = false;
+      userAns = "";
       render();
     };
 
@@ -820,7 +824,7 @@
         <div class="tool">
           <div class="panel">
             <h2>Énoncé généré aléatoirement</h2>
-            <p class="sub">Résolvez la facture et indiquez le Net à payer (TVA 18 %).</p>
+            <p class="sub">Prenez un papier ou votre calculatrice, résolvez la facture et indiquez le Net à payer (TTC).</p>
             <div style="background:var(--bg);padding:18px;border-radius:12px;font-size:15px;line-height:1.7;margin-bottom:20px">
               L'entreprise réalise une vente de marchandises :<br>
               • <strong>Montant brut :</strong> ${fmt(t.mb)} F CFA<br>
@@ -830,48 +834,70 @@
               • <strong>Taux de TVA :</strong> 18 %
             </div>
             <div class="field">
-              <label for="gen-ans">Quel est le Net à payer (TTC) ?</label>
-              <input class="input" id="gen-ans" type="number" placeholder="Entrez votre calcul en F CFA">
+              <label for="gen-ans">Quel est le montant du Net à payer (TTC) ?</label>
+              <input class="input" id="gen-ans" type="number" placeholder="Entrez votre calcul en F CFA" value="${esc(userAns)}" ${isChecked ? 'disabled' : ''}>
             </div>
-            <div style="display:flex;gap:12px;margin-top:16px">
-              <button class="btn btn-primary" id="btn-check-gen" type="button">Vérifier ma réponse</button>
-              <button class="btn btn-outline" id="btn-next-gen" type="button">${icon('refresh', 'ic-sm')} Autre énoncé</button>
+            <div style="display:flex;gap:12px;margin-top:16px;flex-wrap:wrap">
+              <button class="btn btn-primary" id="btn-check-gen" type="button" ${isChecked ? 'disabled' : ''}>Vérifier ma réponse</button>
+              <button class="btn btn-outline" id="btn-next-gen" type="button">${icon('refresh', 'ic-sm')} Générer un autre énoncé</button>
             </div>
             <div id="gen-feedback" style="margin-top:18px"></div>
           </div>
 
           <div class="panel">
             <h2>Solution détaillée de la facture</h2>
-            <div id="gen-sol" style="opacity:0.25;transition:opacity 0.3s">
-              <div class="invoice">
-                <div class="invoice-row"><span class="lbl">Montant brut</span><span class="val">${fmt(t.mb)}</span></div>
-                ${t.rem ? `<div class="invoice-row minus"><span class="lbl">Remise ${t.rem} %</span><span class="val">− ${fmt(t.mb * t.rem / 100)}</span></div>` : ''}
-                <div class="invoice-row total"><span class="lbl">Net commercial</span><span class="val">${fmt(t.nc)}</span></div>
-                ${t.esc ? `<div class="invoice-row minus"><span class="lbl">Escompte ${t.esc} %</span><span class="val">− ${fmt(t.escompte)}</span></div>` : ''}
-                ${t.esc ? `<div class="invoice-row total"><span class="lbl">Net financier</span><span class="val">${fmt(t.nf)}</span></div>` : ''}
-                ${t.port ? `<div class="invoice-row plus"><span class="lbl">Port HT</span><span class="val">+ ${fmt(t.port)}</span></div>` : ''}
-                <div class="invoice-row plus"><span class="lbl">TVA 18 %</span><span class="val">+ ${fmt(t.tva)}</span></div>
-                <div class="invoice-row nap"><span class="lbl">Net à payer</span><span class="val">${fmt(t.nap)}</span></div>
+            ${!isChecked ? `
+              <div style="background:var(--surface-2);border:1px dashed var(--line);border-radius:12px;padding:36px 20px;text-align:center;margin-top:14px">
+                <div style="width:44px;height:44px;border-radius:50%;background:var(--bg-subtle);display:grid;place-items:center;margin:0 auto 12px;color:var(--muted)">
+                  ${icon('calc', 'ic-sm')}
+                </div>
+                <strong style="display:block;color:var(--fg);font-size:15px;margin-bottom:6px">Solution masquée</strong>
+                <p style="color:var(--muted);font-size:13.5px;max-width:320px;margin:0 auto;line-height:1.5">
+                  Calculez votre montant et cliquez sur <em>« Vérifier ma réponse »</em> pour dévoiler la décomposition complète de la facture.
+                </p>
+              </div>` : `
+              <div class="fade-in" style="margin-top:14px">
+                <div class="invoice">
+                  <div class="invoice-row"><span class="lbl">Montant brut</span><span class="val">${fmt(t.mb)}</span></div>
+                  ${t.rem ? `<div class="invoice-row minus"><span class="lbl">Remise ${t.rem} %</span><span class="val">− ${fmt(t.mb * t.rem / 100)}</span></div>` : ''}
+                  <div class="invoice-row total"><span class="lbl">Net commercial</span><span class="val">${fmt(t.nc)}</span></div>
+                  ${t.esc ? `<div class="invoice-row minus"><span class="lbl">Escompte ${t.esc} %</span><span class="val">− ${fmt(t.escompte)}</span></div>` : ''}
+                  ${t.esc ? `<div class="invoice-row total"><span class="lbl">Net financier</span><span class="val">${fmt(t.nf)}</span></div>` : ''}
+                  ${t.port ? `<div class="invoice-row plus"><span class="lbl">Port HT</span><span class="val">+ ${fmt(t.port)}</span></div>` : ''}
+                  <div class="invoice-row plus"><span class="lbl">TVA 18 %</span><span class="val">+ ${fmt(t.tva)}</span></div>
+                  <div class="invoice-row nap"><span class="lbl">Net à payer</span><span class="val">${fmt(t.nap)}</span></div>
+                </div>
               </div>
-            </div>
-            <p id="sol-hint" style="color:var(--muted);font-size:13px;margin-top:14px;text-align:center">La solution sera révélée après votre réponse.</p>
+            `}
           </div>
         </div>`;
 
-      $('#btn-check-gen').addEventListener('click', () => {
-        const val = num($('#gen-ans').value);
-        const diff = Math.abs(val - t.nap);
-        $('#gen-sol').style.opacity = '1';
-        $('#sol-hint').style.display = 'none';
+      const input = $('#gen-ans');
+      const checkBtn = $('#btn-check-gen');
 
-        if (diff < 5) {
-          confetti();
-          unlockBadge('calc_guru');
-          $('#gen-feedback').innerHTML = `<div class="feedback ok"><b>${icon('check', 'ic-sm')} Excellent !</b><p>Votre calcul est parfaitement exact (${fmt(t.nap)} F CFA).</p></div>`;
-        } else {
-          $('#gen-feedback').innerHTML = `<div class="feedback ko"><b>${icon('x', 'ic-sm')} Pas tout à fait...</b><p>Le Net à payer attendu est de <strong>${fmt(t.nap)} F CFA</strong>. Consultez la cascade à droite pour analyser vos écarts.</p></div>`;
-        }
-      });
+      if (!isChecked && checkBtn) {
+        checkBtn.addEventListener('click', () => {
+          const rawVal = input.value.trim();
+          if (!rawVal) {
+            alert("Veuillez d'abord saisir votre résultat avant de pouvoir afficher la solution détaillée.");
+            input.focus();
+            return;
+          }
+          userAns = rawVal;
+          isChecked = true;
+          render();
+
+          const val = num(userAns);
+          const diff = Math.abs(val - t.nap);
+          if (diff < 5) {
+            confetti();
+            unlockBadge('calc_guru');
+            $('#gen-feedback').innerHTML = `<div class="feedback ok"><b>${icon('check', 'ic-sm')} Excellent résultat !</b><p>Votre calcul est parfaitement exact (${fmt(t.nap)} F CFA). La cascade de calcul détaillée est dévoilée ci-contre.</p></div>`;
+          } else {
+            $('#gen-feedback').innerHTML = `<div class="feedback ko"><b>${icon('x', 'ic-sm')} Écart détecté...</b><p>Vous avez proposé <strong>${fmt(val)} F CFA</strong>, alors que le Net à payer exact est de <strong>${fmt(t.nap)} F CFA</strong>. Consultez la cascade à droite pour analyser vos étapes de calcul.</p></div>`;
+          }
+        });
+      }
 
       $('#btn-next-gen').addEventListener('click', generateTask);
     };
