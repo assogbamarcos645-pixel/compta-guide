@@ -2128,7 +2128,7 @@
 
   <div class="header">
     <p><strong>UNIVERSITÉ / INSTITUT LES COURS SONOU — L1 INFORMATIQUE</strong></p>
-    <p>Enseignant : Dr Rock Stanislas HINVI · SYSCOHADA Révisé</p>
+    <p>Initiation à la Comptabilité Générale I · Référentiel SYSCOHADA Révisé</p>
     <h1>Épreuve d'Initiation à la Comptabilité Générale I</h1>
     <p>Session d'entraînement officiel · Durée conseillée : 2h00 · Calculatrice autorisée</p>
   </div>
@@ -2237,7 +2237,7 @@
 
   <div class="header">
     <p><strong>UNIVERSITÉ / INSTITUT LES COURS SONOU — L1 INFORMATIQUE</strong></p>
-    <p>Enseignant : Dr Rock Stanislas HINVI · SYSCOHADA Révisé</p>
+    <p>Initiation à la Comptabilité Générale I · Référentiel SYSCOHADA Révisé</p>
     <h1>Corrigé Officiel & Grille de Notation</h1>
     <p>Session d'examen blanc du ${dateStr} · Barème total sur 20 points</p>
   </div>
