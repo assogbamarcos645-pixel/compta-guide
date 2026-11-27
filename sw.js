@@ -1,5 +1,5 @@
 // Service Worker — Comptabilité Générale I (PWA hors-ligne)
-const CACHE_NAME = 'compta-l1-v4';
+const CACHE_NAME = 'compta-l1-v5';
 const ASSETS = [
   './',
   './index.html',

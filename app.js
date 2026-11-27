@@ -50,16 +50,26 @@
   checkStreak();
 
   // Débloquer un badge
-  const unlockBadge = (id) => {
+  const unlockBadge = (id, silent = false) => {
     if (!state.badges.has(id)) {
       state.badges.add(id);
       saveBadges();
       const bObj = (C.badges || []).find(b => b.id === id);
-      if (bObj) {
+      if (bObj && !silent) {
         toast("Trophée débloqué : " + bObj.title + " !");
         confetti();
       }
     }
+  };
+
+  // Rétroaction et synchronisation automatique de tous les badges
+  const checkBadges = (silent = false) => {
+    if (state.read && state.read.size >= 1) unlockBadge("first_read", silent);
+    if (state.read && state.read.size >= C.chapters.length) unlockBadge("all_read", silent);
+    if (state.attempts >= 1) unlockBadge("quiz_first", silent);
+    if (state.best && state.best.pct === 100) unlockBadge("quiz_ace", silent);
+    if (state.streak && state.streak.count >= 3) unlockBadge("streak_3", silent);
+    if (state.exDone && state.exDone.size >= (C.exercises ? C.exercises.length : 5)) unlockBadge("ex_master", silent);
   };
   const saveRead = () => store.set("read", Array.from(state.read));
 
@@ -411,6 +421,7 @@
       else {
         state.read.add(ch.id);
         toast(state.read.size === C.chapters.length ? "Bravo, vous avez terminé tout le cours." : "Chapitre enregistré comme lu.");
+        checkBadges();
       }
       saveRead();
       updateRead();
@@ -1277,6 +1288,7 @@
       if (currentOpIdx >= ops.length) {
         state.exDone.add(ex.id);
         saveExDone();
+        checkBadges();
         confetti();
         runner.innerHTML = `
           <div style="text-align:center;padding:30px 10px">
@@ -1438,6 +1450,7 @@
       if (allCorrect) {
         state.exDone.add(ex.id);
         saveExDone();
+        checkBadges();
         confetti();
         $('#fac-feedback').innerHTML = `<div class="feedback ok"><b>${icon('check', 'ic-sm')} Bravo ! Facture exacte.</b><p>Tous les calculs en cascade correspondent parfaitement à la solution du professeur.</p></div>`;
       } else {
@@ -1668,7 +1681,8 @@
       const isBest = !state.best || pct > state.best.pct;
       if (isBest) { state.best = { pct, score, total }; store.set("best", state.best); }
       if (pct === 100) unlockBadge("quiz_ace");
-      if (state.attempts >= 1) unlockBadge("first_quiz");
+      if (state.attempts >= 1) unlockBadge("quiz_first");
+      checkBadges();
 
       const toReview = [...new Set(Q.wrongs.map((w) => w.ch))].map(chapterIndex).filter((k) => k >= 0).sort((a, b) => a - b);
 
@@ -1846,13 +1860,13 @@
                 </div>
                 <div style="margin-bottom:8px">
                   <span class="pill" style="background:var(--bad-soft);color:var(--bad);font-weight:700;font-size:11px;margin-right:6px">Erreur classique</span>
-                  <span style="color:var(--bad);font-size:14px;font-weight:500">${esc(t.wrong)}</span>
+                  <span style="color:var(--bad);font-size:14px;font-weight:500">${esc(t.wrong || t.trap || '')}</span>
                 </div>
                 <div style="margin-bottom:8px">
                   <span class="pill" style="background:var(--ok-soft);color:var(--ok);font-weight:700;font-size:11px;margin-right:6px">Règle exacte</span>
-                  <span style="color:var(--ok);font-size:14px;font-weight:600">${esc(t.right)}</span>
+                  <span style="color:var(--ok);font-size:14px;font-weight:600">${esc(t.right || t.rule || '')}</span>
                 </div>
-                <p style="color:var(--muted);font-size:13px;line-height:1.5;margin:6px 0 0 0;border-top:1px dashed var(--line);padding-top:8px">${esc(t.tip)}</p>
+                <p style="color:var(--muted);font-size:13px;line-height:1.5;margin:6px 0 0 0;border-top:1px dashed var(--line);padding-top:8px">${esc(t.tip || t.conseil || 'Appliquez strictement la logique des flux et la codification SYSCOHADA.')}</p>
               </div>`).join("")}
           </div>
         </div>
@@ -1890,123 +1904,171 @@
     }
   }
 
-  // Générateur d'examen blanc avec corrigé détachable
+  // Générateur d'examen blanc avec corrigé détachable (Compatible 100% PC, Android et iOS sans blocage de pop-up)
   function generateExamPaper() {
     const questionsPool = [...C.questions].sort(() => 0.5 - Math.random()).slice(0, 10);
     const dateStr = new Date().toLocaleDateString("fr-FR");
 
-    const printWindow = window.open("", "_blank");
-    if (!printWindow) {
-      alert("Veuillez autoriser les fenêtres pop-up pour générer le sujet d'examen imprimable.");
-      return;
+    const paperHtml = `<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Examen Blanc — Initiation à la Comptabilité Générale I</title>
+  <style>
+    body { font-family: "Times New Roman", Georgia, serif; margin: 40px; color: #111; line-height: 1.5; font-size: 13pt; background: #fff; }
+    .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 25px; }
+    .header h1 { margin: 5px 0; font-size: 17pt; text-transform: uppercase; }
+    .header p { margin: 3px 0; font-size: 11pt; }
+    .meta-box { display: flex; justify-content: space-between; margin-bottom: 25px; font-size: 12pt; }
+    .section-title { font-size: 14pt; font-weight: bold; margin-top: 25px; margin-bottom: 12px; border-bottom: 1px solid #444; padding-bottom: 4px; text-transform: uppercase; }
+    .q-item { margin-bottom: 16px; page-break-inside: avoid; }
+    .q-title { font-weight: bold; margin-bottom: 5px; }
+    .q-choices { margin-left: 20px; list-style-type: upper-alpha; }
+    .q-choices li { margin-bottom: 3px; }
+    .page-break { page-break-before: always; margin-top: 40px; border-top: 2px dashed #999; padding-top: 30px; }
+    .corrigé-title { text-align: center; font-size: 17pt; font-weight: bold; margin-bottom: 20px; color: #111; }
+    .answer-item { margin-bottom: 14px; page-break-inside: avoid; }
+    .actions-bar { position: sticky; top: 0; background: #e0e7ff; padding: 12px; text-align: center; margin: -40px -40px 20px -40px; border-bottom: 2px solid #c7d2fe; font-family: sans-serif; font-size: 13pt; z-index: 100; }
+    .btn-print { padding: 8px 18px; font-size: 14pt; font-weight: bold; background: #4f46e5; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
+    .btn-close { padding: 8px 16px; font-size: 13pt; margin-left: 10px; background: #fff; border: 1px solid #6b7280; border-radius: 6px; cursor: pointer; }
+    @media print {
+      .no-print { display: none !important; }
+      body { margin: 15mm 20mm; }
     }
+  </style>
+</head>
+<body>
+  <div class="no-print actions-bar">
+    <strong>Sujet d'examen blanc prêt à l'emploi.</strong>
+    <button class="btn-print" onclick="window.print()">Imprimer ou Enregistrer en PDF</button>
+    <button class="btn-close" onclick="window.close()">Fermer</button>
+  </div>
 
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html lang="fr">
-      <head>
-        <meta charset="UTF-8">
-        <title>Examen Blanc — Initiation à la Comptabilité Générale I</title>
-        <style>
-          body { font-family: "Times New Roman", serif; margin: 40px; color: #111; line-height: 1.5; font-size: 13pt; }
-          .header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 15px; margin-bottom: 25px; }
-          .header h1 { margin: 5px 0; font-size: 17pt; text-transform: uppercase; }
-          .header p { margin: 3px 0; font-size: 11pt; }
-          .meta-box { display: flex; justify-content: space-between; margin-bottom: 25px; font-size: 12pt; }
-          .section-title { font-size: 14pt; font-weight: bold; margin-top: 25px; margin-bottom: 12px; border-bottom: 1px solid #444; padding-bottom: 4px; text-transform: uppercase; }
-          .q-item { margin-bottom: 16px; page-break-inside: avoid; }
-          .q-title { font-weight: bold; margin-bottom: 5px; }
-          .q-choices { margin-left: 20px; list-style-type: upper-alpha; }
-          .q-choices li { margin-bottom: 3px; }
-          .page-break { page-break-before: always; margin-top: 40px; border-top: 2px dashed #999; padding-top: 30px; }
-          .corrigé-title { text-align: center; font-size: 17pt; font-weight: bold; margin-bottom: 20px; color: #111; }
-          .answer-item { margin-bottom: 14px; page-break-inside: avoid; }
-          @media print {
-            .no-print { display: none; }
-          }
-        </style>
-      </head>
-      <body>
-        <div class="no-print" style="background:#e0e7ff;padding:12px;text-align:center;margin-bottom:20px;border-radius:6px;font-family:sans-serif;font-size:12pt">
-          <strong>Aperçu du sujet d'examen blanc.</strong> Utilisez le bouton ci-contre pour imprimer ou enregistrer en PDF : 
-          <button onclick="window.print()" style="padding:6px 14px;font-weight:bold;cursor:pointer;margin-left:10px">Imprimer / Exporter PDF</button>
-        </div>
+  <div class="header">
+    <p><strong>UNIVERSITÉ / INSTITUT LES COURS SONOU — L1 INFORMATIQUE</strong></p>
+    <p>Enseignant : Dr Rock Stanislas HINVI · SYSCOHADA Révisé</p>
+    <h1>Épreuve d'Initiation à la Comptabilité Générale I</h1>
+    <p>Session d'entraînement · Durée conseillée : 1h30 · Calculatrice autorisée</p>
+  </div>
 
-        <div class="header">
-          <p><strong>UNIVERSITÉ / INSTITUT LES COURS SONOU — L1 INFORMATIQUE</strong></p>
-          <p>Enseignant : Dr Rock Stanislas HINVI · SYSCOHADA Révisé</p>
-          <h1>Épreuve d'Initiation à la Comptabilité Générale I</h1>
-          <p>Session d'entraînement · Durée conseillée : 1h30 · Calculatrice autorisée</p>
-        </div>
+  <div class="meta-box">
+    <div>Nom & Prénom(s) : ..........................................................................</div>
+    <div>Date : ${dateStr}</div>
+  </div>
 
-        <div class="meta-box">
-          <div>Nom & Prénom(s) : ..........................................................................</div>
-          <div>Date : ${dateStr}</div>
-        </div>
+  <div class="section-title">Partie I : Questionnaire à Choix Multiple (${questionsPool.length} points)</div>
+  <p><em>Pour chaque question, cochez la seule réponse exacte parmi les propositions formulées.</em></p>
 
-        <div class="section-title">Partie I : Questionnaire à Choix Multiple (${questionsPool.length} points)</div>
-        <p><em>Pour chaque question, cochez la seule réponse exacte parmi les propositions formulées.</em></p>
+  ${questionsPool.map((q, idx) => {
+    const opts = q.o || q.options || [];
+    return `
+    <div class="q-item">
+      <div class="q-title">Question ${idx + 1} : ${esc(q.q)}</div>
+      <ol class="q-choices">
+        ${opts.map(opt => `<li>[ &nbsp; ] &nbsp; ${esc(opt)}</li>`).join("")}
+      </ol>
+    </div>`;
+  }).join("")}
 
-        ${questionsPool.map((q, idx) => `
-          <div class="q-item">
-            <div class="q-title">Question ${idx + 1} : ${esc(q.q)}</div>
-            <ol class="q-choices">
-              ${q.a.map(opt => `<li>[ &nbsp; ] &nbsp; ${esc(opt)}</li>`).join("")}
-            </ol>
-          </div>`).join("")}
+  <div class="section-title">Partie II : Cas Pratique de Synthèse (Facturation & Journalisation - 10 points)</div>
+  <p>L'entreprise « SONOU-TECH SA » réalise au cours du mois de novembre les opérations suivantes sous le taux de TVA en vigueur au Bénin (18 %) :</p>
+  <p><strong>Opération 1 :</strong> Achat de marchandises pour un montant brut de 1 500 000 F CFA. Remise de 5 %, Escompte de règlement de 2 % accordé pour paiement sous huitaine, Port facturé : 45 000 F CFA HT. Règlement prévu dans 30 jours.</p>
+  <p><strong>Opération 2 :</strong> Vente de marchandises d'une valeur brute de 2 000 000 F CFA, rabais 2%, TVA 18%, encaissée par chèque bancaire.</p>
+  <p><strong>Travail à faire :</strong></p>
+  <ol>
+    <li>Présenter la facture n° V-101 complète de l'opération 1 en détaillant toutes les étapes de calcul.</li>
+    <li>Enregistrer les deux opérations au journal de l'entreprise dans le strict respect des comptes SYSCOHADA.</li>
+  </ol>
 
-        <div class="section-title">Partie II : Cas Pratique de Synthèse (Facturation & Journalisation - 10 points)</div>
-        <p>L'entreprise « SONOU-TECH SA » réalise au cours du mois de novembre les opérations suivantes sous le taux de TVA en vigueur au Bénin (18 %) :</p>
-        <p><strong>Opération 1 :</strong> Achat de marchandises pour un montant brut de 1 500 000 F CFA. Remise de 5 %, Escompte de règlement de 2 % accordé pour paiement sous huitaine, Port facturé : 45 000 F CFA HT. Règlement prévu dans 30 jours.</p>
-        <p><strong>Opération 2 :</strong> Vente de marchandises d'une valeur brute de 2 000 000 F CFA, rabais 2%, TVA 18%, encaissée par chèque bancaire.</p>
-        <p><strong>Travail à faire :</strong></p>
-        <ol>
-          <li>Présenter la facture n° V-101 complète de l'opération 1 en détaillant toutes les étapes de calcul.</li>
-          <li>Enregistrer les deux opérations au journal de l'entreprise dans le strict respect des comptes SYSCOHADA.</li>
-        </ol>
+  <!-- SAUT DE PAGE : CORRIGÉ OFFICIEL DÉTACHABLE -->
+  <div class="page-break">
+    <div class="corrigé-title">CORRIGÉ OFFICIEL & GRILLE DE NOTATION (DÉTACHABLE)</div>
+    <p style="text-align:center;font-style:italic;margin-bottom:25px">À détacher avant l'épreuve par le surveillant ou pour autocorrection.</p>
 
-        <!-- PAGE BREAK : CORRIGÉ OFFICIEL DÉTACHABLE -->
-        <div class="page-break">
-          <div class="corrigé-title">CORRIGÉ OFFICIEL & GRILLE DE NOTATION (DÉTACHABLE)</div>
-          <p style="text-align:center;font-style:italic;margin-bottom:25px">À détacher avant l'épreuve par le surveillant ou pour autocorrection.</p>
+    <div class="section-title">Corrigé de la Partie I : Q.C.M.</div>
+    ${questionsPool.map((q, idx) => {
+      const opts = q.o || q.options || [];
+      const goodIdx = typeof q.a === "number" ? q.a : (typeof q.good === "number" ? q.good : 0);
+      const goodText = opts[goodIdx] || "";
+      return `
+      <div class="answer-item">
+        <strong>Q${idx + 1} : Réponse correcte -> Option ${String.fromCharCode(65 + goodIdx)} : ${esc(goodText)}</strong>
+        <div style="font-size:12pt;color:#333;margin-top:3px"><em>Justification SYSCOHADA :</em> ${esc(q.e || "")}</div>
+      </div>`;
+    }).join("")}
 
-          <div class="section-title">Corrigé de la Partie I : Q.C.M.</div>
-          ${questionsPool.map((q, idx) => `
-            <div class="answer-item">
-              <strong>Q${idx + 1} : Réponse correcte -> Option ${String.fromCharCode(65 + q.good)} : ${esc(q.a[q.good])}</strong>
-              <div style="font-size:12pt;color:#333;margin-top:3px"><em>Justification SYSCOHADA :</em> ${esc(q.e)}</div>
-            </div>`).join("")}
+    <div class="section-title">Corrigé de la Partie II : Cas Pratique</div>
+    <p><strong>1. Décompte de la facture de l'Opération 1 :</strong></p>
+    <ul>
+      <li>Brut HT = 1 500 000 F CFA</li>
+      <li>Remise 5% = 75 000 F CFA -> Net Commercial = 1 425 000 F CFA</li>
+      <li>Escompte 2% = 28 500 F CFA -> Net Financier = 1 396 500 F CFA</li>
+      <li>Port forfaitaire = 45 000 F CFA</li>
+      <li>Base HT soumise à TVA = Net Financier (1 396 500) + Port (45 000) = 1 441 500 F CFA</li>
+      <li>TVA 18% = 1 441 500 × 18% = 259 470 F CFA</li>
+      <li>Net à payer TTC = 1 441 500 + 259 470 = 1 700 970 F CFA</li>
+    </ul>
+    <p><strong>2. Schéma d'imputation au journal :</strong></p>
+    <ul>
+      <li>Débit 601 Achats de marchandises (Net Commercial : 1 425 000)</li>
+      <li>Débit 611 Transports sur achats (Port : 45 000)</li>
+      <li>Débit 4452 État, TVA récupérable sur achats (259 470)</li>
+      <li>Crédit 773 Escomptes obtenus (28 500)</li>
+      <li>Crédit 401 Fournisseurs (Net à payer TTC : 1 700 970)</li>
+    </ul>
+  </div>
+</body>
+</html>`;
 
-          <div class="section-title">Corrigé de la Partie II : Cas Pratique</div>
-          <p><strong>1. Décompte de la facture de l'Opération 1 :</strong></p>
-          <ul>
-            <li>Brut HT = 1 500 000 F CFA</li>
-            <li>Remise 5% = 75 000 F CFA -> Net Commercial = 1 425 000 F CFA</li>
-            <li>Escompte 2% = 28 500 F CFA -> Net Financier = 1 396 500 F CFA</li>
-            <li>Port forfaitaire = 45 000 F CFA</li>
-            <li>Base HT soumise à TVA = Net Financier (1 396 500) + Port (45 000) = 1 441 500 F CFA</li>
-            <li>TVA 18% = 1 441 500 × 18% = 259 470 F CFA</li>
-            <li>Net à payer TTC = 1 441 500 + 259 470 = 1 700 970 F CFA</li>
-          </ul>
-          <p><strong>2. Schéma d'imputation au journal :</strong></p>
-          <ul>
-            <li>Débit 601 Achats de marchandises (Net Commercial : 1 425 000)</li>
-            <li>Débit 611 Transports sur achats (Port : 45 000)</li>
-            <li>Débit 4452 État, TVA récupérable sur achats (259 470)</li>
-            <li>Crédit 773 Escomptes obtenus (28 500)</li>
-            <li>Crédit 401 Fournisseurs (Net à payer TTC : 1 700 970)</li>
-          </ul>
-        </div>
-      </body>
-      </html>
-    `);
-    printWindow.document.close();
+    // Méthode 1 : Essai d'ouverture d'onglet direct
+    let printWin = null;
+    try {
+      printWin = window.open("", "_blank");
+    } catch(e) {}
+
+    if (printWin && printWin.document) {
+      printWin.document.open();
+      printWin.document.write(paperHtml);
+      printWin.document.close();
+      toast("Sujet d'examen généré avec succès !");
+    } else {
+      // Méthode 2 (Mobile / Pop-ups bloqués) : Utilisation d'un iframe invisible qui déclenche directement l'impression
+      let printFrame = document.getElementById("examPrintIframe");
+      if (!printFrame) {
+        printFrame = document.createElement("iframe");
+        printFrame.id = "examPrintIframe";
+        printFrame.style.position = "fixed";
+        printFrame.style.right = "0";
+        printFrame.style.bottom = "0";
+        printFrame.style.width = "0";
+        printFrame.style.height = "0";
+        printFrame.style.border = "0";
+        document.body.appendChild(printFrame);
+      }
+      const frameDoc = printFrame.contentWindow || printFrame.contentDocument.document || printFrame.contentDocument;
+      frameDoc.document.open();
+      frameDoc.document.write(paperHtml);
+      frameDoc.document.close();
+      setTimeout(() => {
+        try {
+          printFrame.contentWindow.focus();
+          printFrame.contentWindow.print();
+          toast("Boîte d'impression / export PDF ouverte !");
+        } catch(err) {
+          // Méthode 3 de repli : Blob URL
+          const blob = new Blob([paperHtml], { type: "text/html;charset=utf-8" });
+          const url = URL.createObjectURL(blob);
+          location.href = url;
+        }
+      }, 300);
+    }
   }
 
   /* ============================================================
      TABLEAU DE BORD, GAMIFICATION & PROGRESSION
      ============================================================ */
   function viewDashboard() {
+    checkBadges(true);
     const unlockedCount = state.badges ? state.badges.size : 0;
     const totalBadges = (C.badges || []).length;
     const streakDays = (state.streak && state.streak.count) || 0;
