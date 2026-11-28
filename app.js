@@ -214,6 +214,7 @@
   const TOOLS = [
     { id: "facture", label: "Calculateur de facture", icon: "calc", desc: "Du montant brut au net à payer, étape par étape, avec comparaison miroir acheteur vs fournisseur." },
     { id: "compte-t", label: "Compte en T", icon: "t", desc: "Passez des opérations au débit ou au crédit et observez le solde évoluer." },
+    { id: "balance", label: "Balance à 6 colonnes", icon: "list", desc: "Simulateur de balance générale : double égalité journal / balance et formation du résultat." },
     { id: "guide-compte", label: "Guide du compte", icon: "target", desc: "Arbre décisionnel pour trouver le bon numéro de compte SYSCOHADA selon l'opération." },
     { id: "anomalies", label: "Trouver l'anomalie", icon: "refresh", desc: "Détecteur d'erreurs comptables fréquentes pour développer vos réflexes d'auditeur." },
     { id: "fiches", label: "Fiches du plan comptable", icon: "cards", desc: "Mémorisez les comptes avec système de répétition espacée." },
@@ -360,9 +361,17 @@
           </div>
 
           <header class="article-head">
-            <span class="eyebrow">Chapitre ${i + 1} sur ${C.chapters.length}</span>
-            <h1>${esc(ch.title)}</h1>
-            <div class="meta">${icon("clock", "ic-sm")} ${ch.minutes} min de lecture ${ch.key ? '<span class="pill">Essentiel</span>' : ""}</div>
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+              <div>
+                <span class="eyebrow">Chapitre ${i + 1} sur ${C.chapters.length}</span>
+                <h1>${esc(ch.title)}</h1>
+                <div class="meta">${icon("clock", "ic-sm")} ${ch.minutes} min de lecture ${ch.key ? '<span class="pill">Essentiel</span>' : ""}</div>
+              </div>
+              <button class="btn btn-outline btn-sm" id="btn-zen-mode" type="button" title="Activer / désactiver le mode lecture zen sans distraction">
+                <svg class="ic" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                <span id="zen-text">Mode Zen</span>
+              </button>
+            </div>
           </header>
 
           <div class="prose" id="prose">${ch.content}</div>
@@ -429,6 +438,19 @@
       updateRead();
     });
 
+    // Mode lecture Zen
+    let isZen = false;
+    const btnZen = $("#btn-zen-mode");
+    if (btnZen) {
+      btnZen.addEventListener("click", () => {
+        isZen = !isZen;
+        document.body.classList.toggle("zen-mode", isZen);
+        $("#zen-text").textContent = isZen ? "Quitter Zen" : "Mode Zen";
+        btnZen.classList.toggle("btn-primary", isZen);
+        btnZen.classList.toggle("btn-outline", !isZen);
+      });
+    }
+
     // Barre de lecture
     const bar = $("#readProgress");
     const onScroll = () => {
@@ -437,7 +459,11 @@
     };
     addEventListener("scroll", onScroll, { passive: true });
     onScroll();
-    return () => { removeEventListener("scroll", onScroll); bar.style.width = "0"; };
+    return () => {
+      document.body.classList.remove("zen-mode");
+      removeEventListener("scroll", onScroll);
+      bar.style.width = "0";
+    };
   }
 
   /* ============================================================
@@ -461,6 +487,7 @@
     const map = {
       facture: toolFacture,
       "compte-t": toolCompteT,
+      balance: toolBalance,
       "guide-compte": toolGuideCompte,
       anomalies: toolAnomalies,
       fiches: toolFiches,
@@ -472,6 +499,127 @@
     return (map[t.id] || toolFacture)(el);
   }
 
+
+  /* ── Simulateur de Balance à 6 Colonnes ──────────────────── */
+  function toolBalance(el) {
+    const DEFAULT_ACCOUNTS = [
+      { num: "101", name: "Capital social", siD: 0, siC: 5000000, mvD: 0, mvC: 0 },
+      { num: "245", name: "Matériel de transport", siD: 3000000, siC: 0, mvD: 500000, mvC: 0 },
+      { num: "401", name: "Fournisseurs", siD: 0, siC: 1200000, mvD: 800000, mvC: 600000 },
+      { num: "411", name: "Clients", siD: 1500000, siC: 0, mvD: 1200000, mvC: 900000 },
+      { num: "521", name: "Banques", siD: 2200000, siC: 0, mvD: 900000, mvC: 1300000 },
+      { num: "601", name: "Achats de marchandises", siD: 0, siC: 0, mvD: 1000000, mvC: 0 },
+      { num: "701", name: "Ventes de marchandises", siD: 0, siC: 0, mvD: 0, mvC: 1600000 }
+    ];
+
+    let accounts = JSON.parse(JSON.stringify(DEFAULT_ACCOUNTS));
+
+    const draw = () => {
+      let totSiD = 0, totSiC = 0, totMvD = 0, totMvC = 0, totSfD = 0, totSfC = 0;
+
+      const rows = accounts.map(a => {
+        totSiD += a.siD; totSiC += a.siC;
+        totMvD += a.mvD; totMvC += a.mvC;
+        const totalD = a.siD + a.mvD;
+        const totalC = a.siC + a.mvC;
+        const solde = totalD - totalC;
+        const sfD = solde > 0 ? solde : 0;
+        const sfC = solde < 0 ? Math.abs(solde) : 0;
+        totSfD += sfD; totSfC += sfC;
+
+        return `
+          <tr>
+            <td style="font-family:var(--mono);font-weight:700;color:var(--brand)">${a.num}</td>
+            <td>${esc(a.name)}</td>
+            <td class="num">${a.siD ? fmt(a.siD) : '-'}</td>
+            <td class="num">${a.siC ? fmt(a.siC) : '-'}</td>
+            <td class="num" style="color:var(--fg)">${a.mvD ? fmt(a.mvD) : '-'}</td>
+            <td class="num" style="color:var(--fg)">${a.mvC ? fmt(a.mvC) : '-'}</td>
+            <td class="num" style="font-weight:700;color:${sfD ? 'var(--ok)' : 'inherit'}">${sfD ? fmt(sfD) : '-'}</td>
+            <td class="num" style="font-weight:700;color:${sfC ? 'var(--brand)' : 'inherit'}">${sfC ? fmt(sfC) : '-'}</td>
+          </tr>`;
+      }).join("");
+
+      const isBalancedMv = Math.abs(totMvD - totMvC) < 1;
+      const isBalancedSf = Math.abs(totSfD - totSfC) < 1;
+
+      el.innerHTML = `
+        <div class="tool">
+          <div class="panel" style="grid-column:1 / -1">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+              <div>
+                <h2>Balance Générale à 6 Colonnes (SYSCOHADA)</h2>
+                <p class="sub" style="margin:4px 0 0 0">Vérification de la double égalité fondamentale et contrôle arithmétique avant bilan.</p>
+              </div>
+              <div style="display:flex;gap:10px;align-items:center">
+                <span class="pill ${isBalancedMv && isBalancedSf ? 'ok' : 'ko'}" style="font-weight:700;padding:6px 14px">
+                  ${isBalancedMv && isBalancedSf ? 'Double égalité équilibrée' : 'Déséquilibre détecté'}
+                </span>
+                <button class="btn btn-outline btn-sm" id="btn-reset-bal" type="button">
+                  ${icon('refresh', 'ic-sm')} Réinitialiser
+                </button>
+              </div>
+            </div>
+
+            <div style="overflow-x:auto;margin-top:10px">
+              <table class="journal-table" style="min-width:750px">
+                <thead>
+                  <tr>
+                    <th rowspan="2" style="vertical-align:middle">N°</th>
+                    <th rowspan="2" style="vertical-align:middle">Intitulé des comptes</th>
+                    <th colspan="2" style="text-align:center;background:var(--bg-subtle)">Soldes initiaux</th>
+                    <th colspan="2" style="text-align:center;background:var(--surface-2)">Mouvements de l'exercice</th>
+                    <th colspan="2" style="text-align:center;background:var(--brand-soft)">Soldes finals (Clôture)</th>
+                  </tr>
+                  <tr>
+                    <th style="text-align:right">Débit</th>
+                    <th style="text-align:right">Crédit</th>
+                    <th style="text-align:right">Débit</th>
+                    <th style="text-align:right">Crédit</th>
+                    <th style="text-align:right">Débiteur</th>
+                    <th style="text-align:right">Créditeur</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${rows}
+                  <tr style="background:var(--bg-subtle);font-weight:700;border-top:2px solid var(--fg)">
+                    <td colspan="2">TOTAUX GÉNÉRAUX</td>
+                    <td class="num">${fmt(totSiD)}</td>
+                    <td class="num">${fmt(totSiC)}</td>
+                    <td class="num">${fmt(totMvD)}</td>
+                    <td class="num">${fmt(totMvC)}</td>
+                    <td class="num" style="color:var(--ok)">${fmt(totSfD)}</td>
+                    <td class="num" style="color:var(--brand)">${fmt(totSfC)}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:16px;margin-top:20px">
+              <div class="panel" style="background:var(--surface-2);border-radius:10px;padding:14px">
+                <strong style="color:var(--fg);font-size:14px;display:block;margin-bottom:4px">1. Première égalité (Journal = Balance) :</strong>
+                <p style="margin:0;font-size:13px;color:var(--ink-2);line-height:1.5">
+                  Total Mouvements Débit (${fmt(totMvD)}) = Total Mouvements Crédit (${fmt(totMvC)}). Garantit qu'aucune écriture déséquilibrée n'a été saisie.
+                </p>
+              </div>
+              <div class="panel" style="background:var(--surface-2);border-radius:10px;padding:14px">
+                <strong style="color:var(--fg);font-size:14px;display:block;margin-bottom:4px">2. Deuxième égalité (Soldes de clôture) :</strong>
+                <p style="margin:0;font-size:13px;color:var(--ink-2);line-height:1.5">
+                  Total Soldes Débiteurs (${fmt(totSfD)}) = Total Soldes Créditeurs (${fmt(totSfC)}). Prépare l'établissement direct du Bilan et du Résultat.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>`;
+
+      $("#btn-reset-bal").addEventListener("click", () => {
+        accounts = JSON.parse(JSON.stringify(DEFAULT_ACCOUNTS));
+        draw();
+        toast("Balance réinitialisée.");
+      });
+    };
+    draw();
+  }
 
   /* ── Guide Décisionnel du Numéro de Compte ────────────────── */
   function toolGuideCompte(el) {
@@ -1667,10 +1815,16 @@
               <h1>Les indispensables pour réussir</h1>
               <p>Toutes les formules clés, principes SYSCOHADA et schémas d'écritures réunis sur une seule page prête à imprimer.</p>
             </div>
-            <button class="btn btn-outline" onclick="window.print()" type="button">
-              <svg class="ic" viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-              Imprimer la fiche PDF
-            </button>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <button class="btn btn-primary" id="btn-antiseche-a4" type="button" title="Télécharger l'antisèche officielle 1 page A4">
+                <svg class="ic" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                Antisèche officielle A4 (PDF)
+              </button>
+              <button class="btn btn-outline" onclick="window.print()" type="button">
+                <svg class="ic" viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                Imprimer les résumés complets
+              </button>
+            </div>
           </div>
         </div>
 
@@ -1684,6 +1838,9 @@
             </div>`).join('')}
         </div>
       </div>`;
+
+    const btnAntiseche = $("#btn-antiseche-a4");
+    if (btnAntiseche) btnAntiseche.addEventListener("click", generateAntisecheA4);
   }
 
   /* ============================================================
@@ -2471,7 +2628,214 @@
     printDocument("Épreuve d'Examen Blanc", paperHtml, "Sujet de l'épreuve généré avec succès !");
   }
 
-  // 2. Générateur du Corrigé Officiel (Document à part)
+  // 3. Générateur de l'Antisèche Officielle A4 Ultra-Dense (Prête pour impression)
+  function generateAntisecheA4() {
+    const paperHtml = `<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Antisèche Officielle — Initiation à la Comptabilité Générale I (SYSCOHADA)</title>
+  <style>
+    @page { size: A4 portrait; margin: 10mm 12mm; }
+    body { font-family: "Helvetica Neue", Arial, sans-serif; font-size: 8.5pt; line-height: 1.3; color: #111; background: #fff; margin: 0; }
+    .header { text-align: center; border-bottom: 2px solid #1e3a8a; padding-bottom: 6px; margin-bottom: 8px; }
+    .header h1 { margin: 2px 0; font-size: 13pt; text-transform: uppercase; color: #1e3a8a; letter-spacing: 0.5px; }
+    .header p { margin: 1px 0; font-size: 8pt; color: #4b5563; font-weight: 600; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .box { border: 1px solid #94a3b8; border-radius: 4px; padding: 6px 8px; margin-bottom: 8px; page-break-inside: avoid; }
+    .box-title { font-weight: bold; font-size: 9pt; color: #1e3a8a; text-transform: uppercase; border-bottom: 1px solid #cbd5e1; padding-bottom: 3px; margin-bottom: 5px; }
+    table { width: 100%; border-collapse: collapse; font-size: 7.8pt; margin: 4px 0; }
+    th, td { border: 1px solid #cbd5e1; padding: 3px 5px; text-align: left; }
+    th { background: #f1f5f9; font-weight: bold; }
+    .num { text-align: right; font-family: monospace; font-weight: bold; }
+    .code { font-family: monospace; font-weight: bold; color: #0f766e; }
+    .important { color: #b91c1c; font-weight: bold; }
+    ul, ol { margin: 3px 0 3px 14px; padding: 0; }
+    li { margin-bottom: 2px; }
+    .actions-bar { position: sticky; top: 0; background: #fef08a; padding: 8px; text-align: center; border-bottom: 2px solid #facc15; font-family: sans-serif; font-size: 11pt; z-index: 100; }
+    .btn-print { padding: 6px 14px; font-size: 11pt; font-weight: bold; background: #1e3a8a; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+    .btn-close { padding: 6px 12px; font-size: 11pt; margin-left: 8px; background: #fff; border: 1px solid #64748b; border-radius: 4px; cursor: pointer; }
+    @media print { .no-print { display: none !important; } }
+  </style>
+</head>
+<body>
+  <div class="no-print actions-bar">
+    <strong>Antisèche Officielle 1 Page A4 prête à imprimer.</strong>
+    <button class="btn-print" onclick="window.print()">Imprimer en 1 Page A4 (PDF)</button>
+    <button class="btn-close" onclick="window.close()">Fermer</button>
+  </div>
+
+  <div class="header">
+    <h1>Antisèche Fondamentale — Comptabilité Générale I</h1>
+    <p>RÉFÉRENTIEL SYSCOHADA RÉVISÉ (OHADA) · SYNTHÈSE TOTALE POUR CONTRÔLES ET EXAMENS</p>
+  </div>
+
+  <div class="grid-2">
+    <!-- COLONNE GAUCHE -->
+    <div>
+      <div class="box">
+        <div class="box-title">1. Architecture des 9 Classes SYSCOHADA</div>
+        <table>
+          <tr><th>Classe & Rôle</th><th>Nature</th><th>Sens normal</th></tr>
+          <tr><td><span class="code">Classe 1</span> Ressources durables</td><td>Capitaux propres & Dettes > 1 an</td><td>Créditeur (Passif)</td></tr>
+          <tr><td><span class="code">Classe 2</span> Actif immobilisé</td><td>Biens durables (> 1 an)</td><td>Débiteur (Actif)</td></tr>
+          <tr><td><span class="code">Classe 3</span> Stocks</td><td>Marchandises, Matières, Produits</td><td>Débiteur (Actif)</td></tr>
+          <tr><td><span class="code">Classe 4</span> Comptes de tiers</td><td>Créances (41) / Dettes (40)</td><td>Débiteur ou Créditeur</td></tr>
+          <tr><td><span class="code">Classe 5</span> Trésorerie</td><td>Banque (521), Caisse (571)</td><td>Débiteur (Liquidités)</td></tr>
+          <tr><td><span class="code">Classe 6</span> Charges AO</td><td>Exploitation & Financières</td><td>Débit (Augmente)</td></tr>
+          <tr><td><span class="code">Classe 7</span> Produits AO</td><td>Ventes & Produits financiers</td><td>Crédit (Augmente)</td></tr>
+          <tr><td><span class="code">Classe 8</span> Comptes HAO</td><td>Hors Activités Ordinaires</td><td>Charges (81-85) / Prod. (82-86)</td></tr>
+        </table>
+        <small><strong>Constantes clés :</strong> 8 en 2e pos. = Amortissement (ex: 284) ; 9 en 2e pos. = Dépréciation (ex: 391) ; 9 en 3e pos. = Sens opposé (ex: 4091 créance sur fournisseur, 4191 dette client).</small>
+      </div>
+
+      <div class="box">
+        <div class="box-title">2. Cascade de Facturation (Ordre Impératif)</div>
+        <p><strong>1. Montant Brut HT</strong><br>
+        <strong>2. - Réductions commerciales (Rabais, Remises, Ristournes)</strong> en cascade<br>
+        <strong>= NET COMMERCIAL HT</strong> <span class="important">(Enregistrement en 601 ou 701, JAMAIS de 609 sur facture de doit !)</span><br>
+        <strong>3. - Escompte de règlement (financier)</strong> calculé sur le Net commercial<br>
+        <strong>= NET FINANCIER HT</strong> (Base de départ si escompte)<br>
+        <strong>4. + Frais accessoires de port HT</strong> (Port forfaitaire 6015/7071)<br>
+        <strong>= BASE HT IMPOSABLE À LA TVA</strong><br>
+        <strong>5. + TVA à 18 %</strong> (sur Base HT = Net financier + Port)<br>
+        <strong>= NET À PAYER TTC</strong></p>
+      </div>
+
+      <div class="box">
+        <div class="box-title">3. Schéma Écritures Facture de Doit</div>
+        <p><strong>Chez l'Acheteur (Client) :</strong><br>
+        Débit <span class="code">601</span> Achats de m/ses (Net commercial)<br>
+        Débit <span class="code">6015</span> Port forfaitaire refacturé<br>
+        Débit <span class="code">4452</span> TVA récupérable sur achats<br>
+        Crédit <span class="code">773</span> Escomptes obtenus (Produit)<br>
+        Crédit <span class="code">401</span> Fournisseurs (Net à payer TTC)</p>
+        <p><strong>Chez le Vendeur (Fournisseur) :</strong><br>
+        Débit <span class="code">411</span> Clients (Net à payer TTC)<br>
+        Débit <span class="code">673</span> Escomptes accordés (Charge)<br>
+        Crédit <span class="code">701</span> Ventes de m/ses (Net commercial)<br>
+        Crédit <span class="code">7071</span> Ports facturés (Produit accessoire)<br>
+        Crédit <span class="code">4431</span> TVA facturée sur ventes</p>
+      </div>
+    </div>
+
+    <!-- COLONNE DROITE -->
+    <div>
+      <div class="box">
+        <div class="box-title">4. Liquidation Mensuelle de la TVA (Bénin 18 %)</div>
+        <p><strong>Formule :</strong> TVA Due = TVA Facturée (443) - [TVA Déductible (445) + Crédit antérieur (4449)]</p>
+        <ul>
+          <li><strong>Si solde > 0 : TVA DUE À PAYER (Compte 4441 au crédit)</strong><br>
+          Écriture : Débit 443 / Crédit 445, Crédit 4449, Crédit 4441 (TVA due).</li>
+          <li><strong>Si solde < 0 : CRÉDIT DE TVA À REPORTER (Compte 4449 au débit)</strong><br>
+          Écriture : Débit 443, Débit 4449 (Crédit TVA) / Crédit 445.</li>
+        </ul>
+      </div>
+
+      <div class="box">
+        <div class="box-title">5. Emballages & Effets de Commerce</div>
+        <p><strong>Consignation d'emballages :</strong><br>
+        - Opération HORS CHAMP de la TVA lors du prêt.<br>
+        - Fournisseur : Crédit <span class="code">4194</span> Dette emballages consignés.<br>
+        - Client : Débit <span class="code">4094</span> Créance emballages à rendre.<br>
+        - Restitution avec retenue : Boni (<span class="code">7074</span>) chez vendeur avec TVA, Mali (<span class="code">6224</span>) chez client.</p>
+        <p><strong>Effets de commerce (Lettre de change / Billet à ordre) :</strong><br>
+        - Acceptation : Débit <span class="code">412</span> / Crédit <span class="code">411</span> (Vendeur) ; Débit <span class="code">401</span> / Crédit <span class="code">402</span> (Client).<br>
+        - Remise à l'escompte : Net versé en banque <span class="code">521</span>, Intérêts en <span class="code">675</span>, Commissions en <span class="code">631</span>.</p>
+      </div>
+
+      <div class="box" style="border-color:#b91c1c;background:#fef2f2">
+        <div class="box-title" style="color:#b91c1c">6. Les 6 Pièges Éliminatoires d'Examen</div>
+        <ol style="font-size:7.5pt">
+          <li><strong>Remises sur facture de doit :</strong> Ne pas créer de compte 609 ! Comptabiliser directement au Net commercial.</li>
+          <li><strong>Base TVA sur transport :</strong> Le port forfaitaire fait partie intégrante de la base imposable à 18 %.</li>
+          <li><strong>Port débours :</strong> Jamais de TVA sur le port débours chez le vendeur (simple avance de fonds).</li>
+          <li><strong>Escompte financier :</strong> Se calcule toujours sur le Net commercial, jamais sur le montant brut.</li>
+          <li><strong>Double égalité de la Balance :</strong> Mouvements D = Mouvements C (Journal) et Soldes D = Soldes C (Clôture).</li>
+          <li><strong>Résultat net :</strong> Produits (Classes 7 & 82/86) - Charges (Classes 6 & 81/85).</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+
+    printDocument("Antisèche Officielle A4", paperHtml, "Antisèche officielle générée avec succès !");
+  }
+
+  // 4. Générateur du Certificat de Réussite Numérique (Format Paysage officiel)
+  function generateCertificate() {
+    let studentName = prompt("Entrez vos Nom et Prénom(s) pour la personnalisation du certificat :", "");
+    if (!studentName || !studentName.trim()) {
+      studentName = "Étudiant(e) émérite";
+    }
+    studentName = studentName.trim();
+    const dateStr = new Date().toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" });
+    const bestPct = (state.best && state.best.pct) || 100;
+
+    const certHtml = `<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Certificat de Réussite — Comptabilité Générale I (SYSCOHADA)</title>
+  <style>
+    @page { size: A4 landscape; margin: 10mm; }
+    body { font-family: "Georgia", serif; margin: 0; padding: 20px; background: #fff; color: #1e293b; text-align: center; }
+    .cert-border { border: 12px double #1e3a8a; padding: 30px 40px; position: relative; background: #fafafa; border-radius: 8px; min-height: 85vh; display: flex; flex-direction: column; justify-content: space-between; }
+    .header-sub { font-size: 11pt; text-transform: uppercase; letter-spacing: 2px; color: #64748b; font-weight: bold; margin-bottom: 5px; }
+    h1 { font-size: 26pt; color: #1e3a8a; margin: 5px 0 15px 0; text-transform: uppercase; letter-spacing: 1px; }
+    .cert-text { font-size: 13pt; color: #475569; margin: 10px 0; }
+    .student-name { font-size: 24pt; font-family: "Times New Roman", serif; font-weight: bold; color: #0f172a; text-decoration: underline; margin: 15px 0; letter-spacing: 0.5px; }
+    .mention-box { font-size: 14pt; font-style: italic; color: #047857; margin: 15px auto; max-width: 650px; line-height: 1.5; }
+    .footer-cert { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 30px; padding: 0 40px; }
+    .signature { text-align: center; }
+    .sig-line { border-top: 1px solid #334155; width: 200px; margin-top: 40px; padding-top: 5px; font-size: 10pt; font-family: sans-serif; }
+    .seal { width: 90px; height: 90px; border: 3px solid #047857; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px auto; color: #047857; font-size: 9pt; font-weight: bold; text-transform: uppercase; transform: rotate(-10deg); font-family: sans-serif; text-align: center; padding: 5px; box-sizing: border-box; }
+    .actions-bar { position: sticky; top: 0; background: #e0e7ff; padding: 10px; text-align: center; margin: -20px -20px 20px -20px; border-bottom: 2px solid #c7d2fe; font-family: sans-serif; font-size: 12pt; z-index: 100; }
+    .btn-print { padding: 8px 18px; font-size: 12pt; font-weight: bold; background: #1e3a8a; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
+    .btn-close { padding: 8px 16px; font-size: 12pt; margin-left: 10px; background: #fff; border: 1px solid #6b7280; border-radius: 6px; cursor: pointer; }
+    @media print { .no-print { display: none !important; } }
+  </style>
+</head>
+<body>
+  <div class="no-print actions-bar">
+    <strong>Certificat de Réussite officiel prêt à être imprimé ou exporté en PDF.</strong>
+    <button class="btn-print" onclick="window.print()">Imprimer mon Certificat (Paysage A4)</button>
+    <button class="btn-close" onclick="window.close()">Fermer</button>
+  </div>
+
+  <div class="cert-border">
+    <div>
+      <div class="header-sub">ENSEIGNEMENT SUPÉRIEUR & FORMATION PROFESSIONNELLE</div>
+      <div class="header-sub">RÉFÉRENTIEL COMPTABLE OHADA / SYSCOHADA RÉVISÉ</div>
+      <h1>CERTIFICAT DE RÉUSSITE & D'ASSIDUITÉ</h1>
+      <p class="cert-text">Le présent certificat d'excellence académique est solennellement décerné à :</p>
+      <div class="student-name">${esc(studentName)}</div>
+      <div class="mention-box">
+        Pour avoir validé avec succès l'intégralité du programme d'<strong>Initiation à la Comptabilité Générale I</strong> (Principes, Équilibre Bilan/Résultat, Facturation, Frais de port, TVA, Emballages et Effets de commerce) avec un score remarquable de <strong>${bestPct} %</strong>.
+      </div>
+    </div>
+
+    <div class="footer-cert">
+      <div class="signature">
+        <div style="font-size:10.5pt;font-weight:bold;color:#1e293b">Délivré le ${dateStr}</div>
+        <div class="sig-line">Date de validation</div>
+      </div>
+      <div>
+        <div class="seal">SYSCOHADA<br>VALIDÉ</div>
+        <small style="font-family:sans-serif;font-size:8pt;color:#64748b">Certification PWA Numérique</small>
+      </div>
+      <div class="signature">
+        <div style="font-size:10.5pt;font-weight:bold;color:#1e3a8a">Le Conseil Pédagogique</div>
+        <div class="sig-line">Signature autorisée</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+
+    printDocument("Certificat de Réussite", certHtml, "Certificat généré avec succès !");
+  }
   function generateExamCorrection() {
     const exam = getOrCreateExamSession(false);
     const { questionsPool, tfPool, directPool, dateStr } = exam;
@@ -2594,6 +2958,11 @@
               <p>Suivez vos compétences, trophées débloqués, régularité et exportez vos examens blancs d'entraînement.</p>
             </div>
             <div style="display:flex;gap:10px;flex-wrap:wrap">
+              ${readCount >= totalChapters && bestPct >= 80 ? `
+                <button class="btn btn-primary" id="btn-certif-download" type="button" title="Télécharger mon certificat officiel" style="background:#047857;border-color:#047857">
+                  <svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+                  Mon Certificat de Réussite (PDF)
+                </button>` : ''}
               <button class="btn btn-primary" id="btn-exam-download" type="button" title="Générer l'épreuve d'examen blanc">
                 <svg class="ic" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
                 Générer l'épreuve (Sujet PDF)
@@ -2822,6 +3191,12 @@
     });
 
     // Générateur d'épreuve et corrigé séparés
+    const btnCertif = $("#btn-certif-download");
+    if (btnCertif) {
+      btnCertif.addEventListener("click", () => {
+        generateCertificate();
+      });
+    }
     $("#btn-exam-download").addEventListener("click", () => {
       generateExamPaper(false);
     });

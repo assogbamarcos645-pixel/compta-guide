@@ -1008,3 +1008,36 @@ select.input { font-family: var(--sans); }
   border: 1px solid var(--line);
 }
 
+/* ===== MODE LECTURE ZEN ===== */
+body.zen-mode .topbar,
+body.zen-mode .footer,
+body.zen-mode .toc,
+body.zen-mode .toc-mobile,
+body.zen-mode .pager,
+body.zen-mode .article-actions {
+  display: none !important;
+}
+
+body.zen-mode .course {
+  grid-template-columns: 1fr !important;
+  max-width: 820px !important;
+  margin: 40px auto !important;
+  padding: 0 20px !important;
+}
+
+body.zen-mode .article {
+  box-shadow: none !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+body.zen-mode .prose {
+  font-size: 19px !important;
+  line-height: 1.85 !important;
+}
+
+body.zen-mode .article-head h1 {
+  font-size: 34px !important;
+}
+

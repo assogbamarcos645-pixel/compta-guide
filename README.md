@@ -32,13 +32,14 @@ Une application web progressive (PWA) moderne, interactive et complète pour l'a
 ### 3. Outils et Simulateurs Interactifs
 1. **Calculateur de Facture avec Vue Miroir** : Calculez dynamiquement les remises en cascade, escomptes, frais de port et TVA, avec génération et comparaison instantanée des écritures au journal côte à côte chez l'acheteur (client) et chez le vendeur (fournisseur).
 2. **Simulateur de Compte en T** : Imputez des opérations au débit ou au crédit et observez l'évolution dynamique du solde.
-3. **Guide Décisionnel du Numéro de Compte** : Arbre interactif par catégorie d'opération pour identifier immédiatement le bon compte SYSCOHADA et son sens Débit / Crédit.
-4. **Détecteur d'Anomalies (« Trouver l'erreur »)** : Cas pratiques d'audit pour repérer les erreurs comptables d'examen et apprendre les schémas conformes.
-5. **Fiches Mémos 3D & SRS** : Cartes mémoire interactives (Flashcards) avec effet 3D et algorithme de répétition espacée (Spaced Repetition System) pour optimiser la mémorisation à long terme.
-6. **Jeu de Tri du Bilan** : Rangez les postes d'actif et de passif par glisser-déposer (Drag & Drop) pour tester vos réflexes d'analyse patrimoniale.
-7. **Tableau d'Amortissement** : Simulation du plan d'amortissement linéaire selon le SYSCOHADA (taux, annuité constante, valeur nette comptable et écritures de dotation 681/28x).
-8. **Bordereau de Déclaration de TVA** : Calcul mensuel automatisé confrontant TVA facturée et TVA déductible (sur immobilisations et sur charges), avec arbitrage TVA due (4441) ou crédit de TVA (4449).
-9. **Générateur Infini d'Exercices** : Génération aléatoire d'opérations commerciales (achats/ventes avec remises, escomptes et ports) pour un entraînement autonome illimité.
+3. **Simulateur de Balance à 6 Colonnes** : Vérification de la double égalité fondamentale du SYSCOHADA (Mouvements Débit = Mouvements Crédit, et Soldes Débiteurs = Soldes Créditeurs).
+4. **Guide Décisionnel du Numéro de Compte** : Arbre interactif par catégorie d'opération pour identifier immédiatement le bon compte SYSCOHADA et son sens Débit / Crédit.
+5. **Détecteur d'Anomalies (« Trouver l'erreur »)** : Cas pratiques d'audit pour repérer les erreurs comptables d'examen et apprendre les schémas conformes.
+6. **Fiches Mémos 3D & SRS** : Cartes mémoire interactives (Flashcards) avec effet 3D et algorithme de répétition espacée (Spaced Repetition System) pour optimiser la mémorisation à long terme.
+7. **Jeu de Tri du Bilan** : Rangez les postes d'actif et de passif par glisser-déposer (Drag & Drop) pour tester vos réflexes d'analyse patrimoniale.
+8. **Tableau d'Amortissement** : Simulation du plan d'amortissement linéaire selon le SYSCOHADA (taux, annuité constante, valeur nette comptable et écritures de dotation 681/28x).
+9. **Bordereau de Déclaration de TVA** : Calcul mensuel automatisé confrontant TVA facturée et TVA déductible (sur immobilisations et sur charges), avec arbitrage TVA due (4441) ou crédit de TVA (4449).
+10. **Générateur Infini d'Exercices** : Génération aléatoire d'opérations commerciales (achats/ventes avec remises, escomptes et ports) avec solution masquée jusqu'à validation de la réponse de l'étudiant.
 
 ---
 
@@ -87,8 +88,11 @@ Une application web progressive (PWA) moderne, interactive et complète pour l'a
 
 ---
 
-### 5. Fiches de Synthèse Prêtes à Imprimer
+### 6. Fiches de Synthèse & Antisèche Officielle A4
 - Tous les points essentiels, définitions clés et schémas d'écritures réunis sur une seule page.
+- **Antisèche officielle A4 (PDF)** : Une synthèse ultra-dense sur une seule page A4 prête pour les révisions de dernière minute et l'impression.
+- **Certificat d'Assiduité & de Réussite Numérique (PDF)** : Débloquable dès la lecture de l'intégralité du cours et l'obtention d'un score supérieur ou égal à 80 % au Quiz complet.
+- **Mode Lecture Zen** : Affichage épuré sans distractions pour une concentration maximale sur les cours.
 - **Feuille de style d'impression dédiée (`@media print`)** : Export PDF ou impression papier nette, sans barre de navigation, sans boutons ni distractions.
 
 ---
